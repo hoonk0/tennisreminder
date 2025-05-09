@@ -82,7 +82,8 @@ dependencies:
   dynamic_tabbar: ^1.0.9
   flutter_riverpod: ^2.5.1
 
-
+  #선택 패키지
+  dropdown_button2: ^2.3.9
 
 dev_dependencies:
   flutter_test:

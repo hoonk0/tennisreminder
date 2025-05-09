@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sizer/sizer.dart';
 import 'package:tennisreminder_app/route/route_main.dart';
@@ -9,14 +10,14 @@ import '../const/static/global.dart';
 import '../service/stream/stream_me.dart';
 import 'auth/route_auth_login.dart';
 
-class RouteSplash extends StatefulWidget {
+class RouteSplash extends ConsumerStatefulWidget {
   const RouteSplash({super.key});
 
   @override
-  State<RouteSplash> createState() => _RouteSplashState();
+  ConsumerState<RouteSplash> createState() => _RouteSplashState();
 }
 
-class _RouteSplashState extends State<RouteSplash> {
+class _RouteSplashState extends ConsumerState<RouteSplash> {
   @override
   void initState() {
     // TODO: implement initState
@@ -67,6 +68,7 @@ class _RouteSplashState extends State<RouteSplash> {
 
   @override
   Widget build(BuildContext context) {
+    Global.refSplash = ref;
     Global.contextSplash = context;
     return Scaffold(
       backgroundColor: colorWhite,

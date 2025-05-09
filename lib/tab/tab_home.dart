@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 // import 'package:cloud_firestore/cloud_firestore.dart' as MasonryGridView;
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
+import 'package:tennisreminder_app/route/route_all_courts.dart';
 import 'package:tennisreminder_core/const/model/model_court.dart';
 import 'package:tennisreminder_core/const/value/colors.dart';
 import 'package:tennisreminder_core/const/value/gaps.dart';
@@ -94,42 +95,53 @@ class _TabHomeState extends State<TabHome> {
           Gaps.v20,
 
           /// 4. 서울시 추천 코트
-          Text('서울시 추천 코트', style: Theme.of(context).textTheme.titleMedium),
-          Gaps.v4,
-          StreamBuilder<QuerySnapshot>(
-            stream: FirebaseFirestore.instance
-                .collection(keyCourt)
-                .orderBy(keyDateCreate, descending: true)
-                .limit(10)
-                .snapshots(),
-            builder: (context, snapshot) {
-              if (!snapshot.hasData) {
-                return const Center(child: CircularProgressIndicator());
-              }
+          GestureDetector(
+            onTap: (){
+              Navigator.of(context).push(MaterialPageRoute(
+                              builder: (context) => RouteAllCourts()));
+            },
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+              Text('서울시 추천 코트', style: Theme.of(context).textTheme.titleMedium),
+              Gaps.v4,
+              StreamBuilder<QuerySnapshot>(
+                stream: FirebaseFirestore.instance
+                    .collection(keyCourt)
+                    .orderBy(keyDateCreate, descending: true)
+                    .limit(4)
+                    .snapshots(),
+                builder: (context, snapshot) {
+                  if (!snapshot.hasData) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
 
-              final courts = snapshot.data!.docs
-                  .map((doc) => ModelCourt.fromJson(doc.data() as Map<String, dynamic>))
-                  .toList();
+                  final courts = snapshot.data!.docs
+                      .map((doc) => ModelCourt.fromJson(doc.data() as Map<String, dynamic>))
+                      .toList();
 
-              return MasonryGridView.count(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                crossAxisCount: 2,
-                mainAxisSpacing: 12,
-                crossAxisSpacing: 12,
-                itemCount: courts.length,
-                itemBuilder: (context, index) {
-                  final court = courts[index];
-                  return CardCourtPreview(
-                    imagePath: court.imageUrls?.isNotEmpty == true
-                        ? court.imageUrls!.first
-                        : 'assets/images/mainicon.png',
-                    courtName: court.courtName,
-                    width: double.infinity,
+                  return MasonryGridView.count(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    crossAxisCount: 2,
+                    mainAxisSpacing: 12,
+                    crossAxisSpacing: 12,
+                    itemCount: courts.length,
+                    itemBuilder: (context, index) {
+                      final court = courts[index];
+                      return CardCourtPreview(
+                        imagePath: court.imageUrls?.isNotEmpty == true
+                            ? court.imageUrls!.first
+                            : 'assets/images/mainicon.png',
+                        courtName: court.courtName,
+                        width: double.infinity,
+                      );
+                    },
                   );
                 },
-              );
-            },
+              ),
+
+            ],),
           ),
 
           Gaps.h20,
