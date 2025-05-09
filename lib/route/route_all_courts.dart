@@ -2,8 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cloud_firestore/cloud_firestore.dart' as MasonryGridView;
 import 'package:flutter/material.dart';
 import 'package:tennisreminder_core/const/model/model_court.dart';
-import 'package:tennisreminder_core/const/value/colors.dart';
-import 'package:tennisreminder_core/const/value/keys.dart';
+import 'package:tennisreminder_core/const/model/moderl_filter_all_courts.dart';
 
 import '../state_management/pagination/pagination_court.dart';
 import '../ui/component/card_court_preview.dart';
@@ -34,7 +33,9 @@ class _RouteAllCourtsState extends State<RouteAllCourts> {
                 children: [
                   Text('서울시 추천 코트', style: Theme.of(context).textTheme.titleMedium),
                   const SizedBox(height: 4),
-                  const PaginationCourt(),
+                  PaginationCourt(
+                    filter: ModelCourtFilter(selectedDistricts: []),
+                  ),
                 ],
               ),
             ),

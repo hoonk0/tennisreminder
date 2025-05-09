@@ -11,11 +11,12 @@ import '../providers/providers.dart';
 
 class FutureFetch {
   static Future<void> fetchCourtAll({
-    int fetchCount = 20,
+    required ModelCourtFilter filter,
+    int fetchCount = 10,
     bool isForce = false,
   }) async {
     final pState = Global.refSplash!.read(
-      providerCourtAll(ModelCourtFilter(selectedDistricts: [])),
+      providerCourtAll(filter),
     );
 
     ///데이터 로딩중이면 그냥 return
@@ -33,11 +34,14 @@ class FutureFetch {
               .limit(fetchCount)
               .get();
 
+      debugPrint('🔥 [CourtLoading] courtQs.docs.length: ${courtQs.docs.length}');
+      debugPrint('🔥 [CourtLoading] lastDocumentSnapshot: ${courtQs.docs.isNotEmpty ? courtQs.docs.last.id : "없음"}');
+
       final listCourt =
           courtQs.docs.map((e) => ModelCourt.fromJson(e.data())).toList();
       Global.refSplash!
           .read(
-            providerCourtAll(ModelCourtFilter(selectedDistricts: [])).notifier,
+            providerCourtAll(filter).notifier,
           )
           .state = CourtNormal(
         listCourt: listCourt,
@@ -52,7 +56,7 @@ class FutureFetch {
       ///추가데이터 없으면 리턴
       if(pState.isEndOfData || pState.lastDocumentSnapshot == null) return;
 
-      Global.refSplash!.read(providerCourtAll(ModelCourtFilter(selectedDistricts: [])).notifier).state =
+      Global.refSplash!.read(providerCourtAll(filter).notifier).state =
           CourtFetchMore(
             listCourt: List.from(pState.listCourt),
             lastDocumentSnapshot: pState.lastDocumentSnapshot,
@@ -66,11 +70,15 @@ class FutureFetch {
           .limit(fetchCount)
           .get();
 
+      debugPrint('🔥 [CourtNormal] courtQs.docs.length: ${courtQs.docs.length}');
+      debugPrint('🔥 [CourtNormal] lastDocumentSnapshot: ${courtQs.docs.isNotEmpty ? courtQs.docs.last.id : "없음"}');
+      debugPrint('🔥 [CourtNormal] isEndOfData: ${courtQs.docs.length < fetchCount}');
+
       final addedCourts = courtQs.docs.map((e) => ModelCourt.fromJson(e.data())).toList();
 
       final newList = [...pState.listCourt, ...addedCourts];
 
-      Global.refSplash!.read(providerCourtAll(ModelCourtFilter(selectedDistricts: [])).notifier).state =
+      Global.refSplash!.read(providerCourtAll(filter).notifier).state =
           CourtNormal(
             listCourt: newList,
             lastDocumentSnapshot: courtQs.docs.last,
