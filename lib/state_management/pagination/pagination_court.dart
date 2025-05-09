@@ -57,8 +57,6 @@ class _PaginationCourtState extends ConsumerState<PaginationCourt> {
     final courts = pState.listCourt;
 
     return ListView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
       controller: rsc,
       itemCount: courts.length + 1,
       padding: const EdgeInsets.all(20),

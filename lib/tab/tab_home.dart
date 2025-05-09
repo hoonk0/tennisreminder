@@ -73,7 +73,7 @@ class _TabHomeState extends State<TabHome> {
           Text('내 주변 코트', style: Theme.of(context).textTheme.titleMedium),
           Gaps.v4,
           Column(
-            children: List.generate(5, (index) {
+            children: List.generate(3, (index) {
               return Container(
                 margin: EdgeInsets.only(bottom: 12),
                 decoration: BoxDecoration(

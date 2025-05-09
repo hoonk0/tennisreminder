@@ -18,31 +18,8 @@ class _RouteAllCourtsState extends State<RouteAllCourts> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('전체 코트 보기'),
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: 20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            GestureDetector(
-              onTap: () {},
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text('서울시 추천 코트', style: Theme.of(context).textTheme.titleMedium),
-                  const SizedBox(height: 4),
-                  PaginationCourt(
-                    filter: ModelCourtFilter(selectedDistricts: []),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 20),
-          ],
-        ),
-      ),
+      appBar: AppBar(title: const Text('전체 코트 보기')),
+      body: PaginationCourt(filter: ModelCourtFilter(selectedDistricts: [])),
     );
   }
 }

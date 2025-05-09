@@ -7,12 +7,13 @@ import 'package:tennisreminder_core/const/model/moderl_filter_all_courts.dart';
 import 'package:tennisreminder_core/const/value/keys.dart';
 
 import '../../const/static/global.dart';
+import '../../service/utils/utils.dart';
 import '../providers/providers.dart';
 
 class FutureFetch {
   static Future<void> fetchCourtAll({
     required ModelCourtFilter filter,
-    int fetchCount = 10,
+    int fetchCount = 15,
     bool isForce = false,
   }) async {
     final pState = Global.refSplash!.read(
@@ -21,7 +22,6 @@ class FutureFetch {
 
     ///데이터 로딩중이면 그냥 return
     if (pState is CourtFetchMore) {
-      debugPrint('이미 데이터 받아오는 중이라 종료');
       return;
     }
 
@@ -33,9 +33,6 @@ class FutureFetch {
               .orderBy(keyDateCreate, descending: true)
               .limit(fetchCount)
               .get();
-
-      debugPrint('🔥 [CourtLoading] courtQs.docs.length: ${courtQs.docs.length}');
-      debugPrint('🔥 [CourtLoading] lastDocumentSnapshot: ${courtQs.docs.isNotEmpty ? courtQs.docs.last.id : "없음"}');
 
       final listCourt =
           courtQs.docs.map((e) => ModelCourt.fromJson(e.data())).toList();
@@ -70,10 +67,16 @@ class FutureFetch {
           .limit(fetchCount)
           .get();
 
-      debugPrint('🔥 [CourtNormal] courtQs.docs.length: ${courtQs.docs.length}');
-      debugPrint('🔥 [CourtNormal] lastDocumentSnapshot: ${courtQs.docs.isNotEmpty ? courtQs.docs.last.id : "없음"}');
-      debugPrint('🔥 [CourtNormal] isEndOfData: ${courtQs.docs.length < fetchCount}');
-
+      if (courtQs.docs.isEmpty) {
+        Global.refSplash!.read(providerCourtAll(filter).notifier).state =
+            CourtNormal(
+              listCourt: pState.listCourt,
+              lastDocumentSnapshot: pState.lastDocumentSnapshot,
+              isEndOfData: true,
+            );
+        Utils.toast(desc: '마지막 데이터 입니다');
+        return;
+      }
       final addedCourts = courtQs.docs.map((e) => ModelCourt.fromJson(e.data())).toList();
 
       final newList = [...pState.listCourt, ...addedCourts];
