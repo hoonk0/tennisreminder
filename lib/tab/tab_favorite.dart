@@ -20,18 +20,21 @@ class _TabFavoriteState extends State<TabFavorite> {
 
     for (int i = 0; i < 10; i++) {
       final docRef = courtsCollection.doc();
+      final address = '서울시 강남구 xx동';
+      final district = address.split(' ').length > 1 ? address.split(' ')[1] : '';
       final court = ModelCourt(
         uid: docRef.id,
         dateCreate: Timestamp.now(),
         latitude: 37.5 + i * 0.01,
         longitude: 127.0 + i * 0.01,
         courtName: '샘플 코트 $i',
-        courtAddress: '서울시 어딘가 $i',
+        courtAddress: address,
         courtInfo: '이곳은 샘플 코트입니다 $i',
         reservationUrl: 'https://reservation.example.com/$i',
         likedUserUids: [],
         imageUrls: [],
         extraInfo: {'parking': i % 2 == 0, 'light': i % 3 == 0},
+        courtDistrict: district,
       );
       batch.set(docRef, court.toJson());
     }
