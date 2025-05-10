@@ -86,7 +86,7 @@ class _RouteCourtInformationState extends State<RouteCourtInformation> {
 
                   ElevatedButton(
                     onPressed: () {
-                      NotificationHelper.scheduleNotification('notification test', '알람', 5);
+                      NotificationHelper.scheduleNotification('5초후 알람', '알람', 5);
                     },
                     child: const Text('alarm on'),
                   ),
