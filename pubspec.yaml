@@ -84,6 +84,7 @@ dependencies:
 
   #선택 패키지
   dropdown_button2: ^2.3.9
+  android_intent_plus: ^5.0.3
 
 dev_dependencies:
   flutter_test:

@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:tennisreminder_app/service/notification/notification_helper.dart';
 import 'package:tennisreminder_core/const/model/model_court.dart';
 
+import '../../service/notification/notification_helper.dart';
+
 class RouteCourtInformation extends StatefulWidget {
   final ModelCourt court;
 
@@ -94,6 +96,13 @@ class _RouteCourtInformationState extends State<RouteCourtInformation> {
                       NotificationHelper().cancelAllNotifications();
                     },
                     child: const Text('alarm off'),
+                  ),
+
+                  ElevatedButton(
+                    onPressed: () {
+                      NotificationHelper.showInstantNotification();
+                    },
+                    child: const Text('알람 테스트'),
                   ),
                 ],
               ),
