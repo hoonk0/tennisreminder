@@ -1,1 +1,43 @@
-{"flutter":{"platforms":{"android":{"default":{"projectId":"tennisreminder-ecf66","appId":"1:334096525:android:b10fc2ea95940b8f2edac4","fileOutput":"android/app/google-services.json"}},"ios":{"default":{"projectId":"tennisreminder-ecf66","appId":"1:334096525:ios:2a81c64c9755d9a02edac4","uploadDebugSymbols":false,"fileOutput":"ios/Runner/GoogleService-Info.plist"}},"dart":{"lib/firebase_options.dart":{"projectId":"tennisreminder-ecf66","configurations":{"android":"1:334096525:android:b10fc2ea95940b8f2edac4","ios":"1:334096525:ios:2a81c64c9755d9a02edac4"}}}}}}
+{
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "tennisreminder-ecf66",
+          "appId": "1:334096525:android:b10fc2ea95940b8f2edac4",
+          "fileOutput": "android/app/google-services.json"
+        }
+      },
+      "ios": {
+        "default": {
+          "projectId": "tennisreminder-ecf66",
+          "appId": "1:334096525:ios:2a81c64c9755d9a02edac4",
+          "uploadDebugSymbols": false,
+          "fileOutput": "ios/Runner/GoogleService-Info.plist"
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "tennisreminder-ecf66",
+          "configurations": {
+            "android": "1:334096525:android:b10fc2ea95940b8f2edac4",
+            "ios": "1:334096525:ios:2a81c64c9755d9a02edac4"
+          }
+        }
+      }
+    }
+  },
+  "functions": [
+    {
+      "source": "functions",
+      "codebase": "default",
+      "ignore": [
+        "node_modules",
+        ".git",
+        "firebase-debug.log",
+        "firebase-debug.*.log",
+        "*.local"
+      ]
+    }
+  ]
+}
