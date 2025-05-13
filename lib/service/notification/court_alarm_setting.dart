@@ -11,7 +11,9 @@ import 'package:tennisreminder_core/const/value/keys.dart';
 import 'package:tennisreminder_core/const/value/text_style.dart';
 
 class CourtAlarmSettings extends StatefulWidget {
-  const CourtAlarmSettings({super.key});
+  final ValueNotifier<bool> vnAlarmSet;
+
+  const CourtAlarmSettings({super.key, required this.vnAlarmSet});
 
   @override
   State<CourtAlarmSettings> createState() => _CourtAlarmSettingsState();
@@ -96,6 +98,10 @@ class _CourtAlarmSettingsState extends State<CourtAlarmSettings> {
           minute: selectedTime.minute,
         ),
       );
+
+      // Update ValueNotifier state
+      widget.vnAlarmSet.value = true;
+
 
 /*
       ScaffoldMessenger.of(
@@ -215,7 +221,7 @@ class _CourtAlarmSettingsState extends State<CourtAlarmSettings> {
           },
           child: Container(
               height: 48,
-          
+
           decoration: BoxDecoration(
            borderRadius: BorderRadius.circular(12.0),
             border: Border.all(

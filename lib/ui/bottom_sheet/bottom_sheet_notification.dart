@@ -7,8 +7,13 @@ import 'package:tennisreminder_core/const/value/text_style.dart';
 
 class BottomSheetNotification extends StatelessWidget {
   final ModelCourt court;
+  final ValueNotifier<bool> vnAlarmSet;
 
-  const BottomSheetNotification({super.key, required this.court});
+  const BottomSheetNotification({
+    super.key,
+    required this.court,
+    required this.vnAlarmSet,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -66,7 +71,7 @@ class BottomSheetNotification extends StatelessWidget {
             Gaps.v20,
 
             ///코트알람
-            const CourtAlarmSettings(),
+            CourtAlarmSettings(vnAlarmSet: vnAlarmSet,),
             Gaps.v20,
           ],
         ),

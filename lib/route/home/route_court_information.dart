@@ -18,15 +18,21 @@ import '../../service/notification/notification_helper.dart';
 class RouteCourtInformation extends StatefulWidget {
   final ModelCourt court;
 
-  const RouteCourtInformation({required this.court, Key? key}) : super(key: key);
+  const RouteCourtInformation({required this.court, Key? key})
+    : super(key: key);
 
   @override
   State<RouteCourtInformation> createState() => _RouteCourtInformationState();
 }
 
 class _RouteCourtInformationState extends State<RouteCourtInformation> {
-  TimeOfDay selectedTime = const TimeOfDay(hour: 22, minute: 0); // mutable for UI input
+  TimeOfDay selectedTime = const TimeOfDay(
+    hour: 22,
+    minute: 0,
+  ); // mutable for UI input
   int selectedWeekday = DateTime.sunday; // mutable for UI input
+
+  final ValueNotifier<bool> vnAlarmSet = ValueNotifier(false);
 
   Future<String?> getFcmToken() async {
     // TODO: Replace with your actual FCM token fetch logic
@@ -36,9 +42,7 @@ class _RouteCourtInformationState extends State<RouteCourtInformation> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('코트 정보'),
-      ),
+      appBar: AppBar(title: const Text('코트 정보')),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -55,9 +59,14 @@ class _RouteCourtInformationState extends State<RouteCourtInformation> {
                       width: double.infinity,
                       decoration: BoxDecoration(
                         image: DecorationImage(
-                          image: widget.court.imageUrls != null && widget.court.imageUrls!.isNotEmpty
-                              ? NetworkImage(widget.court.imageUrls!.first) as ImageProvider
-                              : const AssetImage('assets/images/mainicon.png'),
+                          image:
+                              widget.court.imageUrls != null &&
+                                      widget.court.imageUrls!.isNotEmpty
+                                  ? NetworkImage(widget.court.imageUrls!.first)
+                                      as ImageProvider
+                                  : const AssetImage(
+                                    'assets/images/mainicon.png',
+                                  ),
                           fit: BoxFit.cover,
                         ),
                       ),
@@ -94,7 +103,8 @@ class _RouteCourtInformationState extends State<RouteCourtInformation> {
                       widget.court.courtInfo,
                       style: const TextStyle(color: Colors.black87),
                     ),
-                
+
+                    ///알람설정
                     Container(
                       margin: const EdgeInsets.symmetric(vertical: 16),
                       padding: const EdgeInsets.all(16),
@@ -106,7 +116,21 @@ class _RouteCourtInformationState extends State<RouteCourtInformation> {
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Icon(Icons.notifications_active, color: colorMain900),
+                          ValueListenableBuilder(
+                            valueListenable: vnAlarmSet,
+                            builder: (
+                              BuildContext context,
+                              alarmSet,
+                              Widget? child,
+                            ) {
+                              return Icon(
+                                alarmSet
+                                    ? Icons.notifications_active
+                                    : Icons.notifications_none,
+                                color: alarmSet ? colorMain900 : Colors.grey,
+                              );
+                            },
+                          ),
                           Gaps.h12,
                           Expanded(
                             child: Column(
@@ -131,10 +155,15 @@ class _RouteCourtInformationState extends State<RouteCourtInformation> {
                                         isScrollControlled: true,
                                         backgroundColor: colorGray100,
                                         shape: const RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
+                                          borderRadius: BorderRadius.vertical(
+                                            top: Radius.circular(12),
+                                          ),
                                         ),
                                         builder: (context) {
-                                          return BottomSheetNotification(court: widget.court);
+                                          return BottomSheetNotification(
+                                            court: widget.court,
+                                            vnAlarmSet:vnAlarmSet,
+                                          );
                                         },
                                       );
                                     },
@@ -143,7 +172,7 @@ class _RouteCourtInformationState extends State<RouteCourtInformation> {
                                       style: TS.s14w600(colorMain900),
                                     ),
                                   ),
-                                )
+                                ),
                               ],
                             ),
                           ),
@@ -155,8 +184,8 @@ class _RouteCourtInformationState extends State<RouteCourtInformation> {
                 ),
               ),
               Spacer(),
-              BasicButton(title: '예약하러 가기', onTap: (){}),
-              Gaps.v20
+              BasicButton(title: '예약하러 가기', onTap: () {}),
+              Gaps.v20,
             ],
           ),
         ),
