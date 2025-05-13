@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:tennisreminder_core/const/value/colors.dart';
 import 'package:tennisreminder_core/const/value/gaps.dart';
 import 'package:tennisreminder_core/const/value/text_style.dart';
-import '../component/custom_divider.dart';
+
+import '../../ui/component/custom_divider.dart';
 
 class DialogConfirm extends StatelessWidget {
   final String desc;

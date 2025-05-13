@@ -18,7 +18,9 @@ class BottomSheetNotification extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Gaps.v24,
+            Gaps.v10,
+
+            ///회색선
             Container(
               width: 40,
               height: 4,
@@ -27,7 +29,9 @@ class BottomSheetNotification extends StatelessWidget {
                 color: colorGray300,
               ),
             ),
-            Gaps.v42,
+            Gaps.v20,
+
+            ///코트 사진
             Container(
               width: 90,
               height: 90,
@@ -47,7 +51,9 @@ class BottomSheetNotification extends StatelessWidget {
                 ),
               ),
             ),
-            Gaps.v24,
+            Gaps.v20,
+
+            ///코트정보
             Text(
               court.courtName,
               style: const TS.s18w600(colorGray900),
@@ -57,7 +63,9 @@ class BottomSheetNotification extends StatelessWidget {
               court.courtAddress,
               style: const TextStyle(color: Colors.grey),
             ),
-            Gaps.v24,
+            Gaps.v20,
+
+            ///코트알람
             const CourtAlarmSettings(),
             Gaps.v20,
           ],

@@ -2,8 +2,13 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:tennisreminder_app/service/notification/dialog_confirm.dart';
+import 'package:tennisreminder_app/ui/component/basic_button.dart';
+import 'package:tennisreminder_app/ui/dialog/dialog_notification_confirm.dart';
 import 'package:tennisreminder_core/const/value/colors.dart';
+import 'package:tennisreminder_core/const/value/gaps.dart';
 import 'package:tennisreminder_core/const/value/keys.dart';
+import 'package:tennisreminder_core/const/value/text_style.dart';
 
 class CourtAlarmSettings extends StatefulWidget {
   const CourtAlarmSettings({super.key});
@@ -38,10 +43,11 @@ class _CourtAlarmSettingsState extends State<CourtAlarmSettings> {
       if (message.notification != null) {
         showDialog(
           context: context,
-          builder: (_) => AlertDialog(
-            title: Text(message.notification!.title ?? '알림'),
-            content: Text(message.notification!.body ?? '내용 없음'),
-          ),
+          builder:
+              (_) => AlertDialog(
+                title: Text(message.notification!.title ?? '알림'),
+                content: Text(message.notification!.body ?? '내용 없음'),
+              ),
         );
       }
     });
@@ -82,14 +88,24 @@ class _CourtAlarmSettingsState extends State<CourtAlarmSettings> {
 
       await _firestore.collection(keyCourtAlarms).add(data);
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('알림이 설정되었습니다.')),
+      showDialog(
+        context: context,
+        builder: (_) => DialogNotificationConfirm(
+          weekday: weekdays[selectedWeekday.value] ?? '',
+          hour: selectedTime.hour,
+          minute: selectedTime.minute,
+        ),
       );
+
+/*
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('알림이 설정되었습니다.')));*/
     } catch (e) {
       print('❌ 알림 설정 실패: $e'); // 에러 로그 추가
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('알림 설정 중 오류가 발생했습니다.')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('알림 설정 중 오류가 발생했습니다.')));
     }
   }
 
@@ -102,7 +118,7 @@ class _CourtAlarmSettingsState extends State<CourtAlarmSettings> {
           valueListenable: selectedWeekday,
           builder: (context, value, _) {
             return SizedBox(
-              height: 50,
+              height: 30,
               child: ListView.separated(
                 scrollDirection: Axis.horizontal,
                 itemCount: weekdays.length,
@@ -117,10 +133,12 @@ class _CourtAlarmSettingsState extends State<CourtAlarmSettings> {
                       selectedWeekday.value = key;
                     },
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
                       decoration: BoxDecoration(
-                        color: isSelected ? colorBlue500 : colorWhite,
-                        border: Border.all(color: isSelected ? colorBlue500 : Colors.grey),
+                        color: isSelected ? colorMain900 : colorWhite,
+                        border: Border.all(
+                          color: isSelected ? colorBlue500 : Colors.grey,
+                        ),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Center(
@@ -139,58 +157,77 @@ class _CourtAlarmSettingsState extends State<CourtAlarmSettings> {
             );
           },
         ),
-        const SizedBox(height: 12),
-        const SizedBox(height: 12),
-        OutlinedButton(
-          onPressed: () async {
+        Gaps.v10,
+
+        GestureDetector(
+          onTap: () async {
             showModalBottomSheet(
               context: context,
               builder: (_) {
-                return SizedBox(
-                  height: 250,
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: CupertinoPicker(
-                          backgroundColor: colorWhite,
-                          itemExtent: 32,
-                          scrollController: FixedExtentScrollController(initialItem: selectedTime.hour),
-                          onSelectedItemChanged: (value) {
-                            setState(() {
-                              selectedTime = TimeOfDay(hour: value, minute: selectedTime.minute);
-                            });
-                          },
-                          children: List.generate(24, (index) => Text('$index 시')),
+                return Row(
+                  children: [
+                    Expanded(
+                      child: CupertinoPicker(
+                        backgroundColor: colorWhite,
+                        itemExtent: 32,
+                        scrollController: FixedExtentScrollController(
+                          initialItem: selectedTime.hour,
+                        ),
+                        onSelectedItemChanged: (value) {
+                          setState(() {
+                            selectedTime = TimeOfDay(
+                              hour: value,
+                              minute: selectedTime.minute,
+                            );
+                          });
+                        },
+                        children: List.generate(
+                          24,
+                          (index) => Text('$index 시'),
                         ),
                       ),
-                      Expanded(
-                        child: CupertinoPicker(
-                          backgroundColor: colorWhite,
-                          itemExtent: 32,
-                          scrollController: FixedExtentScrollController(initialItem: selectedTime.minute),
-                          onSelectedItemChanged: (value) {
-                            setState(() {
-                              selectedTime = TimeOfDay(hour: selectedTime.hour, minute: value);
-                            });
-                          },
-                          children: List.generate(60, (index) => Text('$index 분')),
+                    ),
+                    Expanded(
+                      child: CupertinoPicker(
+                        backgroundColor: colorWhite,
+                        itemExtent: 32,
+                        scrollController: FixedExtentScrollController(
+                          initialItem: selectedTime.minute,
+                        ),
+                        onSelectedItemChanged: (value) {
+                          setState(() {
+                            selectedTime = TimeOfDay(
+                              hour: selectedTime.hour,
+                              minute: value,
+                            );
+                          });
+                        },
+                        children: List.generate(
+                          60,
+                          (index) => Text('$index 분'),
                         ),
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 );
               },
             );
           },
-          child: Text(
-            '시간 선택: ${selectedTime.format(context)}',
+          child: Container(
+              height: 48,
+          
+          decoration: BoxDecoration(
+           borderRadius: BorderRadius.circular(12.0),
+            border: Border.all(
+             color: colorMain900
+            )
           ),
+          child: Center(child: Text('시간 선택: ${selectedTime.format(context)}',style: TS.s16w400(colorMain900),)),),
         ),
-        const SizedBox(height: 12),
-        ElevatedButton(
-          onPressed: saveAlarmToFirestore,
-          child: const Text('알림 신청하기'),
-        ),
+
+        Gaps.v20,
+
+        BasicButton(title: '알림 신청하기', onTap: saveAlarmToFirestore),
       ],
     );
   }
