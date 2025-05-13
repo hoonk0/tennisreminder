@@ -8,8 +8,24 @@ import 'package:tennisreminder_app/route/route_splash.dart';
 import 'package:tennisreminder_app/service/notification/notification_helper.dart';
 import 'package:tennisreminder_core/const/value/colors.dart';
 import 'package:tennisreminder_core/const/value/text_style.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 
 import 'firebase_options.dart';
+
+Future<void> _setupInteractedMessage() async {
+  RemoteMessage? initialMessage = await FirebaseMessaging.instance.getInitialMessage();
+
+  if (initialMessage != null) {
+    _handleMessage(initialMessage);
+  }
+
+  FirebaseMessaging.onMessageOpenedApp.listen(_handleMessage);
+}
+
+void _handleMessage(RemoteMessage message) {
+  debugPrint('🔔 종료 상태에서 알림 클릭됨: ${message.notification?.title}');
+  // TODO: Add navigation or processing logic here
+}
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -18,6 +34,8 @@ Future<void> main() async {
   await Future.wait([
     Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform),
   ]);
+
+  await _setupInteractedMessage();
 
   KakaoSdk.init(
     nativeAppKey: 'de368876dad11f1f070baef6058f8d49',

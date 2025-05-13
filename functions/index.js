@@ -62,6 +62,9 @@ await messaging.send({
   android: {
     notification: {
       channelId: "alarm_channel", // 앱에서 사용하는 채널 ID
+      priority: "high", // 헤드업 알림을 위해 추가
+      sound: "default", // 사운드도 켜야 헤드업이 뜨는 경우가 있음
+      visibility: "public", // 잠금화면에서도 보이게
     }
   },
 });
