@@ -4,11 +4,14 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:tennisreminder_app/service/notification/court_alarm_setting.dart';
 import 'package:tennisreminder_app/service/notification/notification_helper.dart';
+import 'package:tennisreminder_app/ui/bottom_sheet/bottom_sheet_notification.dart';
 import 'package:tennisreminder_app/ui/component/basic_button.dart';
 import 'package:tennisreminder_core/const/model/model_court.dart';
 import 'package:tennisreminder_core/const/model/model_court_alarm.dart';
+import 'package:tennisreminder_core/const/value/colors.dart';
 import 'package:tennisreminder_core/const/value/keys.dart';
 import 'package:tennisreminder_core/const/value/gaps.dart';
+import 'package:tennisreminder_core/const/value/text_style.dart';
 
 import '../../service/notification/notification_helper.dart';
 
@@ -96,18 +99,13 @@ class _RouteCourtInformationState extends State<RouteCourtInformation> {
                   showModalBottomSheet(
                     context: context,
                     isScrollControlled: true,
+                    backgroundColor: colorGray100,
                     shape: const RoundedRectangleBorder(
-                      borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+                      borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
                     ),
-                    builder: (context) => const Padding(
-                      padding: EdgeInsets.only(
-                        bottom: 20,
-                        left: 20,
-                        right: 20,
-                        top: 12,
-                      ),
-                      child: CourtAlarmSettings(),
-                    ),
+                    builder: (context) {
+                      return BottomSheetNotification(court: widget.court);
+                    },
                   );
                 },
               ),

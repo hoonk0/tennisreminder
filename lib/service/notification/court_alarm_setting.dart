@@ -1,6 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:tennisreminder_core/const/value/colors.dart';
 import 'package:tennisreminder_core/const/value/keys.dart';
 
 class CourtAlarmSettings extends StatefulWidget {
@@ -11,7 +13,8 @@ class CourtAlarmSettings extends StatefulWidget {
 }
 
 class _CourtAlarmSettingsState extends State<CourtAlarmSettings> {
-  int selectedWeekday = DateTime.monday;
+  final selectedWeekday = ValueNotifier<int>(DateTime.monday);
+
   TimeOfDay selectedTime = const TimeOfDay(hour: 20, minute: 0);
   final weekdays = {
     DateTime.monday: '월요일',
@@ -67,7 +70,7 @@ class _CourtAlarmSettingsState extends State<CourtAlarmSettings> {
       final data = {
         keyCourtUid: 'court_uid_123', // 실제 courtUid로 변경
         keyUserUid: 'user_uid_123', // 실제 userUid로 변경
-        keyAlarmWeekday: selectedWeekday,
+        keyAlarmWeekday: selectedWeekday.value,
         keyAlarmHour: selectedTime.hour,
         keyAlarmMinute: selectedTime.minute,
         keyDateCreate: Timestamp.now(),
@@ -95,28 +98,89 @@ class _CourtAlarmSettingsState extends State<CourtAlarmSettings> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        DropdownButtonFormField<int>(
-          value: selectedWeekday,
-          items: weekdays.entries
-              .map((e) => DropdownMenuItem(value: e.key, child: Text(e.value)))
-              .toList(),
-          onChanged: (value) {
-            if (value != null) setState(() => selectedWeekday = value);
+        ValueListenableBuilder<int>(
+          valueListenable: selectedWeekday,
+          builder: (context, value, _) {
+            return SizedBox(
+              height: 50,
+              child: ListView.separated(
+                scrollDirection: Axis.horizontal,
+                itemCount: weekdays.length,
+                separatorBuilder: (_, __) => const SizedBox(width: 8),
+                itemBuilder: (context, index) {
+                  final key = weekdays.keys.elementAt(index);
+                  final label = weekdays[key]!;
+                  final isSelected = value == key;
+
+                  return GestureDetector(
+                    onTap: () {
+                      selectedWeekday.value = key;
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                      decoration: BoxDecoration(
+                        color: isSelected ? colorBlue500 : colorWhite,
+                        border: Border.all(color: isSelected ? colorBlue500 : Colors.grey),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Center(
+                        child: Text(
+                          label,
+                          style: TextStyle(
+                            color: isSelected ? Colors.white : Colors.black,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ),
+                  );
+                },
+              ),
+            );
           },
-          decoration: const InputDecoration(labelText: '요일 선택'),
         ),
+        const SizedBox(height: 12),
         const SizedBox(height: 12),
         OutlinedButton(
           onPressed: () async {
-            final time = await showTimePicker(
+            showModalBottomSheet(
               context: context,
-              initialTime: selectedTime,
+              builder: (_) {
+                return SizedBox(
+                  height: 250,
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: CupertinoPicker(
+                          backgroundColor: colorWhite,
+                          itemExtent: 32,
+                          scrollController: FixedExtentScrollController(initialItem: selectedTime.hour),
+                          onSelectedItemChanged: (value) {
+                            setState(() {
+                              selectedTime = TimeOfDay(hour: value, minute: selectedTime.minute);
+                            });
+                          },
+                          children: List.generate(24, (index) => Text('$index 시')),
+                        ),
+                      ),
+                      Expanded(
+                        child: CupertinoPicker(
+                          backgroundColor: colorWhite,
+                          itemExtent: 32,
+                          scrollController: FixedExtentScrollController(initialItem: selectedTime.minute),
+                          onSelectedItemChanged: (value) {
+                            setState(() {
+                              selectedTime = TimeOfDay(hour: selectedTime.hour, minute: value);
+                            });
+                          },
+                          children: List.generate(60, (index) => Text('$index 분')),
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              },
             );
-            if (time != null) {
-              setState(() {
-                selectedTime = time;
-              });
-            }
           },
           child: Text(
             '시간 선택: ${selectedTime.format(context)}',
