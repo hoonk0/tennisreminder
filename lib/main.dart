@@ -5,7 +5,6 @@ import 'package:kakao_flutter_sdk/kakao_flutter_sdk.dart';
 import 'package:naver_login_sdk/naver_login_sdk.dart';
 import 'package:sizer/sizer.dart';
 import 'package:tennisreminder_app/route/route_splash.dart';
-import 'package:tennisreminder_app/service/notification/notification_helper.dart';
 import 'package:tennisreminder_core/const/value/colors.dart';
 import 'package:tennisreminder_core/const/value/text_style.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';

@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:tennisreminder_app/service/notification/dialog_confirm.dart';
 import 'package:tennisreminder_app/ui/component/basic_button.dart';
 import 'package:tennisreminder_app/ui/dialog/dialog_notification_confirm.dart';
 import 'package:tennisreminder_core/const/model/model_court.dart';

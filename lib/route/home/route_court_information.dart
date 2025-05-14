@@ -2,19 +2,15 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
-import 'package:tennisreminder_app/service/notification/court_alarm_setting.dart';
-import 'package:tennisreminder_app/service/notification/notification_helper.dart';
+import 'package:tennisreminder_app/service/weather/weather_alarm.dart';
 import 'package:tennisreminder_app/ui/bottom_sheet/bottom_sheet_notification.dart';
 import 'package:tennisreminder_app/ui/component/basic_button.dart';
 import 'package:tennisreminder_core/const/model/model_court.dart';
-import 'package:tennisreminder_core/const/model/model_court_alarm.dart';
-import 'package:tennisreminder_core/const/model/model_user.dart';
 import 'package:tennisreminder_core/const/value/colors.dart';
 import 'package:tennisreminder_core/const/value/keys.dart';
 import 'package:tennisreminder_core/const/value/gaps.dart';
 import 'package:tennisreminder_core/const/value/text_style.dart';
 
-import '../../service/notification/notification_helper.dart';
 
 class RouteCourtInformation extends StatefulWidget {
   final ModelCourt court;
@@ -34,6 +30,7 @@ class _RouteCourtInformationState extends State<RouteCourtInformation> {
   int selectedWeekday = DateTime.sunday; // mutable for UI input
 
   final ValueNotifier<bool> vnAlarmSet = ValueNotifier(false);
+  final ValueNotifier<bool> vnIsFavorite = ValueNotifier(false);
 
   Future<String?> getFcmToken() async {
     // TODO: Replace with your actual FCM token fetch logic
@@ -54,7 +51,6 @@ class _RouteCourtInformationState extends State<RouteCourtInformation> {
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-
                     ///코트사진
                     Container(
                       height: 200,
@@ -75,22 +71,59 @@ class _RouteCourtInformationState extends State<RouteCourtInformation> {
                     ),
                     Gaps.v20,
 
-                    ///코트명
-                    Text(
-                      widget.court.courtName,
-                      style: const TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    Gaps.v5,
+                    ///상단 정보
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            ///코트이름
+                            Text(
+                              widget.court.courtName,
+                              style: const TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            Gaps.v5,
 
-                    ///코트주소
-                    Text(
-                      widget.court.courtAddress,
-                      style: const TextStyle(color: Colors.grey),
+                            ///코트주소
+                            Text(
+                              widget.court.courtAddress,
+                              style: const TextStyle(color: Colors.grey),
+                            ),
+                          ],
+                        ),
+
+                        ValueListenableBuilder(
+                          valueListenable: vnIsFavorite,
+                          builder:
+                              (BuildContext context, isFavorite, Widget? child) {
+                            return GestureDetector(
+                                onTap: (){
+                                  vnIsFavorite.value = !vnIsFavorite.value;
+                                },
+                                child: Container(
+                                  padding: const EdgeInsets.all(4),
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    border: Border.all(color: colorMain900),
+                                  ),
+                                  child: Icon(
+                                    isFavorite ? Icons.favorite : Icons.favorite_border,
+                                    color: colorMain900,
+                                  ),
+                                ));
+                              },
+                        ),
+                      ],
                     ),
+
                     Gaps.v10,
+
+                    ///날씨알람
+                    WeatherAlarm(),
 
                     ///알람설정
                     GestureDetector(
@@ -99,15 +132,17 @@ class _RouteCourtInformationState extends State<RouteCourtInformation> {
                           // 알람 설정 해제
                           vnAlarmSet.value = false;
 
-                          final userUid = FirebaseAuth.instance.currentUser?.uid;
+                          final userUid =
+                              FirebaseAuth.instance.currentUser?.uid;
                           final courtUid = widget.court.uid;
 
                           if (userUid != null) {
-                            final snapshot = await FirebaseFirestore.instance
-                                .collection(keyCourtAlarms)
-                                .where(keyUserUid, isEqualTo: userUid)
-                                .where(keyCourtUid, isEqualTo: courtUid)
-                                .get();
+                            final snapshot =
+                                await FirebaseFirestore.instance
+                                    .collection(keyCourtAlarms)
+                                    .where(keyUserUid, isEqualTo: userUid)
+                                    .where(keyCourtUid, isEqualTo: courtUid)
+                                    .get();
 
                             for (final doc in snapshot.docs) {
                               await doc.reference.delete();
@@ -120,7 +155,9 @@ class _RouteCourtInformationState extends State<RouteCourtInformation> {
                             isScrollControlled: true,
                             backgroundColor: colorGray100,
                             shape: const RoundedRectangleBorder(
-                              borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
+                              borderRadius: BorderRadius.vertical(
+                                top: Radius.circular(12),
+                              ),
                             ),
                             builder: (context) {
                               return BottomSheetNotification(
@@ -190,7 +227,10 @@ class _RouteCourtInformationState extends State<RouteCourtInformation> {
 
                     const Text(
                       'Field Information',
-                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
                     ),
                     Gaps.v10,
                     Text(
@@ -200,8 +240,6 @@ class _RouteCourtInformationState extends State<RouteCourtInformation> {
                   ],
                 ),
               ),
-
-
 
               Spacer(),
               BasicButton(title: '예약하러 가기', onTap: () {}),
