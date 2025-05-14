@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:tennisreminder_app/service/notification/court_alarm_setting.dart';
 import 'package:tennisreminder_core/const/model/model_court.dart';
+import 'package:tennisreminder_core/const/model/model_user.dart';
 import 'package:tennisreminder_core/const/value/colors.dart';
 import 'package:tennisreminder_core/const/value/gaps.dart';
 import 'package:tennisreminder_core/const/value/text_style.dart';
@@ -46,14 +47,19 @@ class BottomSheetNotification extends StatelessWidget {
                 color: colorWhite,
               ),
               child: Center(
-                child: Image.asset(
-                  court.imageUrls != null && court.imageUrls!.isNotEmpty
-                      ? court.imageUrls!.first
-                      : 'assets/images/mainicon.png',
-                  width: 50,
-                  height: 50,
-                  fit: BoxFit.cover,
-                ),
+                child: (court.imageUrls?.isNotEmpty == true)
+                    ? Image.network(
+                        court.imageUrls!.first,
+                        width: 50,
+                        height: 50,
+                        fit: BoxFit.cover,
+                      )
+                    : Image.asset(
+                        'assets/images/mainicon.png',
+                        width: 50,
+                        height: 50,
+                        fit: BoxFit.cover,
+                      ),
               ),
             ),
             Gaps.v20,
@@ -71,7 +77,7 @@ class BottomSheetNotification extends StatelessWidget {
             Gaps.v20,
 
             ///코트알람
-            CourtAlarmSettings(vnAlarmSet: vnAlarmSet,),
+            CourtAlarmSettings(vnAlarmSet: vnAlarmSet, court: court),
             Gaps.v20,
           ],
         ),

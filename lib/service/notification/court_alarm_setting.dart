@@ -2,9 +2,11 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:tennisreminder_app/service/notification/dialog_confirm.dart';
 import 'package:tennisreminder_app/ui/component/basic_button.dart';
 import 'package:tennisreminder_app/ui/dialog/dialog_notification_confirm.dart';
+import 'package:tennisreminder_core/const/model/model_court.dart';
 import 'package:tennisreminder_core/const/value/colors.dart';
 import 'package:tennisreminder_core/const/value/gaps.dart';
 import 'package:tennisreminder_core/const/value/keys.dart';
@@ -12,8 +14,13 @@ import 'package:tennisreminder_core/const/value/text_style.dart';
 
 class CourtAlarmSettings extends StatefulWidget {
   final ValueNotifier<bool> vnAlarmSet;
+  final ModelCourt court;
 
-  const CourtAlarmSettings({super.key, required this.vnAlarmSet});
+  const CourtAlarmSettings({
+    super.key,
+    required this.vnAlarmSet,
+    required this.court,
+  });
 
   @override
   State<CourtAlarmSettings> createState() => _CourtAlarmSettingsState();
@@ -38,7 +45,6 @@ class _CourtAlarmSettingsState extends State<CourtAlarmSettings> {
   @override
   void initState() {
     super.initState();
-    print('🟢 initState 실행됨');
     _getFcmToken();
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
       debugPrint('📩 포그라운드 수신됨: ${message.notification?.title}');
@@ -58,26 +64,22 @@ class _CourtAlarmSettingsState extends State<CourtAlarmSettings> {
   Future<String?> _getFcmToken() async {
     try {
       final token = await FirebaseMessaging.instance.getToken();
-      if (token != null) {
-        print('📲 FCM Token Retrieved in init: $token');
-      } else {
-        print('⚠️ FCM Token is null');
-      }
       return token;
     } catch (e) {
-      print('❌ Failed to get FCM Token: $e');
       return null;
     }
   }
 
   Future<void> saveAlarmToFirestore() async {
     try {
+      debugPrint('🟡 saveAlarmToFirestore 호출됨');
       final fcmToken = await _getFcmToken();
+      debugPrint('🔑 FCM Token: $fcmToken');
       if (fcmToken == null) throw Exception('FCM 토큰을 가져올 수 없습니다.');
-      print('📲 FCM Token Retrieved in init: $fcmToken');
       final data = {
-        keyCourtUid: 'court_uid_123', // 실제 courtUid로 변경
-        keyUserUid: 'user_uid_123', // 실제 userUid로 변경
+        keyCourtUid: widget.court.uid,
+        keyUserUid: FirebaseAuth.instance.currentUser?.uid,
+        keyCourtName: widget.court.courtName,
         keyAlarmWeekday: selectedWeekday.value,
         keyAlarmHour: selectedTime.hour,
         keyAlarmMinute: selectedTime.minute,
@@ -85,8 +87,7 @@ class _CourtAlarmSettingsState extends State<CourtAlarmSettings> {
         keyAlarmEnabled: true,
         keyFcmToken: fcmToken,
       };
-      print('📲 FCM Token Retrieved in init: $fcmToken');
-      print('📝 저장될 알람 정보: $data'); // 추가된 로그
+      debugPrint('📤 Firestore 저장 데이터: $data');
 
       await _firestore.collection(keyCourtAlarms).add(data);
 
@@ -102,13 +103,8 @@ class _CourtAlarmSettingsState extends State<CourtAlarmSettings> {
       // Update ValueNotifier state
       widget.vnAlarmSet.value = true;
 
-
-/*
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('알림이 설정되었습니다.')));*/
     } catch (e) {
-      print('❌ 알림 설정 실패: $e'); // 에러 로그 추가
+      debugPrint('❌ 예외 발생: $e');
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(const SnackBar(content: Text('알림 설정 중 오류가 발생했습니다.')));

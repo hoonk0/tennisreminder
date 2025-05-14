@@ -8,6 +8,7 @@ import 'package:tennisreminder_app/ui/bottom_sheet/bottom_sheet_notification.dar
 import 'package:tennisreminder_app/ui/component/basic_button.dart';
 import 'package:tennisreminder_core/const/model/model_court.dart';
 import 'package:tennisreminder_core/const/model/model_court_alarm.dart';
+import 'package:tennisreminder_core/const/model/model_user.dart';
 import 'package:tennisreminder_core/const/value/colors.dart';
 import 'package:tennisreminder_core/const/value/keys.dart';
 import 'package:tennisreminder_core/const/value/gaps.dart';
