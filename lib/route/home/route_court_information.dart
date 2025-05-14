@@ -53,7 +53,8 @@ class _RouteCourtInformationState extends State<RouteCourtInformation> {
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Court Image (temporary placeholder)
+
+                    ///코트사진
                     Container(
                       height: 200,
                       width: double.infinity,
@@ -72,6 +73,8 @@ class _RouteCourtInformationState extends State<RouteCourtInformation> {
                       ),
                     ),
                     Gaps.v20,
+
+                    ///코트명
                     Text(
                       widget.court.courtName,
                       style: const TextStyle(
@@ -80,109 +83,125 @@ class _RouteCourtInformationState extends State<RouteCourtInformation> {
                       ),
                     ),
                     Gaps.v5,
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            widget.court.courtAddress,
-                            style: const TextStyle(color: Colors.grey),
-                          ),
-                        ),
-                      ],
+
+                    ///코트주소
+                    Text(
+                      widget.court.courtAddress,
+                      style: const TextStyle(color: Colors.grey),
                     ),
                     Gaps.v10,
+
+                    ///알람설정
+                    GestureDetector(
+                      onTap: () async {
+                        if (vnAlarmSet.value) {
+                          // 알람 설정 해제
+                          vnAlarmSet.value = false;
+
+                          final userUid = FirebaseAuth.instance.currentUser?.uid;
+                          final courtUid = widget.court.uid;
+
+                          if (userUid != null) {
+                            final snapshot = await FirebaseFirestore.instance
+                                .collection(keyCourtAlarms)
+                                .where(keyUserUid, isEqualTo: userUid)
+                                .where(keyCourtUid, isEqualTo: courtUid)
+                                .get();
+
+                            for (final doc in snapshot.docs) {
+                              await doc.reference.delete();
+                            }
+                          }
+                        } else {
+                          // 알람 설정
+                          showModalBottomSheet(
+                            context: context,
+                            isScrollControlled: true,
+                            backgroundColor: colorGray100,
+                            shape: const RoundedRectangleBorder(
+                              borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
+                            ),
+                            builder: (context) {
+                              return BottomSheetNotification(
+                                court: widget.court,
+                                vnAlarmSet: vnAlarmSet,
+                              );
+                            },
+                          );
+                        }
+                      },
+                      child: Container(
+                        margin: const EdgeInsets.symmetric(vertical: 16),
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: colorGray100,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: colorGray300),
+                        ),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            ValueListenableBuilder(
+                              valueListenable: vnAlarmSet,
+                              builder: (
+                                BuildContext context,
+                                alarmSet,
+                                Widget? child,
+                              ) {
+                                return Icon(
+                                  alarmSet
+                                      ? Icons.notifications_active
+                                      : Icons.notifications_none,
+                                  color: alarmSet ? colorMain900 : Colors.grey,
+                                );
+                              },
+                            ),
+                            Gaps.h12,
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    '원하는 시간에 알림을 받을 수 있어요!',
+                                    style: const TS.s16w600(colorGray900),
+                                  ),
+                                  Gaps.v5,
+                                  const Text(
+                                    '매주 예약하고 싶은 요일과 시간을 설정하세요.',
+                                    style: TS.s14w400(Colors.black87),
+                                  ),
+                                  Gaps.v10,
+                                  Align(
+                                    alignment: Alignment.centerRight,
+                                    child: const Text(
+                                      '알림 설정하기 >',
+                                      style: TS.s14w600(colorMain900),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    Gaps.v10,
+
                     const Text(
                       'Field Information',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                      ),
+                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                     ),
                     Gaps.v10,
                     Text(
                       widget.court.courtInfo,
                       style: const TextStyle(color: Colors.black87),
                     ),
-
-                    ///알람설정
-                    Container(
-                      margin: const EdgeInsets.symmetric(vertical: 16),
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: colorGray100,
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: colorGray300),
-                      ),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          ValueListenableBuilder(
-                            valueListenable: vnAlarmSet,
-                            builder: (
-                              BuildContext context,
-                              alarmSet,
-                              Widget? child,
-                            ) {
-                              return Icon(
-                                alarmSet
-                                    ? Icons.notifications_active
-                                    : Icons.notifications_none,
-                                color: alarmSet ? colorMain900 : Colors.grey,
-                              );
-                            },
-                          ),
-                          Gaps.h12,
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  '원하는 시간에 알림을 받을 수 있어요!',
-                                  style: const TS.s16w600(colorGray900),
-                                ),
-                                Gaps.v5,
-                                const Text(
-                                  '매주 예약하고 싶은 요일과 시간을 설정하세요.',
-                                  style: TS.s14w400(Colors.black87),
-                                ),
-                                Gaps.v10,
-                                Align(
-                                  alignment: Alignment.centerRight,
-                                  child: GestureDetector(
-                                    onTap: () {
-                                      showModalBottomSheet(
-                                        context: context,
-                                        isScrollControlled: true,
-                                        backgroundColor: colorGray100,
-                                        shape: const RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.vertical(
-                                            top: Radius.circular(12),
-                                          ),
-                                        ),
-                                        builder: (context) {
-                                          return BottomSheetNotification(
-                                            court: widget.court,
-                                            vnAlarmSet:vnAlarmSet,
-                                          );
-                                        },
-                                      );
-                                    },
-                                    child: const Text(
-                                      '알림 설정하기 >',
-                                      style: TS.s14w600(colorMain900),
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    Gaps.v10,
                   ],
                 ),
               ),
+
+
+
               Spacer(),
               BasicButton(title: '예약하러 가기', onTap: () {}),
               Gaps.v20,
