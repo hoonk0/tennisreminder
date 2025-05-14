@@ -11,21 +11,21 @@ import 'package:tennisreminder_core/const/value/gaps.dart';
 import 'package:tennisreminder_core/const/value/keys.dart';
 import 'package:tennisreminder_core/const/value/text_style.dart';
 
-class CourtAlarmSettings extends StatefulWidget {
+class CourtNotificationSettings extends StatefulWidget {
   final ValueNotifier<bool> vnAlarmSet;
   final ModelCourt court;
 
-  const CourtAlarmSettings({
+  const CourtNotificationSettings({
     super.key,
     required this.vnAlarmSet,
     required this.court,
   });
 
   @override
-  State<CourtAlarmSettings> createState() => _CourtAlarmSettingsState();
+  State<CourtNotificationSettings> createState() => _CourtNotificationSettingsState();
 }
 
-class _CourtAlarmSettingsState extends State<CourtAlarmSettings> {
+class _CourtNotificationSettingsState extends State<CourtNotificationSettings> {
   final selectedWeekday = ValueNotifier<int>(DateTime.monday);
 
   TimeOfDay selectedTime = const TimeOfDay(hour: 20, minute: 0);

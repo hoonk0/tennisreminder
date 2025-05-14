@@ -11,6 +11,7 @@ import 'package:tennisreminder_core/const/value/keys.dart';
 import 'package:tennisreminder_core/const/value/gaps.dart';
 import 'package:tennisreminder_core/const/value/text_style.dart';
 
+import '../../const/static/global.dart';
 
 class RouteCourtInformation extends StatefulWidget {
   final ModelCourt court;
@@ -30,7 +31,6 @@ class _RouteCourtInformationState extends State<RouteCourtInformation> {
   int selectedWeekday = DateTime.sunday; // mutable for UI input
 
   final ValueNotifier<bool> vnAlarmSet = ValueNotifier(false);
-  final ValueNotifier<bool> vnIsFavorite = ValueNotifier(false);
 
   Future<String?> getFcmToken() async {
     // TODO: Replace with your actual FCM token fetch logic
@@ -97,25 +97,33 @@ class _RouteCourtInformationState extends State<RouteCourtInformation> {
                         ),
 
                         ValueListenableBuilder(
-                          valueListenable: vnIsFavorite,
-                          builder:
-                              (BuildContext context, isFavorite, Widget? child) {
+                          valueListenable: Global.vnFavoriteCourts,
+                          builder: (context, likedCourts, child) {
+                            final isFavorite = likedCourts.any((e) => e.uid == widget.court.uid);
+
                             return GestureDetector(
-                                onTap: (){
-                                  vnIsFavorite.value = !vnIsFavorite.value;
-                                },
-                                child: Container(
-                                  padding: const EdgeInsets.all(4),
-                                  decoration: BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    border: Border.all(color: colorMain900),
-                                  ),
-                                  child: Icon(
-                                    isFavorite ? Icons.favorite : Icons.favorite_border,
-                                    color: colorMain900,
-                                  ),
-                                ));
+                              onTap: () {
+                                final currentCourt = widget.court;
+                                if (isFavorite) {
+                                  Global.vnFavoriteCourts.value =
+                                      likedCourts.where((e) => e.uid != currentCourt.uid).toList();
+                                } else {
+                                  Global.vnFavoriteCourts.value = [...likedCourts, currentCourt];
+                                }
                               },
+                              child: Container(
+                                padding: const EdgeInsets.all(4),
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  border: Border.all(color: colorMain900),
+                                ),
+                                child: Icon(
+                                  isFavorite ? Icons.favorite : Icons.favorite_border,
+                                  color: colorMain900,
+                                ),
+                              ),
+                            );
+                          },
                         ),
                       ],
                     ),
@@ -251,3 +259,4 @@ class _RouteCourtInformationState extends State<RouteCourtInformation> {
     );
   }
 }
+

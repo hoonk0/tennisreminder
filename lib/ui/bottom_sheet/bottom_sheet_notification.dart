@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:tennisreminder_app/service/notification/court_alarm_setting.dart';
+import 'package:tennisreminder_app/service/notification/court_notification_setting.dart';
 import 'package:tennisreminder_core/const/model/model_court.dart';
 import 'package:tennisreminder_core/const/model/model_user.dart';
 import 'package:tennisreminder_core/const/value/colors.dart';
@@ -77,7 +77,7 @@ class BottomSheetNotification extends StatelessWidget {
             Gaps.v20,
 
             ///코트알람
-            CourtAlarmSettings(vnAlarmSet: vnAlarmSet, court: court),
+            CourtNotificationSettings(vnAlarmSet: vnAlarmSet, court: court),
             Gaps.v20,
           ],
         ),
