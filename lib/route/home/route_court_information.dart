@@ -98,17 +98,18 @@ class _RouteCourtInformationState extends State<RouteCourtInformation> {
 
                         ValueListenableBuilder(
                           valueListenable: Global.vnFavoriteCourts,
-                          builder: (context, likedCourts, child) {
-                            final isFavorite = likedCourts.any((e) => e.uid == widget.court.uid);
+                          builder: (context, favoriteCourts, child) {
+                            final isFavorite = favoriteCourts.any((e) => e.uid == widget.court.uid);
 
                             return GestureDetector(
                               onTap: () {
+                                ///좋아요 이미 누르면 취소, 반대면 리스트 추가
                                 final currentCourt = widget.court;
                                 if (isFavorite) {
                                   Global.vnFavoriteCourts.value =
-                                      likedCourts.where((e) => e.uid != currentCourt.uid).toList();
+                                      favoriteCourts.where((e) => e.uid != currentCourt.uid).toList();
                                 } else {
-                                  Global.vnFavoriteCourts.value = [...likedCourts, currentCourt];
+                                  Global.vnFavoriteCourts.value = [...favoriteCourts, currentCourt];
                                 }
                               },
                               child: Container(
