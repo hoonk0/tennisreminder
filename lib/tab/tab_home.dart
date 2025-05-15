@@ -8,7 +8,9 @@ import 'package:tennisreminder_core/const/model/model_court.dart';
 import 'package:tennisreminder_core/const/value/colors.dart';
 import 'package:tennisreminder_core/const/value/gaps.dart';
 import 'package:tennisreminder_core/const/value/keys.dart';
+import 'package:tennisreminder_core/const/value/text_style.dart';
 import '../../const/static/global.dart';
+import '../route/home/route_court_search.dart';
 import '../service/weather/weather_alarm.dart';
 import '../ui/component/textfield_border.dart';
 import '../ui/component/card_court_preview.dart';
@@ -23,14 +25,38 @@ class TabHome extends StatefulWidget {
 
 class _TabHomeState extends State<TabHome> {
 
+  final TextEditingController _tecSearch = TextEditingController();
+  List<ModelCourt> _searchResults = [];
+
   @override
   void initState() {
     super.initState();
+    _tecSearch.addListener(_onSearchChanged);
   }
 
   @override
   void dispose() {
+    _tecSearch.dispose();
     super.dispose();
+  }
+
+  void _onSearchChanged() async {
+    final text = _tecSearch.text.trim();
+    if (text.isEmpty) {
+      setState(() => _searchResults = []);
+      return;
+    }
+
+    final snapshot = await FirebaseFirestore.instance
+        .collection(keyCourt)
+        .get();
+
+    final courts = snapshot.docs
+        .map((doc) => ModelCourt.fromJson(doc.data()))
+        .where((court) => court.courtName.toLowerCase().contains(text.toLowerCase()))
+        .toList();
+
+    setState(() => _searchResults = courts);
   }
 
 
@@ -43,12 +69,29 @@ class _TabHomeState extends State<TabHome> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           /// 1. 검색창
-          TextFieldBorder(
-            hintText: '테니스코트를 검색해보세요',
-            prefixIcon: Icon(Icons.search),
-            fillColor: Colors.white,
+          GestureDetector(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const RouteCourtSearch()),
+              );
+            },
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: colorGray300),
+              ),
+              child: Row(
+                children: const [
+                  Icon(Icons.search, color: colorGray300),
+                  SizedBox(width: 8),
+                  Text('테니스 코트를 검색해보세요', style: TS.s14w600(colorGray600),),
+                ],
+              ),
+            ),
           ),
-
           Gaps.v20,
 
 
@@ -56,6 +99,43 @@ class _TabHomeState extends State<TabHome> {
           Text('이번주 서울 날씨', style: Theme.of(context).textTheme.titleMedium),
           Gaps.v5,
           WeatherAlarm(),
+
+          if (_searchResults.isNotEmpty) ...[
+            const SizedBox(height: 16),
+            Text('검색 결과', style: Theme.of(context).textTheme.titleMedium),
+            const SizedBox(height: 8),
+            Column(
+              children: _searchResults.map((court) {
+                return Container(
+                  margin: const EdgeInsets.only(bottom: 12),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: colorGray300),
+                  ),
+                  child: ListTile(
+                    leading: ClipRRect(
+                      borderRadius: BorderRadius.circular(6),
+                      child: Image(
+                        image: court.imageUrls != null && court.imageUrls!.isNotEmpty
+                            ? NetworkImage(court.imageUrls!.first)
+                            : const AssetImage('assets/images/mainicon.png') as ImageProvider,
+                        width: 56,
+                        height: 56,
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                    title: Text(court.courtName),
+                    subtitle: Text(court.courtAddress),
+                    onTap: () {
+                      Navigator.of(context).push(MaterialPageRoute(
+                        builder: (_) => RouteCourtInformation(court: court),
+                      ));
+                    },
+                  ),
+                );
+              }).toList(),
+            ),
+          ],
 
  /*         /// 2. 최근 본 코트
           Text('최근 본 코트', style: Theme.of(context).textTheme.titleMedium),
