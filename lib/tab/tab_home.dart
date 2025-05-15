@@ -14,6 +14,8 @@ import '../route/home/route_court_search.dart';
 import '../service/weather/weather_alarm.dart';
 import '../ui/component/textfield_border.dart';
 import '../ui/component/card_court_preview.dart';
+import 'package:geolocator/geolocator.dart';
+import '../../ui/component/card_court_inform.dart';
 
 
 class TabHome extends StatefulWidget {
@@ -24,42 +26,81 @@ class TabHome extends StatefulWidget {
 }
 
 class _TabHomeState extends State<TabHome> {
-
-  final TextEditingController _tecSearch = TextEditingController();
-  List<ModelCourt> _searchResults = [];
+  List<ModelCourt> _nearbyCourts = [];
+  bool _isNearbyLoading = true;
 
   @override
   void initState() {
     super.initState();
-    _tecSearch.addListener(_onSearchChanged);
+    _loadNearbyCourts();
   }
 
   @override
   void dispose() {
-    _tecSearch.dispose();
     super.dispose();
   }
 
-  void _onSearchChanged() async {
-    final text = _tecSearch.text.trim();
-    if (text.isEmpty) {
-      setState(() => _searchResults = []);
-      return;
+  Future<void> _loadNearbyCourts() async {
+    try {
+      await _ensureLocationPermission();
+      final courts = await _getNearbyCourts();
+      setState(() {
+        _nearbyCourts = courts;
+        _isNearbyLoading = false;
+      });
+    } catch (e) {
+      debugPrint('❌ 위치 접근 오류: $e');
+      setState(() => _isNearbyLoading = false);
+      // 사용자에게 알림
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('위치 정보를 가져올 수 없습니다. 권한을 확인해주세요.')),
+        );
+      }
     }
-
-    final snapshot = await FirebaseFirestore.instance
-        .collection(keyCourt)
-        .get();
-
-    final courts = snapshot.docs
-        .map((doc) => ModelCourt.fromJson(doc.data()))
-        .where((court) => court.courtName.toLowerCase().contains(text.toLowerCase()))
-        .toList();
-
-    setState(() => _searchResults = courts);
   }
 
+  Future<List<ModelCourt>> _getNearbyCourts() async {
+    try {
+      final allCourtsSnapshot = await FirebaseFirestore.instance.collection(keyCourt).get();
+      final allCourts = allCourtsSnapshot.docs.map((e) => ModelCourt.fromJson(e.data())).toList();
 
+      final currentPosition = await Geolocator.getCurrentPosition();
+      debugPrint('📍 현재 위치: ${currentPosition.latitude}, ${currentPosition.longitude}');
+
+      final nearbyCourts = <ModelCourt>[];
+      for (final court in allCourts) {
+        final distance = Geolocator.distanceBetween(
+          currentPosition.latitude,
+          currentPosition.longitude,
+          court.latitude,
+          court.longitude,
+        );
+        if (distance < 1) {
+          nearbyCourts.add(court);
+        }
+      }
+
+      return nearbyCourts;
+    } catch (e) {
+      debugPrint('❌ _getNearbyCourts 예외: $e');
+      return [];
+    }
+  }
+
+  Future<void> _ensureLocationPermission() async {
+    LocationPermission permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) {
+        throw Exception("위치 권한이 거부되었습니다.");
+      }
+    }
+
+    if (permission == LocationPermission.deniedForever) {
+      throw Exception("위치 권한이 영구적으로 거부되었습니다.");
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -92,50 +133,15 @@ class _TabHomeState extends State<TabHome> {
               ),
             ),
           ),
-          Gaps.v20,
-
+          Gaps.v10,
 
           ///2. 날씨알람
-          Text('이번주 서울 날씨', style: Theme.of(context).textTheme.titleMedium),
+/*          Text('이번주 서울 날씨', style: Theme.of(context).textTheme.titleMedium),*/
           Gaps.v5,
           WeatherAlarm(),
 
-          if (_searchResults.isNotEmpty) ...[
-            const SizedBox(height: 16),
-            Text('검색 결과', style: Theme.of(context).textTheme.titleMedium),
-            const SizedBox(height: 8),
-            Column(
-              children: _searchResults.map((court) {
-                return Container(
-                  margin: const EdgeInsets.only(bottom: 12),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: colorGray300),
-                  ),
-                  child: ListTile(
-                    leading: ClipRRect(
-                      borderRadius: BorderRadius.circular(6),
-                      child: Image(
-                        image: court.imageUrls != null && court.imageUrls!.isNotEmpty
-                            ? NetworkImage(court.imageUrls!.first)
-                            : const AssetImage('assets/images/mainicon.png') as ImageProvider,
-                        width: 56,
-                        height: 56,
-                        fit: BoxFit.cover,
-                      ),
-                    ),
-                    title: Text(court.courtName),
-                    subtitle: Text(court.courtAddress),
-                    onTap: () {
-                      Navigator.of(context).push(MaterialPageRoute(
-                        builder: (_) => RouteCourtInformation(court: court),
-                      ));
-                    },
-                  ),
-                );
-              }).toList(),
-            ),
-          ],
+          Gaps.v10,
+
 
  /*         /// 2. 최근 본 코트
           Text('최근 본 코트', style: Theme.of(context).textTheme.titleMedium),
@@ -155,30 +161,28 @@ class _TabHomeState extends State<TabHome> {
             ),
           ),*/
 
-          Gaps.v20,
+
 
           /// 3. 내 주변 10km 코트
           Text('내 주변 코트', style: Theme.of(context).textTheme.titleMedium),
           Gaps.v5,
-          Column(
-            children: List.generate(3, (index) {
-              return Container(
-                margin: EdgeInsets.only(bottom: 12),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: colorGray300),
-                ),
-                child: ListTile(
-                  leading: ClipRRect(
-                    borderRadius: BorderRadius.circular(6),
-                    child: Image.asset('assets/images/mainicon.png', width: 56, height: 56, fit: BoxFit.cover),
-                  ),
-                  title: Text('코트 이름 $index'),
-                  subtitle: Text('10km 이내 위치'),
-                ),
-              );
-            }),
-          ),
+          if (_isNearbyLoading)
+            const Center(child: CircularProgressIndicator())
+          else if (_nearbyCourts.isEmpty)
+            const Text('주변 10km 이내의 코트를 찾을 수 없습니다.')
+          else
+            Column(
+              children: _nearbyCourts.map((court) {
+                return CardCourtInform(
+                  court: court,
+                  onTap: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(builder: (_) => RouteCourtInformation(court: court)),
+                    );
+                  },
+                );
+              }).toList(),
+            ),
 
           Gaps.v20,
 
