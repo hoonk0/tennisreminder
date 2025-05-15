@@ -53,6 +53,8 @@ class _TabHomeState extends State<TabHome> {
 
 
           ///2. 날씨알람
+          Text('이번주 서울 날씨', style: Theme.of(context).textTheme.titleMedium),
+          Gaps.v5,
           WeatherAlarm(),
 
  /*         /// 2. 최근 본 코트
@@ -77,7 +79,7 @@ class _TabHomeState extends State<TabHome> {
 
           /// 3. 내 주변 10km 코트
           Text('내 주변 코트', style: Theme.of(context).textTheme.titleMedium),
-          Gaps.v4,
+          Gaps.v5,
           Column(
             children: List.generate(3, (index) {
               return Container(
@@ -117,7 +119,7 @@ class _TabHomeState extends State<TabHome> {
                 ],
               ),
             ),
-            Gaps.v4,
+            Gaps.v5,
             StreamBuilder<QuerySnapshot>(
               stream: FirebaseFirestore.instance
                   .collection(keyCourt)
@@ -162,7 +164,7 @@ class _TabHomeState extends State<TabHome> {
 
           ],),
 
-          Gaps.h20,
+          Gaps.v20,
 /*
           /// 5. 좋아요 많은 코트
           Text('인기 코트 TOP 5', style: Theme.of(context).textTheme.titleMedium),

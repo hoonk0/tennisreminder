@@ -8,10 +8,14 @@ import 'package:tennisreminder_app/route/route_splash.dart';
 import 'package:tennisreminder_core/const/value/colors.dart';
 import 'package:tennisreminder_core/const/value/text_style.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:tennisreminder_core/const/model/model_court.dart';
 
+import 'const/static/global.dart';
 import 'firebase_options.dart';
 
-Future<void> _setupInteractedMessage() async {
+/*Future<void> _setupInteractedMessage() async {
   RemoteMessage? initialMessage = await FirebaseMessaging.instance.getInitialMessage();
 
   if (initialMessage != null) {
@@ -24,17 +28,19 @@ Future<void> _setupInteractedMessage() async {
 void _handleMessage(RemoteMessage message) {
   debugPrint('🔔 종료 상태에서 알림 클릭됨: ${message.notification?.title}');
   // TODO: Add navigation or processing logic here
-}
+}*/
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
 
   await Future.wait([
     Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform),
   ]);
 
-  await _setupInteractedMessage();
+  //await _setupInteractedMessage();
+
+  // 좋아요 코트 불러오기
+  await _loadFavoriteCourts();
 
   KakaoSdk.init(
     nativeAppKey: 'de368876dad11f1f070baef6058f8d49',
@@ -50,6 +56,19 @@ Future<void> main() async {
 */
 
   runApp(const ProviderScope(child: MyApp()));
+}
+
+Future<void> _loadFavoriteCourts() async {
+  final user = FirebaseAuth.instance.currentUser;
+  if (user == null) return;
+
+  final snapshot = await FirebaseFirestore.instance
+      .collection('court')
+      .where('liked_user_uids', arrayContains: user.uid)
+      .get();
+
+  final courts = snapshot.docs.map((e) => ModelCourt.fromJson(e.data())).toList();
+  Global.vnFavoriteCourts.value = courts;
 }
 
 class MyApp extends StatelessWidget {
