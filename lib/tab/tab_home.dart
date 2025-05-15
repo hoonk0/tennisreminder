@@ -11,6 +11,7 @@ import 'package:tennisreminder_core/const/value/keys.dart';
 import 'package:tennisreminder_core/const/value/text_style.dart';
 import '../../const/static/global.dart';
 import '../route/home/route_court_search.dart';
+import '../service/location_service.dart';
 import '../service/weather/weather_alarm.dart';
 import '../ui/component/textfield_border.dart';
 import '../ui/component/card_court_preview.dart';
@@ -26,81 +27,32 @@ class TabHome extends StatefulWidget {
 }
 
 class _TabHomeState extends State<TabHome> {
-  List<ModelCourt> _nearbyCourts = [];
-  bool _isNearbyLoading = true;
+  final ValueNotifier<List<ModelCourt>> vnNearbyCourts = ValueNotifier([]);
 
   @override
   void initState() {
     super.initState();
-    _loadNearbyCourts();
+    LocationService.loadNearbyCourts(
+      onSuccess: (courts) {
+        vnNearbyCourts.value = courts;
+      },
+      onError: (e) {
+        debugPrint('❌ 위치 접근 오류: $e');
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('위치 정보를 가져올 수 없습니다. 권한을 확인해주세요.')),
+          );
+        }
+      },
+    );
   }
 
   @override
   void dispose() {
+    vnNearbyCourts.dispose();
     super.dispose();
   }
 
-  Future<void> _loadNearbyCourts() async {
-    try {
-      await _ensureLocationPermission();
-      final courts = await _getNearbyCourts();
-      setState(() {
-        _nearbyCourts = courts;
-        _isNearbyLoading = false;
-      });
-    } catch (e) {
-      debugPrint('❌ 위치 접근 오류: $e');
-      setState(() => _isNearbyLoading = false);
-      // 사용자에게 알림
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('위치 정보를 가져올 수 없습니다. 권한을 확인해주세요.')),
-        );
-      }
-    }
-  }
-
-  Future<List<ModelCourt>> _getNearbyCourts() async {
-    try {
-      final allCourtsSnapshot = await FirebaseFirestore.instance.collection(keyCourt).get();
-      final allCourts = allCourtsSnapshot.docs.map((e) => ModelCourt.fromJson(e.data())).toList();
-
-      final currentPosition = await Geolocator.getCurrentPosition();
-      debugPrint('📍 현재 위치: ${currentPosition.latitude}, ${currentPosition.longitude}');
-
-      final nearbyCourts = <ModelCourt>[];
-      for (final court in allCourts) {
-        final distance = Geolocator.distanceBetween(
-          currentPosition.latitude,
-          currentPosition.longitude,
-          court.latitude,
-          court.longitude,
-        );
-        if (distance < 1) {
-          nearbyCourts.add(court);
-        }
-      }
-
-      return nearbyCourts;
-    } catch (e) {
-      debugPrint('❌ _getNearbyCourts 예외: $e');
-      return [];
-    }
-  }
-
-  Future<void> _ensureLocationPermission() async {
-    LocationPermission permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
-      if (permission == LocationPermission.denied) {
-        throw Exception("위치 권한이 거부되었습니다.");
-      }
-    }
-
-    if (permission == LocationPermission.deniedForever) {
-      throw Exception("위치 권한이 영구적으로 거부되었습니다.");
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -166,23 +118,26 @@ class _TabHomeState extends State<TabHome> {
           /// 3. 내 주변 10km 코트
           Text('내 주변 코트', style: Theme.of(context).textTheme.titleMedium),
           Gaps.v5,
-          if (_isNearbyLoading)
-            const Center(child: CircularProgressIndicator())
-          else if (_nearbyCourts.isEmpty)
-            const Text('주변 10km 이내의 코트를 찾을 수 없습니다.')
-          else
-            Column(
-              children: _nearbyCourts.map((court) {
-                return CardCourtInform(
-                  court: court,
-                  onTap: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(builder: (_) => RouteCourtInformation(court: court)),
-                    );
-                  },
-                );
-              }).toList(),
-            ),
+          ValueListenableBuilder<List<ModelCourt>>(
+            valueListenable: vnNearbyCourts,
+            builder: (context, nearbyCourts, _) {
+              if (nearbyCourts.isEmpty) {
+                return const Text('주변 10km 이내의 코트를 찾을 수 없습니다.');
+              }
+              return Column(
+                children: nearbyCourts.map((court) {
+                  return CardCourtInform(
+                    court: court,
+                    onTap: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(builder: (_) => RouteCourtInformation(court: court)),
+                      );
+                    },
+                  );
+                }).toList(),
+              );
+            },
+          ),
 
           Gaps.v20,
 
