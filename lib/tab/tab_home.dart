@@ -9,6 +9,7 @@ import 'package:tennisreminder_core/const/value/colors.dart';
 import 'package:tennisreminder_core/const/value/gaps.dart';
 import 'package:tennisreminder_core/const/value/keys.dart';
 import '../../const/static/global.dart';
+import '../service/weather/weather_alarm.dart';
 import '../ui/component/textfield_border.dart';
 import '../ui/component/card_court_preview.dart';
 
@@ -50,7 +51,11 @@ class _TabHomeState extends State<TabHome> {
 
           Gaps.v20,
 
-          /// 2. 최근 본 코트
+
+          ///2. 날씨알람
+          WeatherAlarm(),
+
+ /*         /// 2. 최근 본 코트
           Text('최근 본 코트', style: Theme.of(context).textTheme.titleMedium),
           Gaps.v4,
           Container(
@@ -66,7 +71,7 @@ class _TabHomeState extends State<TabHome> {
                 );
               },
             ),
-          ),
+          ),*/
 
           Gaps.v20,
 

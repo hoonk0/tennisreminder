@@ -4,6 +4,8 @@ import 'package:tennisreminder_core/const/value/colors.dart';
 import 'package:tennisreminder_core/const/value/gaps.dart';
 import 'package:tennisreminder_core/const/value/text_style.dart';
 
+import '../../const/static/global.dart';
+
 class MainAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String title;
 
@@ -35,11 +37,16 @@ class MainAppBar extends StatelessWidget implements PreferredSizeWidget {
               style: const TS.s16w800(colorMain900),
             ),
             const Spacer(),
-            SvgPicture.asset(
-              'assets/icons/notification.svg',
-              width: 24,
-              height: 24,
-            ),
+    /*        GestureDetector(
+              onTap: () {
+                Global.tabIndexNotifier.value = 2;
+              },
+              child: SvgPicture.asset(
+                'assets/icons/notification.svg',
+                width: 24,
+                height: 24,
+              ),
+            ),*/
           ],
         ),
       ),
