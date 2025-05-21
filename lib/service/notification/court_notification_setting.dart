@@ -47,14 +47,14 @@ class _CourtNotificationSettingsState extends State<CourtNotificationSettings> {
     _getFcmToken();
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
       debugPrint('📩 포그라운드 수신됨: ${message.notification?.title}');
+      if (!mounted) return; // ✅ 위젯이 활성 상태인지 확인
       if (message.notification != null) {
         showDialog(
           context: context,
-          builder:
-              (_) => AlertDialog(
-                title: Text(message.notification!.title ?? '알림'),
-                content: Text(message.notification!.body ?? '내용 없음'),
-              ),
+          builder: (_) => AlertDialog(
+            title: Text(message.notification!.title ?? '알림'),
+            content: Text(message.notification!.body ?? '내용 없음'),
+          ),
         );
       }
     });

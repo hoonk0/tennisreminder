@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:tennisreminder_app/service/weather/weather_alarm.dart';
 import 'package:tennisreminder_app/ui/bottom_sheet/bottom_sheet_notification.dart';
 import 'package:tennisreminder_app/ui/component/basic_button.dart';
@@ -12,6 +13,8 @@ import 'package:tennisreminder_core/const/value/gaps.dart';
 import 'package:tennisreminder_core/const/value/text_style.dart';
 
 import '../../const/static/global.dart';
+
+final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
 
 class RouteCourtInformation extends StatefulWidget {
   final ModelCourt court;
@@ -260,6 +263,26 @@ class _RouteCourtInformationState extends State<RouteCourtInformation> {
                   Gaps.v20,
                 ],
               ),
+            ),
+            // 🔔 테스트용 알림 버튼
+            ElevatedButton(
+              onPressed: () {
+                flutterLocalNotificationsPlugin.show(
+                  0,
+                  '🔔 테스트 알림',
+                  '이 알림이 보이면 앱 알림 설정은 정상입니다.',
+                  NotificationDetails(
+                    android: AndroidNotificationDetails(
+                      'alarm_channel',
+                      '알림 채널',
+                      importance: Importance.high,
+                      priority: Priority.high,
+                      icon: '@mipmap/ic_launcher',
+                    ),
+                  ),
+                );
+              },
+              child: const Text('🔔 알림 테스트'),
             ),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
