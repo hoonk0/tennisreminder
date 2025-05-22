@@ -7,6 +7,7 @@ import 'package:tennisreminder_app/service/weather/weather_alarm.dart';
 import 'package:tennisreminder_app/ui/bottom_sheet/bottom_sheet_notification.dart';
 import 'package:tennisreminder_app/ui/component/basic_button.dart';
 import 'package:tennisreminder_core/const/model/model_court.dart';
+import 'package:tennisreminder_core/const/model/model_court_alarm.dart';
 import 'package:tennisreminder_core/const/value/colors.dart';
 import 'package:tennisreminder_core/const/value/keys.dart';
 import 'package:tennisreminder_core/const/value/gaps.dart';
@@ -187,7 +188,27 @@ class _RouteCourtInformationState extends State<RouteCourtInformation> {
                               vnAlarmSet: vnAlarmSet,
                             );
                           },
-                        );
+                        ).then((_) async {
+                          final userUid = FirebaseAuth.instance.currentUser?.uid;
+                          if (userUid != null) {
+                            final snapshot = await FirebaseFirestore.instance
+                                .collection(keyCourtAlarms)
+                                .where(keyUserUid, isEqualTo: userUid)
+                                .orderBy(keyDateCreate, descending: true)
+                                .get();
+
+                            final list = snapshot.docs
+                                .map((doc) => ModelCourtAlarm.fromJson(doc.data()))
+                                .toList();
+
+                            debugPrint('📥 알람 불러오기 완료: ${list.length}개');
+                            for (var alarm in list) {
+                              debugPrint('🔔 ${alarm.courtName}, ${alarm.alarmWeekday}요일 ${alarm.alarmHour}:${alarm.alarmMinute}, enabled: ${alarm.alarmEnabled}');
+                            }
+
+                            Global.vnCourtAlarms.value = list;
+                          }
+                        });
                       }
                     },
                     child: Container(

@@ -5,7 +5,9 @@ import 'package:kakao_flutter_sdk/kakao_flutter_sdk.dart';
 import 'package:naver_login_sdk/naver_login_sdk.dart';
 import 'package:sizer/sizer.dart';
 import 'package:tennisreminder_app/route/route_splash.dart';
+import 'package:tennisreminder_core/const/model/model_court_alarm.dart';
 import 'package:tennisreminder_core/const/value/colors.dart';
+import 'package:tennisreminder_core/const/value/keys.dart';
 import 'package:tennisreminder_core/const/value/text_style.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -37,16 +39,12 @@ Future<void> main() async {
     Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform),
   ]);
 
-  //await _setupInteractedMessage();
-
-  // 좋아요 코트 불러오기
-  await _loadFavoriteCourts();
-
   KakaoSdk.init(
     nativeAppKey: 'de368876dad11f1f070baef6058f8d49',
     loggingEnabled: true,
   );
-/*
+
+  /*
   NaverLoginSDK.initialize(
       urlScheme: "sportsdirector",
       clientId:"BjgiZmXeS1CuztyUF6wK",
@@ -55,21 +53,45 @@ Future<void> main() async {
   );
 */
 
+
+  /// 좋아요 코트, 알람코트 불러오기
+  final user = FirebaseAuth.instance.currentUser;
+  if (user == null) return;
+  await _loadFavoriteCourts();
+  await syncCourtAlarms(user.uid);
+
+
   runApp(const ProviderScope(child: MyApp()));
 }
 
+///최초1번 글로벌노티파이어 사용을 위해 불러옴
 Future<void> _loadFavoriteCourts() async {
   final user = FirebaseAuth.instance.currentUser;
   if (user == null) return;
 
   final snapshot = await FirebaseFirestore.instance
-      .collection('court')
-      .where('liked_user_uids', arrayContains: user.uid)
+      .collection(keyCourt)
+      .where(keyLikedUserUids, arrayContains: user.uid)
       .get();
 
   final courts = snapshot.docs.map((e) => ModelCourt.fromJson(e.data())).toList();
   Global.vnFavoriteCourts.value = courts;
 }
+
+///최초1번 글로벌노티파이어 사용을 위해 불러옴
+Future<void> syncCourtAlarms(String uid) async {
+  final snapshot = await FirebaseFirestore.instance
+      .collection(keyCourtAlarms)
+      .where(keyUserUid, isEqualTo: uid)
+      .orderBy(keyDateCreate, descending: true)
+      .get();
+
+  final list = snapshot.docs.map((e) => ModelCourtAlarm.fromJson(e.data())).toList();
+  Global.vnCourtAlarms.value = list;
+  debugPrint('📥 알람 동기화 완료: ${list.length}개 불러옴');
+}
+
+
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});

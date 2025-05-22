@@ -115,31 +115,6 @@ class _TabHomeState extends State<TabHome> {
 
 
 
-          /// 3. 내 주변 10km 코트
-          Text('내 주변 코트', style: Theme.of(context).textTheme.titleMedium),
-          Gaps.v5,
-          ValueListenableBuilder<List<ModelCourt>>(
-            valueListenable: vnNearbyCourts,
-            builder: (context, nearbyCourts, _) {
-              if (nearbyCourts.isEmpty) {
-                return const Text('주변 10km 이내의 코트를 찾을 수 없습니다.');
-              }
-              return Column(
-                children: nearbyCourts.map((court) {
-                  return CardCourtInform(
-                    court: court,
-                    onTap: () {
-                      Navigator.of(context).push(
-                        MaterialPageRoute(builder: (_) => RouteCourtInformation(court: court)),
-                      );
-                    },
-                  );
-                }).toList(),
-              );
-            },
-          ),
-
-          Gaps.v20,
 
           /// 4. 서울시 추천 코트
           Column(
@@ -204,6 +179,34 @@ class _TabHomeState extends State<TabHome> {
           ],),
 
           Gaps.v20,
+
+/*
+          /// 3. 내 주변 10km 코트
+          Text('내 주변 코트', style: Theme.of(context).textTheme.titleMedium),
+          Gaps.v5,
+          ValueListenableBuilder<List<ModelCourt>>(
+            valueListenable: vnNearbyCourts,
+            builder: (context, nearbyCourts, _) {
+              if (nearbyCourts.isEmpty) {
+                return const Text('주변 10km 이내의 코트를 찾을 수 없습니다.');
+              }
+              return Column(
+                children: nearbyCourts.take(5).map((court) {
+                  return CardCourtInform(
+                    court: court,
+                    onTap: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(builder: (_) => RouteCourtInformation(court: court)),
+                      );
+                    },
+                  );
+                }).toList(),
+              );
+            },
+          ),
+
+          Gaps.v20,*/
+
 /*
           /// 5. 좋아요 많은 코트
           Text('인기 코트 TOP 5', style: Theme.of(context).textTheme.titleMedium),
