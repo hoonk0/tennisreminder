@@ -1,4 +1,3 @@
-/*
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:tennisreminder_core/const/value/colors.dart';
@@ -8,14 +7,14 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:tennisreminder_core/const/value/text_style.dart';
 
-class WeatherAlarm extends StatefulWidget {
-  const WeatherAlarm({super.key});
+class RouteWeatherAlarm extends StatefulWidget {
+  const RouteWeatherAlarm({super.key});
 
   @override
-  State<WeatherAlarm> createState() => _WeatherAlarmState();
+  State<RouteWeatherAlarm> createState() => _RouteWeatherAlarmState();
 }
 
-class _WeatherAlarmState extends State<WeatherAlarm> {
+class _RouteWeatherAlarmState extends State<RouteWeatherAlarm> {
   final ValueNotifier<List<Map<String, dynamic>>> vnForecastNotifier = ValueNotifier([]);
 
   @override
@@ -42,9 +41,9 @@ class _WeatherAlarmState extends State<WeatherAlarm> {
     final url = Uri.parse(
       ///요청데이터
       'https://api.open-meteo.com/v1/forecast'
-      '?latitude=$lat&longitude=$lon'
-      '&daily=temperature_2m_min,temperature_2m_max,weathercode'
-      '&timezone=Asia%2FSeoul',
+          '?latitude=$lat&longitude=$lon'
+          '&daily=temperature_2m_min,temperature_2m_max,weathercode'
+          '&timezone=Asia%2FSeoul',
     );
 
     debugPrint('🟡 Open-Meteo API 호출 시작: $url');
@@ -130,39 +129,37 @@ class _WeatherAlarmState extends State<WeatherAlarm> {
           return forecast.isEmpty
               ? const Center(child: CircularProgressIndicator())
               : SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  padding: const EdgeInsets.symmetric(horizontal: 8),
-                  child: Row(
-                    children: forecast.map((item) {
-                      final date = DateTime.fromMillisecondsSinceEpoch(item['dt'] * 1000);
-                      return Container(
-                        margin: const EdgeInsets.symmetric(horizontal: 6),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(
-                              _weekdayKor(date.weekday).toUpperCase(),
-                              style: const TS.s10w600(colorWhite),
-                            ),
-                            Gaps.v5,
-                            Text(
-                              mapWeatherCodeToEmoji(item['icon']),
-                              style: const TextStyle(fontSize: 26),
-                            ),
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.symmetric(horizontal: 8),
+            child: Row(
+              children: forecast.map((item) {
+                final date = DateTime.fromMillisecondsSinceEpoch(item['dt'] * 1000);
+                return Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 6),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        _weekdayKor(date.weekday).toUpperCase(),
+                        style: const TS.s10w600(colorWhite),
+                      ),
+                      Gaps.v5,
+                      Text(
+                        mapWeatherCodeToEmoji(item['icon']),
+                        style: const TextStyle(fontSize: 26),
+                      ),
 
-*/
 /*                            ///온도표시
                             Text(
                               '${item['min'].round()}°/${item['max'].round()}°',
                               style: const TS.s12w400(colorWhite),
-                            ),*//*
-
-                          ],
-                        ),
-                      );
-                    }).toList(),
+                            ),*/
+                    ],
                   ),
                 );
+              }).toList(),
+            ),
+          );
         },
       ),
     );
@@ -173,4 +170,3 @@ class _WeatherAlarmState extends State<WeatherAlarm> {
     return weekdays[(weekday - 1) % 7];
   }
 }
-*/
