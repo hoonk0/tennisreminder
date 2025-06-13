@@ -37,7 +37,7 @@ class _RouteSplashState extends ConsumerState<RouteSplash> {
 
           /// FirebaseAuth에 등록되어 있지 않음: 아무것도 안함
           if (uid == null) {
-            Navigator.of(context).push(MaterialPageRoute(builder: (context) => const RouteAuthLogin()));
+            Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => const RouteAuthLogin()));
           }
 
           /// FirebaseAuth에 등록되어 있음
@@ -45,7 +45,7 @@ class _RouteSplashState extends ConsumerState<RouteSplash> {
 
             StreamMe.listenMe();
 
-            Navigator.of(context).push(
+            Navigator.of(context).pushReplacement(
               MaterialPageRoute(
                 builder: (context) => const RouteMain(),
                 settings: const RouteSettings(name: 'home'),
@@ -56,7 +56,7 @@ class _RouteSplashState extends ConsumerState<RouteSplash> {
       );
     } catch (e) {
 
-      Navigator.of(context).push(MaterialPageRoute(builder: (context) => const RouteAuthLogin()));
+      Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => const RouteAuthLogin()));
     }
   }
 

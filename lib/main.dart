@@ -56,9 +56,10 @@ Future<void> main() async {
 
   /// 좋아요 코트, 알람코트 불러오기
   final user = FirebaseAuth.instance.currentUser;
-  if (user == null) return;
-  await _loadFavoriteCourts();
-  await syncCourtAlarms(user.uid);
+  if (user != null) {
+    await _loadFavoriteCourts();
+    await syncCourtAlarms(user.uid);
+  }
 
 
   runApp(const ProviderScope(child: MyApp()));
