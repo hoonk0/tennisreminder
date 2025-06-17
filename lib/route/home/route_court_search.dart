@@ -95,7 +95,12 @@ class _RouteCourtSearchState extends State<RouteCourtSearch> {
                     itemCount: courts.length,
                     itemBuilder: (context, index) {
                       final court = courts[index];
-                      return CardCourtInform(court: court);
+                      return GestureDetector(
+                          onTap: (){
+                            Navigator.of(context).push(MaterialPageRoute(
+                                            builder: (context) => RouteCourtInformation(court: court)));
+                          },
+                          child: CardCourtInform(court: court));
                     },
                   );
                 },

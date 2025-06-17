@@ -96,8 +96,9 @@ class _TabHomeState extends State<TabHome> {
               ),
             ),
           ),
-          Gaps.v5,
+          Gaps.v20,
 
+          ///빠른메뉴
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
@@ -132,14 +133,8 @@ class _TabHomeState extends State<TabHome> {
 
             ],
           ),
-          Gaps.v10,
+          Gaps.v20,
 
-          ///2. 날씨알람
-          /*          Text('이번주 서울 날씨', style: Theme.of(context).textTheme.titleMedium),*/
-     /*     Gaps.v5,
-          WeatherAlarm(),
-*/
-          Gaps.v10,
 
           /*         /// 2. 최근 본 코트
           Text('최근 본 코트', style: Theme.of(context).textTheme.titleMedium),

@@ -120,127 +120,139 @@ class _RouteWeatherAlarmState extends State<RouteWeatherAlarm> {
     return decoded.map((e) => Map<String, dynamic>.from(e)).toList();
   }
 
-  ///맵코드 -> 날씨이미지로 변경
-  String mapWeatherCodeToEmoji(int code) {
-    if (code == 0) return '☀️';
-    if (code <= 3) return '🌤';
-    if (code <= 48) return '☁️';
-    if (code <= 57) return '🌦';
-    if (code <= 67) return '🌧';
-    if (code <= 77) return '🌨';
-    if (code <= 82) return '🌦';
-    if (code <= 99) return '⛈';
+  ///맵코드 -> 날씨이미지 경로로 변경
+  String mapWeatherCodeToAsset(int code) {
+    if (code == 0) return 'assets/images/sunny.png';
+    if (code <= 3) return 'assets/images/sunnycloudy.png';
+    if (code <= 48) return 'assets/images/cloudy.png';
+    if (code <= 57) return 'assets/images/rainy.png';
+    if (code <= 67) return 'assets/images/rainy.png';
+    if (code <= 77) return 'assets/images/snowy.png';
+    if (code <= 82) return 'assets/images/snowy.png';
+    if (code <= 99) return 'assets/images/thunder.png';
     return '❓';
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF2196F3),
       appBar: AppBar(
-        title: const Text('이번 주 날씨'),
-        backgroundColor: const Color(0xFF1976D2),
-        elevation: 0,
+        title: const Text('날씨'),
       ),
-      body: Center(
-        child: Container(
-          width: 260,
-          padding: const EdgeInsets.all(20),
-          margin: const EdgeInsets.symmetric(vertical: 24),
-          decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.15),
-            borderRadius: BorderRadius.circular(32),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.1),
-                blurRadius: 12,
-                offset: const Offset(0, 6),
-              ),
-            ],
-          ),
-          child: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                ValueListenableBuilder<List<Map<String, dynamic>>>(
-                  valueListenable: vnForecastNotifier,
-                  builder: (context, forecast, _) {
-                    return forecast.isEmpty
-                        ? const Center(child: CircularProgressIndicator())
-                        : Column(
+      body: SafeArea(
+        child: FutureBuilder<void>(
+          future: fetchWeather(),
+          builder: (context, snapshot) {
+            return snapshot.connectionState != ConnectionState.done
+                ? const Center(child: CircularProgressIndicator())
+                : SingleChildScrollView(
+                    padding: const EdgeInsets.all(20),
+                    child: Column(
+                      children: [
+                        /// 맨 위 현재 날씨 온도
+                        Column(
+                          children: [
+                            vnHourlyNotifier.value.isNotEmpty
+                                ? Image.asset(mapWeatherCodeToAsset(vnHourlyNotifier.value.first['icon']), width: 100, height: 100)
+                                : const Icon(Icons.error, size: 64),
+                            Text(
+                              '${vnHourlyNotifier.value.isNotEmpty ? vnHourlyNotifier.value.first['temp'].round() : '--'}°c',
+                              style: const TextStyle(
+                                fontSize: 48,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.black,
+                              ),
+                            ),
+
+                            ///나중에 현재위치로 변경 (동)
+                            const Text(
+                              '서울특별시',
+                              style: TextStyle(fontSize: 16, color: Colors.black54),
+                            ),
+                          ],
+                        ),
+                        Gaps.v20,
+
+                        /// 시간별 날씨
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              '시간별 날씨',
+                              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                            ),
+                            Gaps.v10,
+                            Container(
+
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(16),
+                                color: Colors.grey.shade100,
+                              ),
+                              height: 120,
+                              child: ListView.builder(
+                                scrollDirection: Axis.horizontal,
+                                itemCount: vnHourlyNotifier.value.length,
+                                itemBuilder: (context, index) {
+                                  final h = vnHourlyNotifier.value[index];
+                                  return Container(
+                                    width: 64,
+                                    padding: const EdgeInsets.symmetric(vertical: 8),
+                                    color: Colors.grey.shade100,
+                                    child: Column(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: [
+                                        Text('${h['hour']}시', style: const TextStyle(color: Colors.black)),
+                                        Image.asset(mapWeatherCodeToAsset(h['icon']), width: 32, height: 32),
+                                        Text('${h['temp'].round()}°', style: const TextStyle(color: Colors.black)),
+                                      ],
+                                    ),
+                                  );
+                                },
+                              ),
+                            ),
+                          ],
+                        ),
+                        Gaps.v20,
+
+                        /// 주간 날씨
+                        Container(
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: Colors.grey.shade100,
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
-                            children: forecast.map((item) {
-                              final date = DateTime.fromMillisecondsSinceEpoch(item['dt'] * 1000);
-                              return Padding(
-                                padding: const EdgeInsets.symmetric(vertical: 8),
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Text(
-                                      _weekdayKorKor(date.weekday),
-                                      style: const TextStyle(
-                                        color: Colors.white,
-                                        fontWeight: FontWeight.w600,
-                                        fontSize: 14,
+                            children: [
+                              const Text(
+                                '주간 날씨',
+                                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                              ),
+                              Gaps.v10,
+                              ...vnForecastNotifier.value.map((item) {
+                                final date = DateTime.fromMillisecondsSinceEpoch(item['dt'] * 1000);
+                                return Padding(
+                                  padding: const EdgeInsets.symmetric(vertical: 6),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Text(_weekdayKorKor(date.weekday), style: const TextStyle(color: Colors.black)),
+                                      Image.asset(mapWeatherCodeToAsset(item['icon']), width: 32, height: 32),
+                                      Text(
+                                        '${item['max'].round()}° / ${item['min'].round()}°',
+                                        style: const TextStyle(color: Colors.black),
                                       ),
-                                    ),
-                                    Text(
-                                      mapWeatherCodeToEmoji(item['icon']),
-                                      style: const TextStyle(fontSize: 28),
-                                    ),
-                                    Text(
-                                      '${item['max'].round()}° / ${item['min'].round()}°',
-                                      style: const TextStyle(color: Colors.white, fontSize: 14),
-                                    ),
-                                  ],
-                                ),
-                              );
-                            }).toList(),
-                          );
-                  },
-                ),
-                Gaps.v20,
-                const Text(
-                  '오늘의 시간별 날씨',
-                  style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-                ),
-                Gaps.v10,
-                SizedBox(
-                  height: 100,
-                  child: ValueListenableBuilder<List<Map<String, dynamic>>>(
-                    valueListenable: vnHourlyNotifier,
-                    builder: (context, hourly, _) {
-                      return ListView.builder(
-                        scrollDirection: Axis.horizontal,
-                        itemCount: hourly.length,
-                        itemBuilder: (context, index) {
-                          final h = hourly[index];
-                          return Container(
-                            width: 72,
-                            margin: const EdgeInsets.symmetric(horizontal: 6),
-                            padding: const EdgeInsets.all(8),
-                            decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.2),
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Text('${h['hour']}시', style: const TextStyle(color: Colors.white)),
-                                Text(mapWeatherCodeToEmoji(h['icon']), style: const TextStyle(fontSize: 22)),
-                                Text('${h['temp'].round()}°', style: const TextStyle(color: Colors.white)),
-                                Text('💧${h['pop']}%', style: const TextStyle(fontSize: 12, color: Colors.white)),
-                              ],
-                            ),
-                          );
-                        },
-                      );
-                    },
-                  ),
-                ),
-              ],
-            ),
-          ),
+                                    ],
+                                  ),
+                                );
+                              }).toList(),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+          },
         ),
       ),
     );

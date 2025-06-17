@@ -15,7 +15,8 @@ import 'package:tennisreminder_core/const/value/text_style.dart';
 
 import '../../const/static/global.dart';
 
-final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
+final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+    FlutterLocalNotificationsPlugin();
 
 class RouteCourtInformation extends StatefulWidget {
   final ModelCourt court;
@@ -89,10 +90,17 @@ class _RouteCourtInformationState extends State<RouteCourtInformation> {
                           ),
                           Gaps.v5,
 
-                          ///코트주소
+                          ///주소 길면 짤라서 보이게하기
                           Text(
-                            widget.court.courtAddress,
+                            widget.court.courtAddress
+                                    .split(' ')
+                                    .take(5)
+                                    .join(' ') +
+                                (widget.court.courtAddress.split(' ').length > 5
+                                    ? ''
+                                    : ''),
                             style: const TextStyle(color: Colors.grey),
+                            softWrap: true,
                           ),
                         ],
                       ),
@@ -100,29 +108,43 @@ class _RouteCourtInformationState extends State<RouteCourtInformation> {
                       ValueListenableBuilder(
                         valueListenable: Global.vnFavoriteCourts,
                         builder: (context, favoriteCourts, child) {
-                          final isFavorite = favoriteCourts.any((e) => e.uid == widget.court.uid);
+                          final isFavorite = favoriteCourts.any(
+                            (e) => e.uid == widget.court.uid,
+                          );
 
                           return GestureDetector(
                             onTap: () async {
                               final currentCourt = widget.court;
 
-                              final userUid = FirebaseAuth.instance.currentUser?.uid;
+                              final userUid =
+                                  FirebaseAuth.instance.currentUser?.uid;
                               if (userUid == null) return;
 
-                              final courtRef = FirebaseFirestore.instance.collection(keyCourt).doc(currentCourt.uid);
+                              final courtRef = FirebaseFirestore.instance
+                                  .collection(keyCourt)
+                                  .doc(currentCourt.uid);
 
                               if (isFavorite) {
                                 Global.vnFavoriteCourts.value =
-                                    favoriteCourts.where((e) => e.uid != currentCourt.uid).toList();
+                                    favoriteCourts
+                                        .where((e) => e.uid != currentCourt.uid)
+                                        .toList();
                                 await courtRef.update({
                                   ///파베에서 삭제
-                                  keyLikedUserUids: FieldValue.arrayRemove([userUid])
+                                  keyLikedUserUids: FieldValue.arrayRemove([
+                                    userUid,
+                                  ]),
                                 });
                               } else {
-                                Global.vnFavoriteCourts.value = [...favoriteCourts, currentCourt];
+                                Global.vnFavoriteCourts.value = [
+                                  ...favoriteCourts,
+                                  currentCourt,
+                                ];
                                 await courtRef.update({
                                   ///파베에서 추가
-                                  keyLikedUserUids: FieldValue.arrayUnion([userUid])
+                                  keyLikedUserUids: FieldValue.arrayUnion([
+                                    userUid,
+                                  ]),
                                 });
                               }
                             },
@@ -133,7 +155,9 @@ class _RouteCourtInformationState extends State<RouteCourtInformation> {
                                 border: Border.all(color: colorMain900),
                               ),
                               child: Icon(
-                                isFavorite ? Icons.favorite : Icons.favorite_border,
+                                isFavorite
+                                    ? Icons.favorite
+                                    : Icons.favorite_border,
                                 color: colorMain900,
                               ),
                             ),
@@ -145,7 +169,7 @@ class _RouteCourtInformationState extends State<RouteCourtInformation> {
 
                   Gaps.v10,
 
-   /*               ///날씨알람
+                  /*               ///날씨알람
                   WeatherAlarm(),*/
 
                   ///알람설정
@@ -155,8 +179,7 @@ class _RouteCourtInformationState extends State<RouteCourtInformation> {
                         // 알람 설정 해제
                         vnAlarmSet.value = false;
 
-                        final userUid =
-                            FirebaseAuth.instance.currentUser?.uid;
+                        final userUid = FirebaseAuth.instance.currentUser?.uid;
                         final courtUid = widget.court.uid;
 
                         if (userUid != null) {
@@ -189,21 +212,29 @@ class _RouteCourtInformationState extends State<RouteCourtInformation> {
                             );
                           },
                         ).then((_) async {
-                          final userUid = FirebaseAuth.instance.currentUser?.uid;
+                          final userUid =
+                              FirebaseAuth.instance.currentUser?.uid;
                           if (userUid != null) {
-                            final snapshot = await FirebaseFirestore.instance
-                                .collection(keyCourtAlarms)
-                                .where(keyUserUid, isEqualTo: userUid)
-                                .orderBy(keyDateCreate, descending: true)
-                                .get();
+                            final snapshot =
+                                await FirebaseFirestore.instance
+                                    .collection(keyCourtAlarms)
+                                    .where(keyUserUid, isEqualTo: userUid)
+                                    .orderBy(keyDateCreate, descending: true)
+                                    .get();
 
-                            final list = snapshot.docs
-                                .map((doc) => ModelCourtAlarm.fromJson(doc.data()))
-                                .toList();
+                            final list =
+                                snapshot.docs
+                                    .map(
+                                      (doc) =>
+                                          ModelCourtAlarm.fromJson(doc.data()),
+                                    )
+                                    .toList();
 
                             debugPrint('📥 알람 불러오기 완료: ${list.length}개');
                             for (var alarm in list) {
-                              debugPrint('🔔 ${alarm.courtName}, ${alarm.alarmWeekday}요일 ${alarm.alarmHour}:${alarm.alarmMinute}, enabled: ${alarm.alarmEnabled}');
+                              debugPrint(
+                                '🔔 ${alarm.courtName}, ${alarm.alarmWeekday}요일 ${alarm.alarmHour}:${alarm.alarmMinute}, enabled: ${alarm.alarmEnabled}',
+                              );
                             }
 
                             Global.vnCourtAlarms.value = list;
@@ -270,10 +301,7 @@ class _RouteCourtInformationState extends State<RouteCourtInformation> {
 
                   const Text(
                     'Field Information',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                    ),
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                   ),
                   Gaps.v10,
                   Text(
@@ -307,10 +335,7 @@ class _RouteCourtInformationState extends State<RouteCourtInformation> {
             ),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-              child: BasicButton(
-                title: '예약하러 가기',
-                onTap: () {},
-              ),
+              child: BasicButton(title: '예약하러 가기', onTap: () {}),
             ),
           ],
         ),
