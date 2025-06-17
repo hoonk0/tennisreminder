@@ -25,9 +25,13 @@ class _RouteAllCourtsState extends ConsumerState<RouteAllCourts> {
   Widget build(BuildContext context) {
     final filter = ref.watch(providerCourtFilter);
 
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
+    debugPrint('[ROUTE_ALL_COURTS] Current filter: ${filter.selectedDistricts}');
+
+    Future.microtask(() {
+      if (!mounted) return;
       if (filter.selectedDistricts.isEmpty) {
-        await FutureFetch.fetchCourtAll(
+        FutureFetch.fetchCourtAll(
+            ref: ref,
             filter: const ModelCourtFilter(selectedDistricts: []));
       }
     });
@@ -42,11 +46,13 @@ class _RouteAllCourtsState extends ConsumerState<RouteAllCourts> {
               selected: filter.selectedDistricts.isNotEmpty ? filter.selectedDistricts.first : null,
               onChanged: (district) async {
                 if (district != null) {
+                  debugPrint('[ROUTE_ALL_COURTS] District changed to: $district');
                   final newFilter = ModelCourtFilter(selectedDistricts: [district]);
                   ref.read(providerCourtFilter.notifier).state = newFilter;
 
                   /// 필터 바뀐 후 새로 패치
-                  await FutureFetch.fetchCourtAll(filter: newFilter);
+                  await FutureFetch.fetchCourtAll(ref: ref, filter: newFilter);
+                  debugPrint('[ROUTE_ALL_COURTS] Fetch completed for: ${newFilter.selectedDistricts}');
                 }
               },
             ),

@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tennisreminder_app/state_management/model_base/model_base_court.dart';
 import 'package:tennisreminder_core/const/model/model_court.dart';
 import 'package:tennisreminder_core/const/model/moderl_filter_all_courts.dart';
@@ -11,11 +12,12 @@ import '../providers/providers.dart';
 
 class FutureFetch {
   static Future<void> fetchCourtAll({
+    required WidgetRef ref,
     required ModelCourtFilter filter,
     int fetchCount = 15,
     bool isForce = false,
   }) async {
-    final pState = Global.refSplash!.read(providerCourtAll(filter));
+    final pState = ref.read(providerCourtAll(filter));
     debugPrint('[PAGINATION] fetchCourtAll called (initial: ${pState is CourtLoading}, fetchMore: ${pState is CourtNormal})');
 
     Query courtQuery = FirebaseFirestore.instance.collection(keyCourt);
@@ -42,7 +44,7 @@ class FutureFetch {
       final listCourt =
           courtQs.docs.map((e) => ModelCourt.fromJson(e.data() as Map<String, dynamic>)).toList();
       debugPrint('[PAGINATION] Initial fetch complete: ${listCourt.length} courts');
-      Global.refSplash!
+      ref
           .read(
             providerCourtAll(filter).notifier,
           )
@@ -62,7 +64,7 @@ class FutureFetch {
       if(pState.isEndOfData || pState.lastDocumentSnapshot == null) return;
 
       debugPrint('[PAGINATION] Fetching more courts...');
-      Global.refSplash!.read(providerCourtAll(filter).notifier).state =
+      ref.read(providerCourtAll(filter).notifier).state =
           CourtFetchMore(
             listCourt: List.from(pState.listCourt),
             lastDocumentSnapshot: pState.lastDocumentSnapshot,
@@ -77,7 +79,7 @@ class FutureFetch {
 
       if (courtQs.docs.isEmpty) {
         debugPrint('[PAGINATION] No more courts to load');
-        Global.refSplash!.read(providerCourtAll(filter).notifier).state =
+        ref.read(providerCourtAll(filter).notifier).state =
             CourtNormal(
               listCourt: pState.listCourt,
               lastDocumentSnapshot: pState.lastDocumentSnapshot,
@@ -93,7 +95,7 @@ class FutureFetch {
       final newList = [...pState.listCourt, ...addedCourts];
       debugPrint('[PAGINATION] Fetched ${addedCourts.length} more courts (total: ${newList.length})');
       final isEndOfData = courtQs.docs.length < fetchCount;
-      Global.refSplash!.read(providerCourtAll(filter).notifier).state =
+      ref.read(providerCourtAll(filter).notifier).state =
           CourtNormal(
             listCourt: newList,
             lastDocumentSnapshot: courtQs.docs.last as DocumentSnapshot<Map<String, dynamic>>,

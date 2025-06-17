@@ -25,12 +25,12 @@ class _PaginationCourtState extends ConsumerState<PaginationCourt> {
   void initState() {
     super.initState();
 
-    FutureFetch.fetchCourtAll(filter: widget.filter);
+    FutureFetch.fetchCourtAll(ref: ref, filter: widget.filter);
 
     rsc.addListener(() {
       if (rsc.position.maxScrollExtent - rsc.offset < 300) {
         Global.throttler.run(() {
-          FutureFetch.fetchCourtAll(filter: widget.filter);
+          FutureFetch.fetchCourtAll(ref: ref, filter: widget.filter);
         });
       }
     });
@@ -78,15 +78,18 @@ class _PaginationCourtState extends ConsumerState<PaginationCourt> {
             border: Border.all(color: Colors.grey.shade300),
           ),
           child: ListTile(
-            leading: ClipRRect(
-              borderRadius: BorderRadius.circular(6),
-              child: Image.asset(
-                court.imageUrls?.isNotEmpty == true
-                    ? court.imageUrls!.first
-                    : 'assets/images/mainicon.png',
-                width: 56,
-                height: 56,
-                fit: BoxFit.cover,
+            leading: SizedBox(
+              width: 56,
+              height: 56,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(6),
+                child: court.imageUrls?.isNotEmpty == true
+                    ? Image.network(
+                        court.imageUrls!.first,
+                        fit: BoxFit.cover,
+                        errorBuilder: (_, __, ___) => Image.asset('assets/images/mainicon.png'),
+                      )
+                    : Image.asset('assets/images/mainicon.png'),
               ),
             ),
             title: Text(court.courtName),

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:tennisreminder_core/const/model/model_court.dart';
 import 'package:tennisreminder_core/const/value/colors.dart';
 import 'package:tennisreminder_core/const/value/gaps.dart';
+import 'package:tennisreminder_core/const/value/text_style.dart';
 
 class CardCourtInform extends StatelessWidget {
   final ModelCourt court;
@@ -24,7 +25,7 @@ class CardCourtInform extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               ClipRRect(
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: BorderRadius.only(topLeft: Radius.circular(8), bottomLeft:Radius.circular(8) ),
                 child: Image(
                   image: court.imageUrls != null && court.imageUrls!.isNotEmpty
                       ? NetworkImage(court.imageUrls!.first)
@@ -41,19 +42,12 @@ class CardCourtInform extends StatelessWidget {
                   children: [
                     Text(
                       court.courtName,
-                      style: TextStyle(
-                        color: colorMain900,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                      ),
+                        style: TS.s12w500(colorGray700),
                     ),
                     Gaps.v4,
                     Text(
                       court.courtAddress,
-                      style: TextStyle(
-                        color: colorMain900.withOpacity(0.8),
-                        fontSize: 13,
-                      ),
+                      style: TS.s12w500(colorGray500),
                     ),
                   ],
                 ),

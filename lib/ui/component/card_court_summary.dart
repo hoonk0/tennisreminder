@@ -1,4 +1,3 @@
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:tennisreminder_core/const/model/model_court.dart';
@@ -30,17 +29,23 @@ class CardCourtSummary extends StatelessWidget {
             borderRadius: BorderRadius.circular(12),
             child: court.imageUrls?.isNotEmpty == true
                 ? Image.network(
-              court.imageUrls!.first,
-              height: 200,
-              width: double.infinity,
-              fit: BoxFit.cover,
-            )
-                : Image.asset(
-              'assets/images/mainicon.png',
-              height: 200,
-              width: double.infinity,
-              fit: BoxFit.cover,
-            ),
+                    court.imageUrls!.first,
+                    height: 200,
+                    width: double.infinity,
+                    fit: BoxFit.cover,
+                  )
+                : Container(
+                    height: 200,
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.grey.shade300),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Image.asset(
+                      'assets/images/mainicon.png',
+                      fit: BoxFit.contain,
+                    ),
+                  ),
           ),
           Gaps.v8,
           Text(
