@@ -16,6 +16,7 @@ class RouteWeatherAlarm extends StatefulWidget {
 
 class _RouteWeatherAlarmState extends State<RouteWeatherAlarm> {
   final ValueNotifier<List<Map<String, dynamic>>> vnForecastNotifier = ValueNotifier([]);
+  final ValueNotifier<List<Map<String, dynamic>>> vnHourlyNotifier = ValueNotifier([]);
 
   @override
   void initState() {
@@ -39,11 +40,11 @@ class _RouteWeatherAlarmState extends State<RouteWeatherAlarm> {
     const lat = 37.5665;
     const lon = 126.9780;
     final url = Uri.parse(
-      ///요청데이터
       'https://api.open-meteo.com/v1/forecast'
-          '?latitude=$lat&longitude=$lon'
-          '&daily=temperature_2m_min,temperature_2m_max,weathercode'
-          '&timezone=Asia%2FSeoul',
+      '?latitude=$lat&longitude=$lon'
+      '&daily=temperature_2m_min,temperature_2m_max,weathercode'
+      '&hourly=temperature_2m,weathercode,precipitation_probability'
+      '&timezone=Asia%2FSeoul',
     );
 
     debugPrint('🟡 Open-Meteo API 호출 시작: $url');
@@ -68,6 +69,27 @@ class _RouteWeatherAlarmState extends State<RouteWeatherAlarm> {
       });
       await saveForecastToCache(vnForecastNotifier.value);
       debugPrint('✅ Open-Meteo 예보 수신 성공: ${vnForecastNotifier.value.length}일치');
+
+      // ---- Extract today's hourly weather ----
+      final now = DateTime.now();
+      final hourlyTimes = List<String>.from(data['hourly']['time']);
+      final hourlyTemps = List<double>.from(data['hourly']['temperature_2m']);
+      final hourlyCodes = List<int>.from(data['hourly']['weathercode']);
+      final hourlyPops = List<num>.from(data['hourly']['precipitation_probability']);
+
+      vnHourlyNotifier.value = [];
+      for (int i = 0; i < hourlyTimes.length; i++) {
+        final time = DateTime.parse(hourlyTimes[i]).toLocal();
+        if (time.day == now.day && time.month == now.month && time.year == now.year) {
+          vnHourlyNotifier.value.add({
+            'hour': time.hour,
+            'temp': hourlyTemps[i],
+            'icon': hourlyCodes[i],
+            'pop': hourlyPops[i],
+          });
+        }
+      }
+      // ---- end hourly ----
     } else {
       debugPrint('❌ Open-Meteo 요청 실패: ${response.statusCode}');
       debugPrint('응답 내용: ${response.body}');
@@ -113,60 +135,119 @@ class _RouteWeatherAlarmState extends State<RouteWeatherAlarm> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          colors: [colorMain900, Color(0xFFB3F1D1)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.all(Radius.circular(8)),
+    return Scaffold(
+      backgroundColor: const Color(0xFF2196F3),
+      appBar: AppBar(
+        title: const Text('이번 주 날씨'),
+        backgroundColor: const Color(0xFF1976D2),
+        elevation: 0,
       ),
-      child: ValueListenableBuilder<List<Map<String, dynamic>>>(
-        valueListenable: vnForecastNotifier,
-        builder: (context, forecast, _) {
-          return forecast.isEmpty
-              ? const Center(child: CircularProgressIndicator())
-              : SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: 8),
-            child: Row(
-              children: forecast.map((item) {
-                final date = DateTime.fromMillisecondsSinceEpoch(item['dt'] * 1000);
-                return Container(
-                  margin: const EdgeInsets.symmetric(horizontal: 6),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        _weekdayKor(date.weekday).toUpperCase(),
-                        style: const TS.s10w600(colorWhite),
-                      ),
-                      Gaps.v5,
-                      Text(
-                        mapWeatherCodeToEmoji(item['icon']),
-                        style: const TextStyle(fontSize: 26),
-                      ),
-
-/*                            ///온도표시
-                            Text(
-                              '${item['min'].round()}°/${item['max'].round()}°',
-                              style: const TS.s12w400(colorWhite),
-                            ),*/
-                    ],
+      body: Center(
+        child: Container(
+          width: 260,
+          padding: const EdgeInsets.all(20),
+          margin: const EdgeInsets.symmetric(vertical: 24),
+          decoration: BoxDecoration(
+            color: Colors.white.withOpacity(0.15),
+            borderRadius: BorderRadius.circular(32),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.1),
+                blurRadius: 12,
+                offset: const Offset(0, 6),
+              ),
+            ],
+          ),
+          child: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                ValueListenableBuilder<List<Map<String, dynamic>>>(
+                  valueListenable: vnForecastNotifier,
+                  builder: (context, forecast, _) {
+                    return forecast.isEmpty
+                        ? const Center(child: CircularProgressIndicator())
+                        : Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: forecast.map((item) {
+                              final date = DateTime.fromMillisecondsSinceEpoch(item['dt'] * 1000);
+                              return Padding(
+                                padding: const EdgeInsets.symmetric(vertical: 8),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(
+                                      _weekdayKorKor(date.weekday),
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.w600,
+                                        fontSize: 14,
+                                      ),
+                                    ),
+                                    Text(
+                                      mapWeatherCodeToEmoji(item['icon']),
+                                      style: const TextStyle(fontSize: 28),
+                                    ),
+                                    Text(
+                                      '${item['max'].round()}° / ${item['min'].round()}°',
+                                      style: const TextStyle(color: Colors.white, fontSize: 14),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            }).toList(),
+                          );
+                  },
+                ),
+                Gaps.v20,
+                const Text(
+                  '오늘의 시간별 날씨',
+                  style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                ),
+                Gaps.v10,
+                SizedBox(
+                  height: 100,
+                  child: ValueListenableBuilder<List<Map<String, dynamic>>>(
+                    valueListenable: vnHourlyNotifier,
+                    builder: (context, hourly, _) {
+                      return ListView.builder(
+                        scrollDirection: Axis.horizontal,
+                        itemCount: hourly.length,
+                        itemBuilder: (context, index) {
+                          final h = hourly[index];
+                          return Container(
+                            width: 72,
+                            margin: const EdgeInsets.symmetric(horizontal: 6),
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.2),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text('${h['hour']}시', style: const TextStyle(color: Colors.white)),
+                                Text(mapWeatherCodeToEmoji(h['icon']), style: const TextStyle(fontSize: 22)),
+                                Text('${h['temp'].round()}°', style: const TextStyle(color: Colors.white)),
+                                Text('💧${h['pop']}%', style: const TextStyle(fontSize: 12, color: Colors.white)),
+                              ],
+                            ),
+                          );
+                        },
+                      );
+                    },
                   ),
-                );
-              }).toList(),
+                ),
+              ],
             ),
-          );
-        },
+          ),
+        ),
       ),
     );
   }
 
-  String _weekdayKor(int weekday) {
-    const weekdays = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
-    return weekdays[(weekday - 1) % 7];
+  String _weekdayKorKor(int weekday) {
+    const weekdaysKor = ['월', '화', '수', '목', '금', '토', '일'];
+    return weekdaysKor[(weekday - 1) % 7];
   }
 }

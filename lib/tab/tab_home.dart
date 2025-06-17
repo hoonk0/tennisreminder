@@ -180,29 +180,24 @@ class _TabHomeState extends State<TabHome> {
                 ),
               ),*/
               Gaps.v5,
-              StreamBuilder<QuerySnapshot>(
-                stream:
-                    FirebaseFirestore.instance
-                        .collection(keyCourt)
-                        .orderBy(keyDateCreate, descending: true)
-                        .limit(3)
-                        .snapshots(),
+              FutureBuilder<QuerySnapshot>(
+                future: FirebaseFirestore.instance
+                    .collection(keyCourt)
+                    .get(),
                 builder: (context, snapshot) {
                   if (!snapshot.hasData) {
                     return const Center(child: CircularProgressIndicator());
                   }
 
-                  final courts =
-                      snapshot.data!.docs
-                          .map(
-                            (doc) => ModelCourt.fromJson(
-                              doc.data() as Map<String, dynamic>,
-                            ),
-                          )
-                          .toList();
+                  final courts = snapshot.data!.docs
+                      .map((doc) => ModelCourt.fromJson(doc.data() as Map<String, dynamic>))
+                      .toList();
+
+                  courts.shuffle();
+                  final randomCourts = courts.take(3).toList();
 
                   return Column(
-                    children: courts.map((court) => CardCourtSummary(court: court)).toList(),
+                    children: randomCourts.map((court) => CardCourtSummary(court: court)).toList(),
                   );
                 },
               ),

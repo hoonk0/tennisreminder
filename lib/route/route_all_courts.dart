@@ -45,7 +45,7 @@ class _RouteAllCourtsState extends ConsumerState<RouteAllCourts> {
                   final newFilter = ModelCourtFilter(selectedDistricts: [district]);
                   ref.read(providerCourtFilter.notifier).state = newFilter;
 
-                  // 👇 필터 바뀐 후 새로 패치
+                  /// 필터 바뀐 후 새로 패치
                   await FutureFetch.fetchCourtAll(filter: newFilter);
                 }
               },

@@ -44,17 +44,17 @@ class CardCourtSummary extends StatelessWidget {
           ),
           Gaps.v8,
           Text(
-            '한국 ${court.courtAddress ?? "위치 정보 없음"}',
+            '${court.courtName ?? "위치 정보 없음"}',
             style: TS.s12w500(colorGray700),
           ),
           Gaps.v4,
           Text(
-            '${court.courtDistrict ?? "위치 미지정"} · ${court.courtInfo.isNotEmpty ? court.courtInfo : "정보 없음"}',
+            '${court.courtDistrict ?? "위치 미지정"} ',
             style: TS.s12w500(colorGray500),
           ),
           Gaps.v4,
           Text(
-            '게스트 한마디 “${court.extraInfo?["guest_comment"] ?? "후기 정보 없음"}”',
+            '게스트 한마디 “${court.extraInfo?["guest_comment"] ?? "후기 정보 없음"}” · ${court.courtInfo.isNotEmpty ? court.courtInfo : "정보 없음"}',
             style: TS.s12w500(colorGray500),
           ),
           Gaps.v4,
