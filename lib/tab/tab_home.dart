@@ -218,30 +218,16 @@ class _TabHomeState extends State<TabHome> {
               return Column(
                 children:
                     nearbyCourts.take(5).map((court) {
-                      return Container(
-                        margin: const EdgeInsets.only(bottom: 12),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(12),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.05),
-                              blurRadius: 10,
-                              offset: Offset(0, 4),
+                      return CardCourtInform(
+                        court: court,
+                        onTap: () {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder:
+                                  (_) => RouteCourtInformation(court: court),
                             ),
-                          ],
-                        ),
-                        child: CardCourtInform(
-                          court: court,
-                          onTap: () {
-                            Navigator.of(context).push(
-                              MaterialPageRoute(
-                                builder:
-                                    (_) => RouteCourtInformation(court: court),
-                              ),
-                            );
-                          },
-                        ),
+                          );
+                        },
                       );
                     }).toList(),
               );

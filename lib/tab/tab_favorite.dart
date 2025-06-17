@@ -13,43 +13,42 @@ class TabFavorite extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Gaps.v16,
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: 20),
+      child: Column(
+        children: [
+          Gaps.v16,
 
-        ValueListenableBuilder(
-          valueListenable: Global.vnFavoriteCourts,
-          builder: (context, List<ModelCourt> courts, _) {
-            if (courts.isEmpty) {
-              return const Text('좋아요한 코트가 없습니다.');
-            }
-            return Expanded(
-              child: ListView.builder(
-                itemCount: courts.length,
-                itemBuilder: (context, index) {
-                  final court = courts[index];
-                  return Column(
-                    children: [
-                      CardCourtInform(
-                        court: court,
-                        onTap: () {
-                          Navigator.of(context).push(MaterialPageRoute(
-                                          builder: (context) => RouteCourtInformation(court: court)));
-                        },
-                      ),
-                      /// 구분선
-                      const CustomDivider(
-                        margin: EdgeInsets.symmetric(vertical: 5),
-                        width: double.infinity,
-                      ),
-                    ],
-                  );
-                },
-              ),
-            );
-          },
-        ),
-      ],
+          ValueListenableBuilder(
+            valueListenable: Global.vnFavoriteCourts,
+            builder: (context, List<ModelCourt> courts, _) {
+              if (courts.isEmpty) {
+                return const Text('좋아요한 코트가 없습니다.');
+              }
+              return Expanded(
+                child: ListView.builder(
+                  itemCount: courts.length,
+                  itemBuilder: (context, index) {
+                    final court = courts[index];
+                    return Column(
+                      children: [
+                        CardCourtInform(
+                          court: court,
+                          onTap: () {
+                            Navigator.of(context).push(MaterialPageRoute(
+                                            builder: (context) => RouteCourtInformation(court: court)));
+                          },
+                        ),
+
+                      ],
+                    );
+                  },
+                ),
+              );
+            },
+          ),
+        ],
+      ),
     );
   }
 }
