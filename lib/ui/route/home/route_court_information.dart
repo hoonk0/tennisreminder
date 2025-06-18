@@ -47,68 +47,17 @@ class _RouteCourtInformationState extends State<RouteCourtInformation> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('코트 정보')),
       body: SafeArea(
-        child: Stack(
-          children: [
-            Positioned(
-              bottom: 20,
-              left: 20,
-              right: 20,
-              child: InkWell(
-                onTap: () async {
-                  print('[DEBUG] 예약 버튼이 눌렸습니다');
-                  final url = widget.court.reservationUrl;
-                  print('[예약 URL] $url');
-
-                  if (url.isNotEmpty) {
-                    final uri = Uri.tryParse(url);
-                    print('[URI 파싱 결과] $uri');
-
-                    if (uri != null) {
-                      final canLaunch = await canLaunchUrl(uri);
-                      print('[URL 실행 가능 여부] $canLaunch');
-
-                      if (canLaunch) {
-                        final launched = await launchUrl(uri, mode: LaunchMode.externalApplication);
-                        print('[URL 실행 시도 결과] $launched');
-                      } else {
-                        print('[실패] URL 실행 불가');
-                      }
-                    } else {
-                      print('[실패] URI 파싱 실패');
-                    }
-                  } else {
-                    print('[실패] URL이 비어 있음');
-                  }
-                },
-                child: Container(
-                  padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 20),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.95),
-                    borderRadius: BorderRadius.circular(30),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.1),
-                        blurRadius: 10,
-                        offset: Offset(0, 4),
-                      ),
-                    ],
-                  ),
-                  child: Center(
-                    child: Text(
-                      '예약사이트로 이동하기',
-                      style: TS.s16w600(colorMain900),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-            Column(
-              children: [
-            Expanded(
-              child: ListView(
+        child: SizedBox.expand(
+          child: Stack(
+            children: [
+              Column(
                 children: [
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.only(bottom: 100), // reserve space for button
+                      child: ListView(
+                        children: [
                   /// 코트 사진 - full width with rounded bottom corners
                   Stack(
                     children: [
@@ -118,10 +67,9 @@ class _RouteCourtInformationState extends State<RouteCourtInformation> {
                           bottomRight: Radius.circular(20),
                         ),
                         child: Container(
-                          height: 200,
+                          height: 300,
                           width: double.infinity,
                           decoration: BoxDecoration(
-
                             image: DecorationImage(
                               image: widget.court.imageUrls != null && widget.court.imageUrls!.isNotEmpty
                                   ? NetworkImage(widget.court.imageUrls!.first)
@@ -135,6 +83,24 @@ class _RouteCourtInformationState extends State<RouteCourtInformation> {
                           ),
                         ),
                       ),
+                      // Left-aligned back button
+                      Positioned(
+                        top: 20,
+                        left: 20,
+                        child: GestureDetector(
+                          onTap: (){
+                            Navigator.of(context).pop();
+                          },
+                          child: Container(
+                              padding: const EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                color: Colors.white.withOpacity(0.8),
+                                shape: BoxShape.circle,
+                              ),
+                              child: Icon(Icons.arrow_back, color: Colors.black,)),
+                        ),
+                      ),
+                      // Favorite (heart) icon at top right
                       Positioned(
                         top: 20,
                         right: 20,
@@ -175,7 +141,7 @@ class _RouteCourtInformationState extends State<RouteCourtInformation> {
                                 ),
                                 child: Icon(
                                   isFavorite ? Icons.favorite : Icons.favorite_border,
-                                  color: isFavorite ? Colors.red : Colors.black,
+                                  color: isFavorite ? colorMain900 : Colors.black,
                                   size: 20,
                                 ),
                               ),
@@ -186,7 +152,7 @@ class _RouteCourtInformationState extends State<RouteCourtInformation> {
                     ],
                   ),
 
-                  /// New Stack with overlapping container for court info
+                  /// 컨테이너
                   Column(
                     children: [
                       Stack(
@@ -211,22 +177,15 @@ class _RouteCourtInformationState extends State<RouteCourtInformation> {
                                 ],
                               ),
                               child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
                                     widget.court.courtName,
-                                    style: const TextStyle(
-                                      fontSize: 24,
-                                      fontWeight: FontWeight.bold,
-                                    ),
+                                    style: TS.s24w600(colorGray900),
                                   ),
                                   Gaps.v8,
                                   Text(
                                     widget.court.courtAddress,
-                                    style: const TextStyle(
-                                      fontSize: 14,
-                                      color: Colors.grey,
-                                    ),
+                                      style: TS.s14w400(colorGray600),
                                   ),
 
 
@@ -246,26 +205,13 @@ class _RouteCourtInformationState extends State<RouteCourtInformation> {
                                   Column(
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
-                                      Row(
-                                        children: const [
-                                          Icon(Icons.notifications, color: Colors.black87),
-                                          Gaps.h8,
-                                          Text(
-                                            '알람 설정하기',
-                                            style: TextStyle(
-                                              fontWeight: FontWeight.bold,
-                                              fontSize: 18,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
+                                      Text(
+                                        '알람 설정하기',
+                                        style: TS.s16w600(colorGray900),),
                                       Gaps.v6,
                                       const Text(
                                         '원하는 시간에 예약 알람을 받을 수 있어요.',
-                                        style: TextStyle(
-                                          fontSize: 14,
-                                          color: Colors.black54,
-                                        ),
+                                        style: TS.s14w400(colorGray600),
                                       ),
                                       Gaps.v12,
                                       BasicButton(
@@ -282,10 +228,14 @@ class _RouteCourtInformationState extends State<RouteCourtInformation> {
                                       ),
                                     ],
                                   ),
-
                                   CustomDivider(margin: EdgeInsets.symmetric(vertical: 20, horizontal: 20), width: double.infinity,),
 
-                                  Text("코트 위치 표시"),
+                                  ///코트위치 표시
+                                  Column(
+                                    children: [
+                                      Text("코트 위치 표시",style: TS.s16w600(colorGray900),),
+                                    ],
+                                  ),
 
 
                                 ],
@@ -335,9 +285,68 @@ class _RouteCourtInformationState extends State<RouteCourtInformation> {
                   ),
 
                   Gaps.v20,*/
+                        ],
+                      ),
+                    ),
+                  ),
                 ],
               ),
-            ),
+              Positioned(
+                bottom: 20,
+                left: 20,
+                right: 20,
+                child: Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    onTap: () async {
+                      print('[DEBUG] 예약 버튼이 눌렸습니다');
+                      final url = widget.court.reservationUrl;
+                      print('[예약 URL] $url');
+
+                      if (url.isNotEmpty) {
+                        final uri = Uri.tryParse(url);
+                        print('[URI 파싱 결과] $uri');
+
+                        if (uri != null) {
+                          final canLaunch = await canLaunchUrl(uri);
+                          print('[URL 실행 가능 여부] $canLaunch');
+
+                          if (canLaunch) {
+                            final launched = await launchUrl(uri, mode: LaunchMode.externalApplication);
+                            print('[URL 실행 시도 결과] $launched');
+                          } else {
+                            print('[실패] URL 실행 불가');
+                          }
+                        } else {
+                          print('[실패] URI 파싱 실패');
+                        }
+                      } else {
+                        print('[실패] URL이 비어 있음');
+                      }
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 20),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.95),
+                        borderRadius: BorderRadius.circular(30),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.1),
+                            blurRadius: 10,
+                            offset: Offset(0, 4),
+                          ),
+                        ],
+                      ),
+                      child: Center(
+                        child: Text(
+                          '예약사이트로 이동하기',
+                          style: TS.s16w600(colorMain900),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
 
             /// Bottom buttons: "모든 알람 삭제하기" and "예약하러 가기"
             /*Container(
@@ -382,10 +391,10 @@ class _RouteCourtInformationState extends State<RouteCourtInformation> {
                 ],
               ),
             ),*/
-                Gaps.v20,
-          ],
+              Gaps.v20,
+            ],
+          ),
         ),
-    ])),
-    );
+      ),);
   }
 }
