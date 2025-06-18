@@ -16,6 +16,7 @@ import 'package:tennisreminder_core/const/value/gaps.dart';
 import 'package:tennisreminder_core/const/value/text_style.dart';
 
 import '../../../const/static/global.dart';
+import '../../../service/utils/utils.dart';
 
 final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
     FlutterLocalNotificationsPlugin();
@@ -235,6 +236,8 @@ class _RouteCourtInformationState extends State<RouteCourtInformation> {
                                             title: '모든 알람 삭제하기',
                                             colorBg: hasAlarm ? colorMain900 : colorGray400,
                                             onTap: () async {
+                                              Utils.toast(desc: '해당 코트 알람이 삭제되었습니다.');
+
                                               if (!hasAlarm) return;
 
                                               vnAlarmSet.value = false;
