@@ -6,10 +6,13 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:tennisreminder_app/ui/component/basic_button.dart';
 import 'package:tennisreminder_app/ui/dialog/dialog_notification_confirm.dart';
 import 'package:tennisreminder_core/const/model/model_court.dart';
+import 'package:tennisreminder_core/const/model/model_court_alarm.dart';
 import 'package:tennisreminder_core/const/value/colors.dart';
 import 'package:tennisreminder_core/const/value/gaps.dart';
 import 'package:tennisreminder_core/const/value/keys.dart';
 import 'package:tennisreminder_core/const/value/text_style.dart';
+
+import '../../const/static/global.dart';
 
 class CourtNotificationSettings extends StatefulWidget {
   final ValueNotifier<bool> vnAlarmSet;
@@ -89,6 +92,15 @@ class _CourtNotificationSettingsState extends State<CourtNotificationSettings> {
       debugPrint('📤 Firestore 저장 데이터: $data');
 
       await _firestore.collection(keyCourtAlarms).add(data);
+
+      final snapshot = await _firestore
+          .collection(keyCourtAlarms)
+          .where(keyUserUid, isEqualTo: FirebaseAuth.instance.currentUser?.uid)
+          .get();
+
+      Global.vnCourtAlarms.value = snapshot.docs
+          .map((e) => ModelCourtAlarm.fromJson(e.data()))
+          .toList();
 
       showDialog(
         context: context,

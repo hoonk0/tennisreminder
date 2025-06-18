@@ -299,29 +299,18 @@ class _RouteCourtInformationState extends State<RouteCourtInformation> {
                   color: Colors.transparent,
                   child: InkWell(
                     onTap: () async {
-                      print('[DEBUG] 예약 버튼이 눌렸습니다');
                       final url = widget.court.reservationUrl;
-                      print('[예약 URL] $url');
-
                       if (url.isNotEmpty) {
                         final uri = Uri.tryParse(url);
-                        print('[URI 파싱 결과] $uri');
-
                         if (uri != null) {
                           final canLaunch = await canLaunchUrl(uri);
-                          print('[URL 실행 가능 여부] $canLaunch');
-
                           if (canLaunch) {
                             final launched = await launchUrl(uri, mode: LaunchMode.externalApplication);
-                            print('[URL 실행 시도 결과] $launched');
                           } else {
-                            print('[실패] URL 실행 불가');
                           }
                         } else {
-                          print('[실패] URI 파싱 실패');
                         }
                       } else {
-                        print('[실패] URL이 비어 있음');
                       }
                     },
                     child: Container(
