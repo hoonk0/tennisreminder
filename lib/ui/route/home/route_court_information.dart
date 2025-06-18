@@ -13,7 +13,7 @@ import 'package:tennisreminder_core/const/value/keys.dart';
 import 'package:tennisreminder_core/const/value/gaps.dart';
 import 'package:tennisreminder_core/const/value/text_style.dart';
 
-import '../../const/static/global.dart';
+import '../../../const/static/global.dart';
 
 final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
     FlutterLocalNotificationsPlugin();

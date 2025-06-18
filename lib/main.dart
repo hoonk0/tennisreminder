@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:kakao_flutter_sdk/kakao_flutter_sdk.dart';
 import 'package:naver_login_sdk/naver_login_sdk.dart';
 import 'package:sizer/sizer.dart';
-import 'package:tennisreminder_app/route/route_splash.dart';
+import 'package:tennisreminder_app/ui/route/route_splash.dart';
 import 'package:tennisreminder_core/const/model/model_court_alarm.dart';
 import 'package:tennisreminder_core/const/value/colors.dart';
 import 'package:tennisreminder_core/const/value/keys.dart';

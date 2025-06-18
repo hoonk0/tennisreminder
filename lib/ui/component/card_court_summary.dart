@@ -5,7 +5,7 @@ import 'package:tennisreminder_core/const/value/colors.dart';
 import 'package:tennisreminder_core/const/value/gaps.dart';
 import 'package:tennisreminder_core/const/value/text_style.dart';
 
-import '../../route/home/route_court_information.dart';
+import '../route/home/route_court_information.dart';
 
 class CardCourtSummary extends StatelessWidget {
   final ModelCourt court;

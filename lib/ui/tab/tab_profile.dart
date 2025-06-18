@@ -7,8 +7,8 @@ import 'package:tennisreminder_core/const/value/gaps.dart';
 import 'package:tennisreminder_core/const/value/text_style.dart';
 import '../../const/static/global.dart';
 import '../../service/utils/utils.dart';
+import '../dialog/dialog_logout.dart';
 import '../route/route_splash.dart';
-import '../ui/dialog/dialog_logout.dart';
 
 class TabProfile extends StatelessWidget {
   final VoidCallback? onTapBookmark;

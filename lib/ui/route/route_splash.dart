@@ -2,12 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sizer/sizer.dart';
-import 'package:tennisreminder_app/route/route_main.dart';
+import 'package:tennisreminder_app/ui/route/route_main.dart';
 import 'package:tennisreminder_core/const/value/colors.dart';
 import 'package:tennisreminder_core/const/value/keys.dart';
-
-import '../const/static/global.dart';
-import '../service/stream/stream_me.dart';
+import '../../const/static/global.dart';
+import '../../service/stream/stream_me.dart';
 import 'auth/route_auth_login.dart';
 
 class RouteSplash extends ConsumerStatefulWidget {

@@ -9,7 +9,7 @@ import 'package:tennisreminder_core/const/value/gaps.dart';
 import 'package:tennisreminder_core/const/value/keys.dart';
 import 'package:tennisreminder_core/const/value/text_style.dart';
 import '../../../service/utils/utils.dart';
-import '../../ui/component/basic_button.dart';
+import '../../component/basic_button.dart';
 import '../route_main.dart';
 
 class RouteAuthSnsSignUp extends StatefulWidget {

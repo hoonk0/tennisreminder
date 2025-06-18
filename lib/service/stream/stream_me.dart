@@ -6,7 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tennisreminder_core/const/model/model_user.dart';
 import 'package:tennisreminder_core/const/value/keys.dart';
 import '../../const/static/global.dart';
-import '../../route/route_splash.dart';
+import '../../ui/route/route_splash.dart';
 import '../utils/utils.dart';
 
 class StreamMe {

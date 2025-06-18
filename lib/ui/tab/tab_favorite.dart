@@ -1,10 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:tennisreminder_app/route/home/route_court_information.dart';
-import 'package:tennisreminder_app/ui/component/custom_divider.dart';
 import 'package:tennisreminder_core/const/value/gaps.dart';
 import 'package:tennisreminder_core/const/model/model_court.dart';
 import '../../const/static/global.dart';
+import '../component/card_court_inform.dart';
+import '../route/home/route_court_information.dart';
 import '../ui/component/card_court_inform.dart';
 
 

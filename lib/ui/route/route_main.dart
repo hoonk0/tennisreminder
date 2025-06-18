@@ -4,11 +4,11 @@ import 'package:tennisreminder_core/const/value/colors.dart';
 import 'package:tennisreminder_core/const/value/gaps.dart';
 import '../../const/static/global.dart';
 import '../../service/stream/stream_me.dart';
+import '../component/main_app_bar.dart';
 import '../tab/tab_favorite.dart';
 import '../tab/tab_home.dart';
 import '../tab/tab_notification.dart';
 import '../tab/tab_profile.dart';
-import '../ui/component/main_app_bar.dart';
 
 class RouteMain extends StatefulWidget {
   const RouteMain({super.key});
@@ -55,8 +55,8 @@ class _RouteMainState extends State<RouteMain> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: const PreferredSize(
-        preferredSize: Size.fromHeight(kToolbarHeight),
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(kToolbarHeight),
         child: MainAppBar(title: '테코알'),
       ),
       backgroundColor: colorWhite,

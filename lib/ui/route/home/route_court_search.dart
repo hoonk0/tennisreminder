@@ -4,8 +4,8 @@ import 'package:tennisreminder_core/const/model/model_court.dart';
 import 'package:tennisreminder_core/const/value/colors.dart';
 import 'package:tennisreminder_core/const/value/gaps.dart';
 import 'package:tennisreminder_core/const/value/keys.dart';
-import '../../const/static/global.dart';
-import '../../ui/component/main_app_bar.dart';
+import '../../component/card_court_inform.dart';
+import '../../component/main_app_bar.dart';
 import 'route_court_information.dart';
 import '../../ui/component/card_court_inform.dart';
 

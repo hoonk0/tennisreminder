@@ -2,24 +2,17 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 // import 'package:cloud_firestore/cloud_firestore.dart' as MasonryGridView;
 import 'package:flutter/material.dart';
-import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
-import 'package:flutter_svg/svg.dart';
-import 'package:tennisreminder_app/route/home/route_court_information.dart';
-import 'package:tennisreminder_app/route/home/route_weather.dart';
-import 'package:tennisreminder_app/route/route_all_courts.dart';
 import 'package:tennisreminder_core/const/model/model_court.dart';
 import 'package:tennisreminder_core/const/value/colors.dart';
 import 'package:tennisreminder_core/const/value/gaps.dart';
 import 'package:tennisreminder_core/const/value/keys.dart';
 import 'package:tennisreminder_core/const/value/text_style.dart';
-import '../../const/static/global.dart';
+import '../../service/location_service.dart';
+import '../component/card_court_summary.dart';
+import '../route/home/route_court_information.dart';
 import '../route/home/route_court_search.dart';
-import '../service/location_service.dart';
-import '../service/weather/weather_alarm.dart';
-import '../ui/component/card_court_summary.dart';
-import '../ui/component/textfield_border.dart';
-import '../ui/component/card_court_preview.dart';
-import 'package:geolocator/geolocator.dart';
+import '../route/home/route_weather.dart';
+import '../route/route_all_courts.dart';
 import '../../ui/component/card_court_inform.dart';
 
 class TabHome extends StatefulWidget {
