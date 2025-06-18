@@ -20,6 +20,7 @@ class BottomSheetNotification extends StatelessWidget {
   Widget build(BuildContext context) {
     return SafeArea(
       child: Container(
+        color: colorWhite,
         padding: const EdgeInsets.symmetric(horizontal: 20),
         child: Column(
           mainAxisSize: MainAxisSize.min,

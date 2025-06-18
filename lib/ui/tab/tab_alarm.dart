@@ -6,6 +6,7 @@ import 'package:tennisreminder_core/const/value/gaps.dart';
 import 'package:tennisreminder_core/const/model/model_court.dart';
 import 'package:tennisreminder_core/const/model/model_court_alarm.dart';
 import 'package:tennisreminder_core/const/value/keys.dart';
+import 'package:tennisreminder_core/const/value/text_style.dart';
 import '../../const/static/global.dart';
 
 import 'package:flutter/foundation.dart';
@@ -48,7 +49,7 @@ class TabAlarm extends StatelessWidget {
               children: [
                 Text(
                   courtName,
-                  style: const TextStyle(fontSize: 20, color: colorBlack, fontWeight: FontWeight.bold),
+                  style: TS.s16w500(colorGray900),
                 ),
                 const SizedBox(height: 8),
                 ...entry.value.map((alarm) {
@@ -71,12 +72,12 @@ class TabAlarm extends StatelessWidget {
                           children: [
                             Text(
                               '${weekdayMap[alarm.alarmWeekday]}요일',
-                              style: const TextStyle(fontSize: 14, color: Color(0xFFF7D245)),
+                              style: TS.s14w500(Color(0xFFF7D245)),
                             ),
-                            const SizedBox(height: 4),
+                            Gaps.v4,
                             Text(
                               timeStr,
-                              style: const TextStyle(fontSize: 20, color: Colors.white, fontWeight: FontWeight.bold),
+                              style: TS.s20w500(colorWhite)
                             ),
                           ],
                         ),
@@ -132,7 +133,7 @@ class TabAlarm extends StatelessWidget {
                     ),
                   );
                 }),
-                const SizedBox(height: 24),
+                Gaps.v20,
               ],
             );
           }).toList(),

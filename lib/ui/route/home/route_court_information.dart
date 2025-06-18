@@ -6,6 +6,7 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:tennisreminder_app/service/weather/weather_alarm.dart';
 import 'package:tennisreminder_app/ui/bottom_sheet/bottom_sheet_notification.dart';
 import 'package:tennisreminder_app/ui/component/basic_button.dart';
+import 'package:tennisreminder_app/ui/component/custom_divider.dart';
 import 'package:tennisreminder_core/const/model/model_court.dart';
 import 'package:tennisreminder_core/const/model/model_court_alarm.dart';
 import 'package:tennisreminder_core/const/value/colors.dart';
@@ -51,187 +52,243 @@ class _RouteCourtInformationState extends State<RouteCourtInformation> {
           children: [
             Expanded(
               child: ListView(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
                 children: [
-                  ///코트사진
-                  Container(
-                    height: 200,
-                    width: double.infinity,
-                    decoration: BoxDecoration(
-                      image: DecorationImage(
-                        image:
-                            widget.court.imageUrls != null &&
-                                    widget.court.imageUrls!.isNotEmpty
-                                ? NetworkImage(widget.court.imageUrls!.first)
-                                    as ImageProvider
-                                : const AssetImage(
-                                  'assets/images/mainicon.png',
-                                ),
-                        fit: BoxFit.cover,
-                      ),
-                    ),
-                  ),
-                  Gaps.v20,
-
-                  ///상단 정보
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  /// 코트 사진 - full width with rounded bottom corners
+                  Stack(
                     children: [
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          ///코트이름
-                          Text(
-                            widget.court.courtName,
-                            style: const TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          Gaps.v5,
+                      ClipRRect(
+                        borderRadius: const BorderRadius.only(
+                          bottomLeft: Radius.circular(20),
+                          bottomRight: Radius.circular(20),
+                        ),
+                        child: Container(
+                          height: 200,
+                          width: double.infinity,
+                          decoration: BoxDecoration(
 
-                          ///주소 길면 짤라서 보이게하기
-                          Text(
-                            widget.court.courtAddress
-                                    .split(' ')
-                                    .take(5)
-                                    .join(' ') +
-                                (widget.court.courtAddress.split(' ').length > 5
-                                    ? ''
-                                    : ''),
-                            style: const TextStyle(color: Colors.grey),
-                            softWrap: true,
+                            image: DecorationImage(
+                              image: widget.court.imageUrls != null && widget.court.imageUrls!.isNotEmpty
+                                  ? NetworkImage(widget.court.imageUrls!.first)
+                                  : const AssetImage('assets/images/mainicon.png') as ImageProvider,
+                              fit: widget.court.imageUrls != null && widget.court.imageUrls!.isNotEmpty
+                                  ? BoxFit.cover
+                                  : BoxFit.contain,
+                              alignment: Alignment.center,
+                            ),
+                            color: colorWhite,
                           ),
-                        ],
+                        ),
                       ),
+                      Positioned(
+                        top: 20,
+                        right: 20,
+                        child: ValueListenableBuilder(
+                          valueListenable: Global.vnFavoriteCourts,
+                          builder: (context, favoriteCourts, child) {
+                            final isFavorite = favoriteCourts.any((e) => e.uid == widget.court.uid);
+                            return GestureDetector(
+                              onTap: () async {
+                                final userUid = FirebaseAuth.instance.currentUser?.uid;
+                                if (userUid == null) return;
 
-                      ValueListenableBuilder(
-                        valueListenable: Global.vnFavoriteCourts,
-                        builder: (context, favoriteCourts, child) {
-                          final isFavorite = favoriteCourts.any(
-                            (e) => e.uid == widget.court.uid,
-                          );
+                                final courtRef = FirebaseFirestore.instance
+                                    .collection(keyCourt)
+                                    .doc(widget.court.uid);
 
-                          return GestureDetector(
-                            onTap: () async {
-                              final currentCourt = widget.court;
-
-                              final userUid =
-                                  FirebaseAuth.instance.currentUser?.uid;
-                              if (userUid == null) return;
-
-                              final courtRef = FirebaseFirestore.instance
-                                  .collection(keyCourt)
-                                  .doc(currentCourt.uid);
-
-                              if (isFavorite) {
-                                Global.vnFavoriteCourts.value =
-                                    favoriteCourts
-                                        .where((e) => e.uid != currentCourt.uid)
-                                        .toList();
-                                await courtRef.update({
-                                  ///파베에서 삭제
-                                  keyLikedUserUids: FieldValue.arrayRemove([
-                                    userUid,
-                                  ]),
-                                });
-                              } else {
-                                Global.vnFavoriteCourts.value = [
-                                  ...favoriteCourts,
-                                  currentCourt,
-                                ];
-                                await courtRef.update({
-                                  ///파베에서 추가
-                                  keyLikedUserUids: FieldValue.arrayUnion([
-                                    userUid,
-                                  ]),
-                                });
-                              }
-                            },
-                            child: Container(
-                              padding: const EdgeInsets.all(4),
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                border: Border.all(color: colorMain900),
+                                if (isFavorite) {
+                                  Global.vnFavoriteCourts.value =
+                                      favoriteCourts.where((e) => e.uid != widget.court.uid).toList();
+                                  await courtRef.update({
+                                    keyLikedUserUids: FieldValue.arrayRemove([userUid]),
+                                  });
+                                } else {
+                                  Global.vnFavoriteCourts.value = [
+                                    ...favoriteCourts,
+                                    widget.court,
+                                  ];
+                                  await courtRef.update({
+                                    keyLikedUserUids: FieldValue.arrayUnion([userUid]),
+                                  });
+                                }
+                              },
+                              child: Container(
+                                padding: const EdgeInsets.all(8),
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withOpacity(0.8),
+                                  shape: BoxShape.circle,
+                                ),
+                                child: Icon(
+                                  isFavorite ? Icons.favorite : Icons.favorite_border,
+                                  color: isFavorite ? Colors.red : Colors.black,
+                                  size: 20,
+                                ),
                               ),
-                              child: Icon(
-                                isFavorite
-                                    ? Icons.favorite
-                                    : Icons.favorite_border,
-                                color: colorMain900,
-                              ),
-                            ),
-                          );
-                        },
+                            );
+                          },
+                        ),
                       ),
                     ],
                   ),
 
-                  Gaps.v10,
+                  /// New Stack with overlapping container for court info
+                  Column(
+                    children: [
+                      Stack(
+                        clipBehavior: Clip.none,
+                        children: [
+                          Transform.translate(
+                            offset: const Offset(0, -30),
+                            child: Container(
+                              width: double.infinity,
+                              padding: const EdgeInsets.all(20),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(20),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withOpacity(0.08),
+                                    blurRadius: 10,
+                                    spreadRadius: 0,
+                                    offset: Offset(0, -6), // sharper top shadow only
+                                  ),
 
-                  /*               ///날씨알람
-                  WeatherAlarm(),*/
+                                ],
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    widget.court.courtName,
+                                    style: const TextStyle(
+                                      fontSize: 24,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  Gaps.v8,
+                                  Text(
+                                    widget.court.courtAddress,
+                                    style: const TextStyle(
+                                      fontSize: 14,
+                                      color: Colors.grey,
+                                    ),
+                                  ),
 
-                  ///알람설정
-                  Container(
-                    margin: const EdgeInsets.symmetric(vertical: 16),
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: colorGray100,
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: colorGray300),
-                    ),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        ValueListenableBuilder(
-                          valueListenable: Global.vnCourtAlarms,
-                          builder: (
-                            BuildContext context,
-                            alarms,
-                            Widget? child,
-                          ) {
-                            final alarmCount = alarms
-                                .where((e) => e.courtUid == widget.court.uid)
-                                .length;
-                            return Icon(
-                              alarmCount > 0
-                                  ? Icons.notifications_active
-                                  : Icons.notifications_none,
-                              color: alarmCount > 0 ? colorMain900 : colorGray300,
-                            );
-                          },
-                        ),
-                        Gaps.h12,
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                '원하는 시간에 알림을 받을 수 있어요!',
-                                style: const TS.s16w600(colorGray900),
+
+
+                                  Gaps.v8,
+                                  Text(
+                                    widget.court.extraInfo?['xxx'] ?? '',
+                                    style: const TextStyle(
+                                      fontSize: 14,
+                                      color: Colors.black87,
+                                    ),
+                                  ),
+
+                                  CustomDivider(margin: EdgeInsets.symmetric(vertical: 20, horizontal: 20), width: double.infinity,),
+
+                                  /// 알람 설정하기 section
+                                  Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Row(
+                                        children: const [
+                                          Icon(Icons.notifications, color: Colors.black87),
+                                          Gaps.h8,
+                                          Text(
+                                            '알람 설정하기',
+                                            style: TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 18,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      Gaps.v6,
+                                      const Text(
+                                        '원하는 시간에 예약 알람을 받을 수 있어요.',
+                                        style: TextStyle(
+                                          fontSize: 14,
+                                          color: Colors.black54,
+                                        ),
+                                      ),
+                                      Gaps.v12,
+                                      BasicButton(
+                                        title: '알람 설정하기',
+                                        onTap: () {
+                                          showModalBottomSheet(
+                                            context: context,
+                                            isScrollControlled: true,
+                                            builder: (context) {
+                                              return BottomSheetNotification(court: widget.court, vnAlarmSet: vnAlarmSet);
+                                            },
+                                          );
+                                        },
+                                      ),
+                                    ],
+                                  ),
+
+                                  Gaps.v20,
+                                ],
                               ),
-                              Gaps.v5,
-                              const Text(
-                                '매주 예약하고 싶은 요일과 시간을 설정하세요.',
-                                style: TS.s14w400(Colors.black87),
-                              ),
-                              Gaps.v10,
-                              Align(
-                                alignment: Alignment.centerRight,
-                                child: const Text(
-                                  '알림 설정하기 >',
-                                  style: TS.s14w600(colorMain900),
-                                ),
-                              ),
-                            ],
+                            ),
                           ),
+                        ],
+                      ),
+
+                    ],
+                  ),
+
+
+
+ /*                 /// Test Notification Button - styled as chip/outlined button aligned left
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: OutlinedButton.icon(
+                      onPressed: () {
+                        flutterLocalNotificationsPlugin.show(
+                          0,
+                          '🔔 테스트 알림',
+                          '이 알림이 보이면 앱 알림 설정은 정상입니다.',
+                          NotificationDetails(
+                            android: AndroidNotificationDetails(
+                              'alarm_channel',
+                              '알림 채널',
+                              importance: Importance.high,
+                              priority: Priority.high,
+                              icon: '@mipmap/ic_launcher',
+                            ),
+                          ),
+                        );
+                      },
+                      icon: const Icon(Icons.check_circle_outline),
+                      label: const Text('기능 테스트용'),
+                      style: OutlinedButton.styleFrom(
+                        side: BorderSide(color: colorMain900),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(20),
                         ),
-                      ],
+                        foregroundColor: colorMain900,
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                        textStyle: const TextStyle(fontWeight: FontWeight.w600),
+                      ),
                     ),
                   ),
-                  Gaps.v10,
 
+                  Gaps.v20,*/
+                ],
+              ),
+            ),
+
+            /// Bottom buttons: "모든 알람 삭제하기" and "예약하러 가기"
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                border: Border(top: BorderSide(color: colorGray300)),
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
                   BasicButton(
                     title: '모든 알람 삭제하기',
                     onTap: () async {
@@ -260,44 +317,10 @@ class _RouteCourtInformationState extends State<RouteCourtInformation> {
                       vnAlarmSet.value = false;
                     },
                   ),
-
-                  const Text(
-                    'Field Information',
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                  ),
-                  Gaps.v10,
-                  Text(
-                    widget.court.courtInfo,
-                    style: const TextStyle(color: Colors.black87),
-                  ),
-
-                  Gaps.v20,
+                  Gaps.v12,
+                  BasicButton(title: '예약하러 가기', onTap: () {}),
                 ],
               ),
-            ),
-            // 🔔 테스트용 알림 버튼
-            ElevatedButton(
-              onPressed: () {
-                flutterLocalNotificationsPlugin.show(
-                  0,
-                  '🔔 테스트 알림',
-                  '이 알림이 보이면 앱 알림 설정은 정상입니다.',
-                  NotificationDetails(
-                    android: AndroidNotificationDetails(
-                      'alarm_channel',
-                      '알림 채널',
-                      importance: Importance.high,
-                      priority: Priority.high,
-                      icon: '@mipmap/ic_launcher',
-                    ),
-                  ),
-                );
-              },
-              child: const Text('🔔 알림 테스트'),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-              child: BasicButton(title: '예약하러 가기', onTap: () {}),
             ),
           ],
         ),
