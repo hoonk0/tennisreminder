@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 // import 'package:cloud_firestore/cloud_firestore.dart' as MasonryGridView;
 import 'package:flutter/material.dart';
+import 'package:tennisreminder_app/ui/route/home/route_near_court.dart';
 import 'package:tennisreminder_core/const/model/model_court.dart';
 import 'package:tennisreminder_core/const/value/colors.dart';
 import 'package:tennisreminder_core/const/value/gaps.dart';
@@ -114,7 +115,8 @@ class _TabHomeState extends State<TabHome> {
               HomeIcon(
                 assetPath: 'assets/icons/nearcourt.png',
                 onTap: () {
-                  // TODO: Add nearby court tap functionality
+                  Navigator.of(context).push(MaterialPageRoute(
+                                  builder: (context) => RouteNearCourt()));
                 }, label: '근처코트',
               ),
               HomeIcon(

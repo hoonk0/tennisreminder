@@ -5,8 +5,6 @@ import 'package:tennisreminder_core/const/model/model_court.dart';
 import '../../const/static/global.dart';
 import '../component/card_court_inform.dart';
 import '../route/home/route_court_information.dart';
-import '../ui/component/card_court_inform.dart';
-
 
 class TabFavorite extends StatelessWidget {
   const TabFavorite({super.key});
