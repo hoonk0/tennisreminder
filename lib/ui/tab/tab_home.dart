@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 // import 'package:cloud_firestore/cloud_firestore.dart' as MasonryGridView;
 import 'package:flutter/material.dart';
+import 'package:tennisreminder_app/ui/route/home/route_court_favorite.dart';
 import 'package:tennisreminder_app/ui/route/home/route_near_court.dart';
 import 'package:tennisreminder_core/const/model/model_court.dart';
 import 'package:tennisreminder_core/const/value/colors.dart';
@@ -113,18 +114,25 @@ class _TabHomeState extends State<TabHome> {
                 }, label: '날씨',
               ),
               HomeIcon(
+                assetPath: 'assets/icons/favoritecourt.png',
+                onTap: () {
+                  Navigator.of(context).push(MaterialPageRoute(
+                      builder: (context) => RouteCourtFavorite()));
+                }, label: '선호코트',
+              ),
+              HomeIcon(
                 assetPath: 'assets/icons/nearcourt.png',
                 onTap: () {
                   Navigator.of(context).push(MaterialPageRoute(
                                   builder: (context) => RouteNearCourt()));
                 }, label: '근처코트',
               ),
-              HomeIcon(
+/*              HomeIcon(
                 assetPath: 'assets/icons/seoulcourt.png',
                 onTap: () {
                   // TODO: Add Seoul court tap functionality
                 }, label: 'xx구 보기',
-              ),
+              ),*/
 
             ],
           ),
