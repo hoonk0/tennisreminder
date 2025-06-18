@@ -226,6 +226,41 @@ class _RouteCourtInformationState extends State<RouteCourtInformation> {
                                           );
                                         },
                                       ),
+                                      Gaps.v4,
+                                      ValueListenableBuilder(
+                                        valueListenable: Global.vnCourtAlarms,
+                                        builder: (context, courtAlarms, _) {
+                                          final hasAlarm = courtAlarms.any((e) => e.courtUid == widget.court.uid);
+                                          return BasicButton(
+                                            title: '모든 알람 삭제하기',
+                                            colorBg: hasAlarm ? colorMain900 : colorGray400,
+                                            onTap: () async {
+                                              if (!hasAlarm) return;
+
+                                              vnAlarmSet.value = false;
+
+                                              final userUid = FirebaseAuth.instance.currentUser?.uid;
+                                              final courtUid = widget.court.uid;
+
+                                              if (userUid != null) {
+                                                final snapshot = await FirebaseFirestore.instance
+                                                    .collection(keyCourtAlarms)
+                                                    .where(keyUserUid, isEqualTo: userUid)
+                                                    .where(keyCourtUid, isEqualTo: courtUid)
+                                                    .get();
+
+                                                for (final doc in snapshot.docs) {
+                                                  await doc.reference.delete();
+                                                }
+
+                                                Global.vnCourtAlarms.value = courtAlarms
+                                                    .where((e) => e.courtUid != courtUid)
+                                                    .toList();
+                                              }
+                                            },
+                                          );
+                                        },
+                                      ),
                                     ],
                                   ),
                                   CustomDivider(margin: EdgeInsets.symmetric(vertical: 20, horizontal: 20), width: double.infinity,),
@@ -347,34 +382,7 @@ class _RouteCourtInformationState extends State<RouteCourtInformation> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  BasicButton(
-                    title: '모든 알람 삭제하기',
-                    onTap: () async {
-                      final userUid = FirebaseAuth.instance.currentUser?.uid;
-                      if (userUid == null) return;
 
-                      final courtUid = widget.court.uid;
-
-                      // Firestore에서 해당 코트의 모든 알람 삭제
-                      final snapshot = await FirebaseFirestore.instance
-                          .collection(keyCourtAlarms)
-                          .where(keyUserUid, isEqualTo: userUid)
-                          .where(keyCourtUid, isEqualTo: courtUid)
-                          .get();
-
-                      for (final doc in snapshot.docs) {
-                        await doc.reference.delete();
-                      }
-
-                      // 글로벌에서도 해당 코트의 알람 제거
-                      Global.vnCourtAlarms.value = Global.vnCourtAlarms.value
-                          .where((e) => e.courtUid != courtUid)
-                          .toList();
-
-                      // 알람 버튼 UI 갱신용
-                      vnAlarmSet.value = false;
-                    },
-                  ),
                   Gaps.v12,
                   BasicButton(title: '예약하러 가기', onTap: () {}),
                 ],
