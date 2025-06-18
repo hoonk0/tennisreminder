@@ -8,6 +8,7 @@ import 'package:tennisreminder_app/ui/bottom_sheet/bottom_sheet_notification.dar
 import 'package:tennisreminder_app/ui/component/basic_button.dart';
 import 'package:tennisreminder_app/ui/component/custom_divider.dart';
 import 'package:tennisreminder_core/const/model/model_court.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:tennisreminder_core/const/model/model_court_alarm.dart';
 import 'package:tennisreminder_core/const/value/colors.dart';
 import 'package:tennisreminder_core/const/value/keys.dart';
@@ -48,8 +49,63 @@ class _RouteCourtInformationState extends State<RouteCourtInformation> {
     return Scaffold(
       appBar: AppBar(title: const Text('코트 정보')),
       body: SafeArea(
-        child: Column(
+        child: Stack(
           children: [
+            Positioned(
+              bottom: 20,
+              left: 20,
+              right: 20,
+              child: InkWell(
+                onTap: () async {
+                  print('[DEBUG] 예약 버튼이 눌렸습니다');
+                  final url = widget.court.reservationUrl;
+                  print('[예약 URL] $url');
+
+                  if (url.isNotEmpty) {
+                    final uri = Uri.tryParse(url);
+                    print('[URI 파싱 결과] $uri');
+
+                    if (uri != null) {
+                      final canLaunch = await canLaunchUrl(uri);
+                      print('[URL 실행 가능 여부] $canLaunch');
+
+                      if (canLaunch) {
+                        final launched = await launchUrl(uri, mode: LaunchMode.externalApplication);
+                        print('[URL 실행 시도 결과] $launched');
+                      } else {
+                        print('[실패] URL 실행 불가');
+                      }
+                    } else {
+                      print('[실패] URI 파싱 실패');
+                    }
+                  } else {
+                    print('[실패] URL이 비어 있음');
+                  }
+                },
+                child: Container(
+                  padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 20),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.95),
+                    borderRadius: BorderRadius.circular(30),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.1),
+                        blurRadius: 10,
+                        offset: Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: Center(
+                    child: Text(
+                      '예약사이트로 이동하기',
+                      style: TS.s16w600(colorMain900),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            Column(
+              children: [
             Expanded(
               child: ListView(
                 children: [
@@ -227,7 +283,11 @@ class _RouteCourtInformationState extends State<RouteCourtInformation> {
                                     ],
                                   ),
 
-                                  Gaps.v20,
+                                  CustomDivider(margin: EdgeInsets.symmetric(vertical: 20, horizontal: 20), width: double.infinity,),
+
+                                  Text("코트 위치 표시"),
+
+
                                 ],
                               ),
                             ),
@@ -280,7 +340,7 @@ class _RouteCourtInformationState extends State<RouteCourtInformation> {
             ),
 
             /// Bottom buttons: "모든 알람 삭제하기" and "예약하러 가기"
-            Container(
+            /*Container(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
               decoration: BoxDecoration(
                 color: Colors.white,
@@ -321,10 +381,11 @@ class _RouteCourtInformationState extends State<RouteCourtInformation> {
                   BasicButton(title: '예약하러 가기', onTap: () {}),
                 ],
               ),
-            ),
+            ),*/
+                Gaps.v20,
           ],
         ),
-      ),
+    ])),
     );
   }
 }
