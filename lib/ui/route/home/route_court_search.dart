@@ -72,7 +72,7 @@ class _RouteCourtSearchState extends State<RouteCourtSearch> {
                         isDense: true,
                         border: InputBorder.none,
                       ),
-                      onSubmitted: _onSearch,
+                      onChanged: _onSearch,
                     ),
                   ),
                   IconButton(
