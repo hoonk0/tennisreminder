@@ -193,6 +193,9 @@ class _RouteCourtInformationState extends State<RouteCourtInformation> {
                           for (final doc in snapshot.docs) {
                             await doc.reference.delete();
                           }
+                          Global.vnCourtAlarms.value = Global.vnCourtAlarms.value
+                              .where((e) => e.courtUid != widget.court.uid)
+                              .toList();
                         }
                       } else {
                         // 알람 설정
@@ -254,17 +257,20 @@ class _RouteCourtInformationState extends State<RouteCourtInformation> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           ValueListenableBuilder(
-                            valueListenable: vnAlarmSet,
+                            valueListenable: Global.vnCourtAlarms,
                             builder: (
                               BuildContext context,
-                              alarmSet,
+                              alarms,
                               Widget? child,
                             ) {
+                              final alarmCount = alarms
+                                  .where((e) => e.courtUid == widget.court.uid)
+                                  .length;
                               return Icon(
-                                alarmSet
+                                alarmCount > 0
                                     ? Icons.notifications_active
                                     : Icons.notifications_none,
-                                color: alarmSet ? colorMain900 : Colors.grey,
+                                color: alarmCount > 0 ? colorMain900 : colorGray300,
                               );
                             },
                           ),
@@ -298,6 +304,35 @@ class _RouteCourtInformationState extends State<RouteCourtInformation> {
                     ),
                   ),
                   Gaps.v10,
+
+                  BasicButton(
+                    title: '모든 알람 삭제하기',
+                    onTap: () async {
+                      final userUid = FirebaseAuth.instance.currentUser?.uid;
+                      if (userUid == null) return;
+
+                      final courtUid = widget.court.uid;
+
+                      // Firestore에서 해당 코트의 모든 알람 삭제
+                      final snapshot = await FirebaseFirestore.instance
+                          .collection(keyCourtAlarms)
+                          .where(keyUserUid, isEqualTo: userUid)
+                          .where(keyCourtUid, isEqualTo: courtUid)
+                          .get();
+
+                      for (final doc in snapshot.docs) {
+                        await doc.reference.delete();
+                      }
+
+                      // 글로벌에서도 해당 코트의 알람 제거
+                      Global.vnCourtAlarms.value = Global.vnCourtAlarms.value
+                          .where((e) => e.courtUid != courtUid)
+                          .toList();
+
+                      // 알람 버튼 UI 갱신용
+                      vnAlarmSet.value = false;
+                    },
+                  ),
 
                   const Text(
                     'Field Information',

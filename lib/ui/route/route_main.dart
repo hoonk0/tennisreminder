@@ -7,7 +7,7 @@ import '../../service/stream/stream_me.dart';
 import '../component/main_app_bar.dart';
 import '../tab/tab_favorite.dart';
 import '../tab/tab_home.dart';
-import '../tab/tab_notification.dart';
+import '../tab/tab_alarm.dart';
 import '../tab/tab_profile.dart';
 
 class RouteMain extends StatefulWidget {
@@ -66,7 +66,7 @@ class _RouteMainState extends State<RouteMain> {
           //physics: const NeverScrollableScrollPhysics(), // 사용자 스크롤 비활성
           children: const [
             TabHome(), // 0
-            TabNotification(), //3
+            TabAlarm(), //3
             TabProfile(), // 4
           ],
           onPageChanged: (index) {

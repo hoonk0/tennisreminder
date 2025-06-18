@@ -9,8 +9,8 @@ import '../../const/static/global.dart';
 import 'package:flutter/foundation.dart';
 
 
-class TabNotification extends StatelessWidget {
-  const TabNotification({super.key});
+class TabAlarm extends StatelessWidget {
+  const TabAlarm({super.key});
 
   @override
   Widget build(BuildContext context) {
