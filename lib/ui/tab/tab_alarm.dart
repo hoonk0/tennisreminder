@@ -1,5 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:tennisreminder_core/const/value/colors.dart';
 import 'package:tennisreminder_core/const/value/gaps.dart';
 import 'package:tennisreminder_core/const/model/model_court.dart';
 import 'package:tennisreminder_core/const/model/model_court_alarm.dart';
@@ -14,44 +16,128 @@ class TabAlarm extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
-      child: Column(
-        children: [
+    return ValueListenableBuilder<List<ModelCourtAlarm>>(
+      valueListenable: Global.vnCourtAlarms,
+      builder: (context, alarms, _) {
+        if (alarms.isEmpty) {
+          return const Center(child: Text('등록된 알람이 없습니다.'));
+        }
 
-          Gaps.v16,
-          Expanded(
-            child: ValueListenableBuilder<List<ModelCourtAlarm>>(
-              valueListenable: Global.vnCourtAlarms,
-              builder: (context, alarms, _) {
-                if (alarms.isEmpty) {
-                  return const Center(child: Text('등록된 알람이 없습니다.'));
-                }
+        final grouped = <String, List<ModelCourtAlarm>>{};
+        for (final alarm in alarms) {
+          grouped.putIfAbsent(alarm.courtUid, () => []).add(alarm);
+        }
 
-                final weekdayMap = {
-                  1: '월', 2: '화', 3: '수', 4: '목', 5: '금', 6: '토', 7: '일'
-                };
+        for (final entry in grouped.entries) {
+          entry.value.sort((a, b) {
+            final aMinutes = a.alarmHour * 60 + a.alarmMinute;
+            final bMinutes = b.alarmHour * 60 + b.alarmMinute;
+            return aMinutes.compareTo(bMinutes);
+          });
+        }
 
-                return ListView.builder(
-                  itemCount: alarms.length,
-                  itemBuilder: (context, index) {
-                    final alarm = alarms[index];
-                    final timeStr = '${alarm.alarmHour.toString().padLeft(2, '0')}:${alarm.alarmMinute.toString().padLeft(2, '0')}';
-                    return ListTile(
-                      leading: const Icon(Icons.alarm),
-                      title: Text('${alarm.courtName}'),
-                      subtitle: Text('${weekdayMap[alarm.alarmWeekday]}요일 $timeStr 알림'),
-                      trailing: alarm.alarmEnabled
-                          ? const Icon(Icons.check_circle, color: Colors.green)
-                          : const Icon(Icons.cancel, color: Colors.grey),
-                    );
-                  },
-                );
-              },
-            ),
-          ),
-        ],
-      ),
+        final sortedEntries = grouped.entries.toList()
+          ..sort((a, b) => a.value.first.courtName.compareTo(b.value.first.courtName));
+
+        return ListView(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+          children: sortedEntries.map((entry) {
+            final courtName = entry.value.first.courtName;
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  courtName,
+                  style: const TextStyle(fontSize: 20, color: colorBlack, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 8),
+                ...entry.value.map((alarm) {
+                  final timeStr = '${alarm.alarmHour.toString().padLeft(2, '0')}:${alarm.alarmMinute.toString().padLeft(2, '0')}';
+                  final weekdayMap = {
+                    1: '월', 2: '화', 3: '수', 4: '목', 5: '금', 6: '토', 7: '일'
+                  };
+                  return Container(
+                    margin: const EdgeInsets.only(bottom: 12),
+                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF1C5D43),
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              '${weekdayMap[alarm.alarmWeekday]}요일',
+                              style: const TextStyle(fontSize: 14, color: Color(0xFFF7D245)),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              timeStr,
+                              style: const TextStyle(fontSize: 20, color: Colors.white, fontWeight: FontWeight.bold),
+                            ),
+                          ],
+                        ),
+                        Switch(
+                          value: alarm.alarmEnabled,
+                          onChanged: (bool value) async {
+                            final userUid = FirebaseAuth.instance.currentUser?.uid;
+                            if (userUid == null) return;
+
+                            if (!value) {
+                              // 꺼질 때: UI 유지, 글로벌/파베 삭제
+                              final snapshot = await FirebaseFirestore.instance
+                                  .collection(keyCourtAlarms)
+                                  .where(keyUserUid, isEqualTo: userUid)
+                                  .where(keyCourtUid, isEqualTo: alarm.courtUid)
+                                  .where(keyDateCreate, isEqualTo: alarm.dateCreate)
+                                  .get();
+
+                              for (final doc in snapshot.docs) {
+                                await doc.reference.delete();
+                              }
+
+                              Global.vnCourtAlarms.value = Global.vnCourtAlarms.value.map((e) {
+                                if (e.dateCreate == alarm.dateCreate &&
+                                    e.userUid == userUid &&
+                                    e.courtUid == alarm.courtUid) {
+                                  return e.copyWith(alarmEnabled: false); // UI 상태만 꺼짐으로 유지
+                                }
+                                return e;
+                              }).toList();
+                            } else {
+                              // 켜질 때: 글로벌/파베 재등록
+                              final newAlarm = alarm.copyWith(alarmEnabled: true, dateCreate: Timestamp.now());
+
+                              await FirebaseFirestore.instance
+                                  .collection(keyCourtAlarms)
+                                  .add(newAlarm.toJson());
+
+                              Global.vnCourtAlarms.value = [
+                                ...Global.vnCourtAlarms.value.where((e) =>
+                                  !(e.dateCreate == alarm.dateCreate &&
+                                    e.userUid == userUid &&
+                                    e.courtUid == alarm.courtUid)),
+                                newAlarm,
+                              ];
+                            }
+                          },
+                          activeColor: const Color(0xFFF7D245), // 노란색
+                          inactiveThumbColor: Colors.white, // 꺼졌을 때 흰색
+                          inactiveTrackColor: Colors.grey.shade400,
+                        ),
+                      ],
+                    ),
+                  );
+                }),
+                const SizedBox(height: 24),
+              ],
+            );
+          }).toList(),
+        );
+      },
     );
   }
 }

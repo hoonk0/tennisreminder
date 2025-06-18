@@ -173,134 +173,61 @@ class _RouteCourtInformationState extends State<RouteCourtInformation> {
                   WeatherAlarm(),*/
 
                   ///알람설정
-                  GestureDetector(
-                    onTap: () async {
-                      if (vnAlarmSet.value) {
-                        // 알람 설정 해제
-                        vnAlarmSet.value = false;
-
-                        final userUid = FirebaseAuth.instance.currentUser?.uid;
-                        final courtUid = widget.court.uid;
-
-                        if (userUid != null) {
-                          final snapshot =
-                              await FirebaseFirestore.instance
-                                  .collection(keyCourtAlarms)
-                                  .where(keyUserUid, isEqualTo: userUid)
-                                  .where(keyCourtUid, isEqualTo: courtUid)
-                                  .get();
-
-                          for (final doc in snapshot.docs) {
-                            await doc.reference.delete();
-                          }
-                          Global.vnCourtAlarms.value = Global.vnCourtAlarms.value
-                              .where((e) => e.courtUid != widget.court.uid)
-                              .toList();
-                        }
-                      } else {
-                        // 알람 설정
-                        showModalBottomSheet(
-                          context: context,
-                          isScrollControlled: true,
-                          backgroundColor: colorGray100,
-                          shape: const RoundedRectangleBorder(
-                            borderRadius: BorderRadius.vertical(
-                              top: Radius.circular(12),
-                            ),
-                          ),
-                          builder: (context) {
-                            return BottomSheetNotification(
-                              court: widget.court,
-                              vnAlarmSet: vnAlarmSet,
+                  Container(
+                    margin: const EdgeInsets.symmetric(vertical: 16),
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: colorGray100,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: colorGray300),
+                    ),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        ValueListenableBuilder(
+                          valueListenable: Global.vnCourtAlarms,
+                          builder: (
+                            BuildContext context,
+                            alarms,
+                            Widget? child,
+                          ) {
+                            final alarmCount = alarms
+                                .where((e) => e.courtUid == widget.court.uid)
+                                .length;
+                            return Icon(
+                              alarmCount > 0
+                                  ? Icons.notifications_active
+                                  : Icons.notifications_none,
+                              color: alarmCount > 0 ? colorMain900 : colorGray300,
                             );
                           },
-                        ).then((_) async {
-                          final userUid =
-                              FirebaseAuth.instance.currentUser?.uid;
-                          if (userUid != null) {
-                            final snapshot =
-                                await FirebaseFirestore.instance
-                                    .collection(keyCourtAlarms)
-                                    .where(keyUserUid, isEqualTo: userUid)
-                                    .orderBy(keyDateCreate, descending: true)
-                                    .get();
-
-                            final list =
-                                snapshot.docs
-                                    .map(
-                                      (doc) =>
-                                          ModelCourtAlarm.fromJson(doc.data()),
-                                    )
-                                    .toList();
-
-                            debugPrint('📥 알람 불러오기 완료: ${list.length}개');
-                            for (var alarm in list) {
-                              debugPrint(
-                                '🔔 ${alarm.courtName}, ${alarm.alarmWeekday}요일 ${alarm.alarmHour}:${alarm.alarmMinute}, enabled: ${alarm.alarmEnabled}',
-                              );
-                            }
-
-                            Global.vnCourtAlarms.value = list;
-                          }
-                        });
-                      }
-                    },
-                    child: Container(
-                      margin: const EdgeInsets.symmetric(vertical: 16),
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: colorGray100,
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: colorGray300),
-                      ),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          ValueListenableBuilder(
-                            valueListenable: Global.vnCourtAlarms,
-                            builder: (
-                              BuildContext context,
-                              alarms,
-                              Widget? child,
-                            ) {
-                              final alarmCount = alarms
-                                  .where((e) => e.courtUid == widget.court.uid)
-                                  .length;
-                              return Icon(
-                                alarmCount > 0
-                                    ? Icons.notifications_active
-                                    : Icons.notifications_none,
-                                color: alarmCount > 0 ? colorMain900 : colorGray300,
-                              );
-                            },
+                        ),
+                        Gaps.h12,
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                '원하는 시간에 알림을 받을 수 있어요!',
+                                style: const TS.s16w600(colorGray900),
+                              ),
+                              Gaps.v5,
+                              const Text(
+                                '매주 예약하고 싶은 요일과 시간을 설정하세요.',
+                                style: TS.s14w400(Colors.black87),
+                              ),
+                              Gaps.v10,
+                              Align(
+                                alignment: Alignment.centerRight,
+                                child: const Text(
+                                  '알림 설정하기 >',
+                                  style: TS.s14w600(colorMain900),
+                                ),
+                              ),
+                            ],
                           ),
-                          Gaps.h12,
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  '원하는 시간에 알림을 받을 수 있어요!',
-                                  style: const TS.s16w600(colorGray900),
-                                ),
-                                Gaps.v5,
-                                const Text(
-                                  '매주 예약하고 싶은 요일과 시간을 설정하세요.',
-                                  style: TS.s14w400(Colors.black87),
-                                ),
-                                Gaps.v10,
-                                Align(
-                                  alignment: Alignment.centerRight,
-                                  child: const Text(
-                                    '알림 설정하기 >',
-                                    style: TS.s14w600(colorMain900),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
                   ),
                   Gaps.v10,
