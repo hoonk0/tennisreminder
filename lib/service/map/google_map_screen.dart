@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:kakao_map_plugin/kakao_map_plugin.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 
-class KakaoMapScreen extends StatelessWidget {
+class GoogleMapScreen extends StatelessWidget {
   final double lat;
   final double lng;
 
-  const KakaoMapScreen({
+  const GoogleMapScreen({
     super.key,
     required this.lat,
     required this.lng,
@@ -13,16 +13,24 @@ class KakaoMapScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return SizedBox(
       height: 300,
-      child: KakaoMap(
-        center: LatLng(lat, lng),
-        markers: [
+      child: GoogleMap(
+        initialCameraPosition: CameraPosition(
+          target: LatLng(lat, lng),
+          zoom: 16,
+        ),
+        markers: {
           Marker(
-            markerId: UniqueKey().toString(),
-            latLng: LatLng(lat, lng),
+            markerId: MarkerId('selected_location'),
+            position: LatLng(lat, lng),
+            infoWindow: InfoWindow(title: '코트 위치'),
+            icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
           ),
-        ],
+        },
+        zoomControlsEnabled: false,
+        myLocationButtonEnabled: false,
       ),
-    );}
+    );
+  }
 }

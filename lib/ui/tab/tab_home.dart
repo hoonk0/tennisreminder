@@ -9,7 +9,7 @@ import 'package:tennisreminder_core/const/value/colors.dart';
 import 'package:tennisreminder_core/const/value/gaps.dart';
 import 'package:tennisreminder_core/const/value/keys.dart';
 import 'package:tennisreminder_core/const/value/text_style.dart';
-import '../../service/location_service.dart';
+import '../../service/map/location_service.dart';
 import '../component/card_court_summary.dart';
 import '../route/home/route_court_information.dart';
 import '../route/home/route_court_search.dart';

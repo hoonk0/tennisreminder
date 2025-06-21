@@ -24,51 +24,73 @@ exports.sendDailyAlarm = onSchedule(
     timeZone: "Asia/Seoul",
   },
   async (event) => {
-    const now = moment().tz("Asia/Seoul");
-    const currentHour = now.hour();
-    const currentMinute = now.minute();
-    const currentWeekday = now.day() === 0 ? 7 : now.day(); // 일요일 보정
-
-    console.log(`⏰ 알림 전송 체크 중: ${currentWeekday}요일 ${currentHour}:${currentMinute}`);
+    // New logic: send notification when alarmDateTime matches current time (to the minute)
+    functions.logger.info(`⏰ 알림 전송 체크 중: 현재 시간 ${new Date().toISOString()}`);
 
     // court_alarms 컬렉션에서 모든 알람 대상 가져오기
-    const courtAlarmsSnapshot = await admin.firestore().collection("court_alarms").get();
+    const snapshot = await admin.firestore().collection("court_alarms").get();
+    functions.logger.info(`✅✅ 활성화된 알람 ${snapshot.docs.length}개`);
+    const currentTime = new Date();
+    functions.logger.info(`🕒 현재 시각 (서버 기준): ${currentTime}`);
 
-    const targetAlarms = courtAlarmsSnapshot.docs.filter(doc => {
-      const data = doc.data();
-      return (
-        data.alarm_enabled &&
-        data.weekday === currentWeekday &&
-        data.hour === currentHour &&
-        data.minute === currentMinute
-      );
-    });
+    for (const doc of snapshot.docs) {
+      const alarmData = doc.data();
+      const alarmDateTimeRaw = alarmData.alarmDateTime ?? alarmData.alarm_date_time;
+      functions.logger.info(`📄 알람 문서 ID: ${doc.id}`);
+      functions.logger.info(`🔍 필드 alarm_enabled: ${alarmData.alarm_enabled}`);
+      functions.logger.info(`🔍 필드 alarm_date_time: ${alarmDateTimeRaw}`);
 
-    for (const doc of targetAlarms) {
-      const data = doc.data();
-      const fcmToken = data.fcm_token;
-      const courtName = data.court_name ?? "테니스 코트";
+      if (!alarmData.alarm_enabled) {
+        functions.logger.info(`⏭️  스킵됨 - alarm_enabled가 false`);
+        continue;
+      }
+      if (!alarmDateTimeRaw) {
+        functions.logger.info(`⏭️  스킵됨 - alarmDateTime 없음`);
+        continue;
+      }
 
-      if (!fcmToken) continue;
+      let alarmDate;
+      try {
+        alarmDate = typeof alarmDateTimeRaw.toDate === "function"
+          ? alarmDateTimeRaw.toDate()
+          : new Date(alarmDateTimeRaw);
+      } catch (e) {
+        functions.logger.error(`❌ 알람 시간 파싱 실패:`, alarmDateTimeRaw, e);
+        continue;
+      }
 
-const messaging = admin.messaging();
-
-await messaging.send({
-  token: fcmToken,
-  notification: {
-    title: "테니스 알림 ⏰",
-    body: `${courtName} 예약을 확인해보세요!`,
-  },
-  android: {
-    notification: {
-      channelId: "alarm_channel", // 앱에서 사용하는 채널 ID
-      priority: "high", // 헤드업 알림을 위해 추가
-      sound: "default", // 사운드도 켜야 헤드업이 뜨는 경우가 있음
-      visibility: "public", // 잠금화면에서도 보이게
-    }
-  },
-});
-      console.log(`✅ ${fcmToken}에게 알림 전송 완료`);
+      const diffInMinutes = Math.floor((alarmDate - currentTime) / (1000 * 60));
+      functions.logger.info(`🕓 현재 시간: ${currentTime}`);
+      functions.logger.info(`📆 알람 시간: ${alarmDate}`);
+      functions.logger.info(`⏱️ 시간 차이 (분): ${diffInMinutes}`);
+      functions.logger.info(`🔍 fcm_token: ${alarmData.fcmToken ?? alarmData.fcm_token}`);
+      functions.logger.info(`🔍 user_uid: ${alarmData.userUid ?? alarmData.user_uid}`);
+      if (Math.abs(diffInMinutes) <= 1) {
+        functions.logger.info(`🔔 알람 전송 대상: ${alarmData.courtName ?? alarmData.court_name ?? "테니스 코트"}`);
+        functions.logger.info(`🕓 알람 예약 시간: ${alarmDateTimeRaw?.toDate ? alarmDateTimeRaw.toDate() : alarmDateTimeRaw}`);
+        // FCM 토큰 확인
+        const fcmToken = alarmData.fcmToken ?? alarmData.fcm_token;
+        const userUid = alarmData.userUid ?? alarmData.user_uid ?? "unknown";
+        if (!fcmToken) {
+          functions.logger.warn(`❌ FCM 토큰 없음: ${userUid}`);
+          continue;
+        }
+        try {
+          await admin.messaging().send({
+            token: fcmToken,
+            notification: {
+              title: `${alarmData.courtName ?? alarmData.court_name ?? "테니스 코트"} 예약 알림`,
+              body: "곧 예약시간입니다. 준비해주세요!",
+            },
+            android: {
+              priority: "high",
+            },
+          });
+          functions.logger.info(`✅ FCM 전송 성공: ${userUid}`);
+        } catch (error) {
+          functions.logger.error(`🚨 FCM 전송 실패: ${userUid}`, error);
+        }
+      }
     }
   }
 );

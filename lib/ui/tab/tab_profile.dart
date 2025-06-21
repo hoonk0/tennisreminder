@@ -33,7 +33,7 @@ class TabProfile extends StatelessWidget {
         reservationUrl: 'https://reservation.example.com/$i',
         likedUserUids: [],
         imageUrls: [],
-        extraInfo: {'parking': i % 2 == 0, 'light': i % 3 == 0},
+    //    extraInfo: {'parking': i % 2 == 0, 'light': i % 3 == 0},
         courtDistrict: district,
       );
       batch.set(docRef, court.toJson());

@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:tennisreminder_app/service/notification/court_notification_setting_upgrade.dart';
 import 'package:tennisreminder_core/const/value/colors.dart';
 import 'package:tennisreminder_core/const/value/gaps.dart';
 import 'package:tennisreminder_core/const/model/model_court.dart';
@@ -28,6 +29,7 @@ class TabAlarm extends StatelessWidget {
         for (final alarm in alarms) {
           grouped.putIfAbsent(alarm.courtUid, () => []).add(alarm);
         }
+/*
 
         for (final entry in grouped.entries) {
           entry.value.sort((a, b) {
@@ -36,6 +38,7 @@ class TabAlarm extends StatelessWidget {
             return aMinutes.compareTo(bMinutes);
           });
         }
+*/
 
         final sortedEntries = grouped.entries.toList()
           ..sort((a, b) => a.value.first.courtName.compareTo(b.value.first.courtName));
@@ -81,6 +84,7 @@ class TabAlarm extends StatelessWidget {
                             ),
                           ],
                         ),
+
                         Switch(
                           value: alarm.alarmEnabled,
                           onChanged: (bool value) async {

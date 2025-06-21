@@ -2,8 +2,10 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:kakao_flutter_sdk/kakao_flutter_sdk.dart';
-import 'package:naver_login_sdk/naver_login_sdk.dart';
+import 'package:kakao_map_plugin/kakao_map_plugin.dart';
+import 'package:intl/date_symbol_data_local.dart';
 import 'package:sizer/sizer.dart';
+import 'package:tennisreminder_app/service/notification/court_notification_setting_upgrade.dart';
 import 'package:tennisreminder_app/ui/route/route_splash.dart';
 import 'package:tennisreminder_core/const/model/model_court_alarm.dart';
 import 'package:tennisreminder_core/const/value/colors.dart';
@@ -13,6 +15,8 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:tennisreminder_core/const/model/model_court.dart';
+
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 import 'const/static/global.dart';
 import 'firebase_options.dart';
@@ -34,25 +38,50 @@ void _handleMessage(RemoteMessage message) {
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await initializeDateFormatting('ko_KR');
+  AuthRepository.initialize(appKey: '26476b06b753504ad14bb998f377645f');
 
-  await Future.wait([
-    Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform),
-  ]);
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+
+  final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
+
+  const AndroidNotificationChannel channel = AndroidNotificationChannel(
+    'default_channel',
+    '기본 채널',
+    description: '기본 알림 채널',
+    importance: Importance.high,
+  );
+
+  await flutterLocalNotificationsPlugin
+      .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()
+      ?.createNotificationChannel(channel);
+
+  FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+    if (message.notification != null) {
+      flutterLocalNotificationsPlugin.show(
+        0,
+        message.notification!.title,
+        message.notification!.body,
+        NotificationDetails(
+          android: AndroidNotificationDetails(
+            'default_channel',
+            '기본 채널',
+            importance: Importance.high,
+            priority: Priority.high,
+            icon: 'ic_stat_notify',
+          ),
+        ),
+      );
+    }
+  });
+
+  checkNotificationSetup();
+  setupFirebaseForegroundHandler();
 
   KakaoSdk.init(
     nativeAppKey: 'de368876dad11f1f070baef6058f8d49',
     loggingEnabled: true,
   );
-
-  /*
-  NaverLoginSDK.initialize(
-      urlScheme: "sportsdirector",
-      clientId:"BjgiZmXeS1CuztyUF6wK",
-      clientSecret: "pfZ5h6DQRU",
-      clientName: "스포츠지도자"
-  );
-*/
-
 
   /// 좋아요 코트, 알람코트 불러오기
   final user = FirebaseAuth.instance.currentUser;
@@ -60,7 +89,6 @@ Future<void> main() async {
     await _loadFavoriteCourts();
     await syncCourtAlarms(user.uid);
   }
-
 
   runApp(const ProviderScope(child: MyApp()));
 }

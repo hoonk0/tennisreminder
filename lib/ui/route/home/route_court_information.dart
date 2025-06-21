@@ -3,11 +3,15 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:tennisreminder_app/service/map/google_map_screen.dart';
 import 'package:tennisreminder_app/service/weather/weather_alarm.dart';
 import 'package:tennisreminder_app/ui/bottom_sheet/bottom_sheet_notification.dart';
+import 'package:tennisreminder_app/ui/bottom_sheet/bottom_sheet_calendar.dart';
 import 'package:tennisreminder_app/ui/component/basic_button.dart';
 import 'package:tennisreminder_app/ui/component/custom_divider.dart';
 import 'package:tennisreminder_core/const/model/model_court.dart';
+import 'package:tennisreminder_core/const/value/enum.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:tennisreminder_core/const/model/model_court_alarm.dart';
 import 'package:tennisreminder_core/const/value/colors.dart';
@@ -16,6 +20,7 @@ import 'package:tennisreminder_core/const/value/gaps.dart';
 import 'package:tennisreminder_core/const/value/text_style.dart';
 
 import '../../../const/static/global.dart';
+import '../../../service/notification/court_notification_setting_upgrade.dart';
 import '../../../service/utils/utils.dart';
 
 final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
@@ -40,9 +45,18 @@ class _RouteCourtInformationState extends State<RouteCourtInformation> {
 
   final ValueNotifier<bool> vnAlarmSet = ValueNotifier(false);
 
+  // GoogleMapController for showing marker info window
+  late GoogleMapController _mapController;
+
   Future<String?> getFcmToken() async {
     // TODO: Replace with your actual FCM token fetch logic
     return await FirebaseMessaging.instance.getToken();
+  }
+
+  void _onMapCreated(GoogleMapController controller) {
+    _mapController = controller;
+    // Show the info window for this court's marker after map loads
+    _mapController.showMarkerInfoWindow(MarkerId(widget.court.uid));
   }
 
   @override
@@ -189,20 +203,57 @@ class _RouteCourtInformationState extends State<RouteCourtInformation> {
                                       style: TS.s14w400(colorGray600),
                                   ),
 
-
-
                                   Gaps.v8,
-                                  Text(
-                                    widget.court.extraInfo?['xxx'] ?? '',
-                                    style: const TextStyle(
-                                      fontSize: 14,
-                                      color: Colors.black87,
+                                  if ((widget.court.courtInfo1?.isNotEmpty ?? false) ||
+                                      (widget.court.courtInfo2?.isNotEmpty ?? false) ||
+                                      (widget.court.courtInfo3?.isNotEmpty ?? false) ||
+                                      (widget.court.courtInfo4?.isNotEmpty ?? false) ||
+                                      (widget.court.reservationSchedule?.isNotEmpty ?? false))
+                                    Text(
+                                      [
+                                        if (widget.court.courtInfo1?.isNotEmpty ?? false) widget.court.courtInfo1!,
+                                        if (widget.court.courtInfo2?.isNotEmpty ?? false) widget.court.courtInfo2!,
+                                        if (widget.court.courtInfo3?.isNotEmpty ?? false) widget.court.courtInfo3!,
+                                        if (widget.court.courtInfo4?.isNotEmpty ?? false) widget.court.courtInfo4!,
+                                        if (widget.court.reservationSchedule?.isNotEmpty ?? false)
+                                          '예약: ${widget.court.reservationSchedule!}',
+                                      ].join(' · '),
+                                      style: const TS.s14w400(colorGray900),
+                                      textAlign: TextAlign.center,
                                     ),
-                                  ),
 
                                   CustomDivider(margin: EdgeInsets.symmetric(vertical: 20, horizontal: 20), width: double.infinity,),
 
-                                  /// 알람 설정하기 section
+                                  ///코트별 알람설정하기
+                                  // 예약 규칙 타입에 따라 알람/캘린더 바텀시트 노출
+                                  if (widget.court.reservationInfo?.reservationRuleType == ReservationRuleType.daysBeforePlay ||
+                                      widget.court.reservationInfo?.reservationRuleType == ReservationRuleType.nthWeekdayOfMonth)
+                                    BasicButton(
+                                      title: '예약 캘린더 열기',
+                                      onTap: () {
+                                        final vnSelectedDate = ValueNotifier<DateTime?>(DateTime.now());
+
+                                        if (widget.court.reservationInfo?.reservationHour != null) {
+                                          final int hour = widget.court.reservationInfo!.reservationHour!;
+                                          final now = DateTime.now();
+                                          final scheduled = DateTime(now.year, now.month, now.day, hour);
+                                          final alarmTime = scheduled.subtract(const Duration(minutes: 10));
+
+                                          print('🕓 저장된 예약 시간: $scheduled');
+                                          print('🔔 알람 예정 시간: $alarmTime');
+                                        }
+
+                                        BottomSheetCalendar(
+                                          context,
+                                          reservationHour: widget.court.reservationInfo?.reservationHour?.toString() ?? '',
+                                          court: widget.court, vnSelectedDate: vnSelectedDate,
+                                        );
+                                      },
+                                    )
+                                  else
+                                    const SizedBox.shrink(),
+
+           /*                       /// 알람 설정하기 section
                                   Column(
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
@@ -267,11 +318,36 @@ class _RouteCourtInformationState extends State<RouteCourtInformation> {
                                     ],
                                   ),
                                   CustomDivider(margin: EdgeInsets.symmetric(vertical: 20, horizontal: 20), width: double.infinity,),
-
+*/
                                   ///코트위치 표시
                                   Column(
                                     children: [
                                       Text("코트 위치 표시",style: TS.s16w600(colorGray900),),
+                                      Gaps.v5,
+                                  SizedBox(
+                                    height: MediaQuery.of(context).size.height * 0.5, // 지도 크기 늘리기
+                                    child: GoogleMap(
+                                      initialCameraPosition: CameraPosition(
+                                        target: LatLng(widget.court.latitude, widget.court.longitude),
+                                        zoom: 16,
+                                      ),
+                                      markers: {
+                                        Marker(
+                                          markerId: MarkerId(widget.court.uid),
+                                          position: LatLng(widget.court.latitude, widget.court.longitude),
+                                          infoWindow: InfoWindow(
+                                            title: widget.court.courtName,
+                                          ),
+                                          onTap: () {
+                                            // Could zoom or center if needed
+                                          },
+                                        ),
+                                      },
+                                      myLocationEnabled: true,
+                                      myLocationButtonEnabled: true,
+                                      onMapCreated: _onMapCreated,
+                                    ),
+                                  ),
                                     ],
                                   ),
 

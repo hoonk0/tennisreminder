@@ -5,7 +5,7 @@ import 'package:tennisreminder_core/const/value/colors.dart';
 import 'package:tennisreminder_core/const/value/gaps.dart';
 import 'package:tennisreminder_core/const/value/text_style.dart';
 
-import '../../../service/location_service.dart';
+import '../../../service/map/location_service.dart';
 import '../../component/card_court_inform.dart';
 
 class RouteNearCourt extends StatefulWidget {

@@ -78,16 +78,30 @@ class _CourtNotificationSettingsState extends State<CourtNotificationSettings> {
       final fcmToken = await _getFcmToken();
       debugPrint('🔑 FCM Token: $fcmToken');
       if (fcmToken == null) throw Exception('FCM 토큰을 가져올 수 없습니다.');
+      // Combine selected weekday and time into a DateTime for alarmDateTime
+      final now = DateTime.now();
+      // Find the next occurrence of the selected weekday
+      int daysToAdd = (selectedWeekday.value - now.weekday) % 7;
+      if (daysToAdd < 0) daysToAdd += 7;
+      final nextAlarmDate = now.add(Duration(days: daysToAdd));
+      final selectedDateTime = DateTime(
+        nextAlarmDate.year,
+        nextAlarmDate.month,
+        nextAlarmDate.day,
+        selectedTime.hour,
+        selectedTime.minute,
+      );
       final data = {
         keyCourtUid: widget.court.uid,
-        keyUserUid: FirebaseAuth.instance.currentUser?.uid,
+        keyUserUid: FirebaseAuth.instance.currentUser?.uid ?? '',
         keyCourtName: widget.court.courtName,
         keyAlarmWeekday: selectedWeekday.value,
         keyAlarmHour: selectedTime.hour,
         keyAlarmMinute: selectedTime.minute,
-        keyDateCreate: Timestamp.now(),
         keyAlarmEnabled: true,
+        keyDateCreate: Timestamp.now(),
         keyFcmToken: fcmToken,
+        'alarmDateTime': Timestamp.fromDate(selectedDateTime), // ✅ Add exact datetime
       };
       debugPrint('📤 Firestore 저장 데이터: $data');
 
