@@ -21,28 +21,33 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'const/static/global.dart';
 import 'firebase_options.dart';
 
-/*Future<void> _setupInteractedMessage() async {
-  RemoteMessage? initialMessage = await FirebaseMessaging.instance.getInitialMessage();
-
-  if (initialMessage != null) {
-    _handleMessage(initialMessage);
-  }
-
-  FirebaseMessaging.onMessageOpenedApp.listen(_handleMessage);
-}
-
-void _handleMessage(RemoteMessage message) {
-  debugPrint('🔔 종료 상태에서 알림 클릭됨: ${message.notification?.title}');
-  // TODO: Add navigation or processing logic here
-}*/
-
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await initializeDateFormatting('ko_KR');
   AuthRepository.initialize(appKey: '26476b06b753504ad14bb998f377645f');
 
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  await initializeNotification();
 
+  checkNotificationSetup();
+  setupFirebaseForegroundHandler();
+
+  KakaoSdk.init(
+    nativeAppKey: 'de368876dad11f1f070baef6058f8d49',
+    loggingEnabled: true,
+  );
+
+  final user = FirebaseAuth.instance.currentUser;
+  if (user != null) {
+    await _loadFavoriteCourts();
+    await syncCourtAlarms(user.uid);
+  }
+
+  runApp(const ProviderScope(child: MyApp()));
+}
+
+///알람 세팅
+Future<void> initializeNotification() async {
   final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
 
   const AndroidNotificationChannel channel = AndroidNotificationChannel(
@@ -74,23 +79,6 @@ Future<void> main() async {
       );
     }
   });
-
-  checkNotificationSetup();
-  setupFirebaseForegroundHandler();
-
-  KakaoSdk.init(
-    nativeAppKey: 'de368876dad11f1f070baef6058f8d49',
-    loggingEnabled: true,
-  );
-
-  /// 좋아요 코트, 알람코트 불러오기
-  final user = FirebaseAuth.instance.currentUser;
-  if (user != null) {
-    await _loadFavoriteCourts();
-    await syncCourtAlarms(user.uid);
-  }
-
-  runApp(const ProviderScope(child: MyApp()));
 }
 
 ///최초1번 글로벌노티파이어 사용을 위해 불러옴
