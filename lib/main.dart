@@ -29,8 +29,6 @@ Future<void> main() async {
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   await initializeNotification();
 
-  checkNotificationSetup();
-  setupFirebaseForegroundHandler();
 
   KakaoSdk.init(
     nativeAppKey: 'de368876dad11f1f070baef6058f8d49',

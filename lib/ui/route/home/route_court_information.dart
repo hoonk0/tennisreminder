@@ -22,6 +22,7 @@ import 'package:tennisreminder_core/const/value/text_style.dart';
 import '../../../const/static/global.dart';
 import '../../../service/notification/court_notification_setting_upgrade.dart';
 import '../../../service/utils/utils.dart';
+import '../../component/court_reservation_section.dart';
 
 final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
     FlutterLocalNotificationsPlugin();
@@ -225,33 +226,7 @@ class _RouteCourtInformationState extends State<RouteCourtInformation> {
                                   CustomDivider(margin: EdgeInsets.symmetric(vertical: 20, horizontal: 20), width: double.infinity,),
 
                                   ///코트별 알람설정하기
-                                  // 예약 규칙 타입에 따라 알람/캘린더 바텀시트 노출
-                                  if (widget.court.reservationInfo?.reservationRuleType == ReservationRuleType.daysBeforePlay ||
-                                      widget.court.reservationInfo?.reservationRuleType == ReservationRuleType.nthWeekdayOfMonth)
-                                    BasicButton(
-                                      title: '예약 캘린더 열기',
-                                      onTap: () {
-                                        final vnSelectedDate = ValueNotifier<DateTime?>(DateTime.now());
-
-                                        if (widget.court.reservationInfo?.reservationHour != null) {
-                                          final int hour = widget.court.reservationInfo!.reservationHour!;
-                                          final now = DateTime.now();
-                                          final scheduled = DateTime(now.year, now.month, now.day, hour);
-                                          final alarmTime = scheduled.subtract(const Duration(minutes: 10));
-
-                                          print('🕓 저장된 예약 시간: $scheduled');
-                                          print('🔔 알람 예정 시간: $alarmTime');
-                                        }
-
-                                        BottomSheetCalendar(
-                                          context,
-                                          reservationHour: widget.court.reservationInfo?.reservationHour?.toString() ?? '',
-                                          court: widget.court, vnSelectedDate: vnSelectedDate,
-                                        );
-                                      },
-                                    )
-                                  else
-                                    const SizedBox.shrink(),
+                                  CourtReservationSection(court: widget.court),
 
            /*                       /// 알람 설정하기 section
                                   Column(
@@ -474,3 +449,4 @@ class _RouteCourtInformationState extends State<RouteCourtInformation> {
       ),);
   }
 }
+

@@ -278,7 +278,7 @@ class _CalendarBottomSheetState extends State<CalendarBottomSheet> {
                             widget.vnSelectedDate.value = selectedDateTime;
 
                             // 알림 저장 호출
-                            await CourtNotificationSettingUpgrade.saveAlarmToFirestoreExternal(
+                            await CourtNotificationDaysBeforePlay.saveAlarmToFirestoreExternal(
                               court: widget.court,
                               selectedDateTime: selectedDateTime,
                             );
