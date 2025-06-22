@@ -8,6 +8,7 @@ import 'package:tennisreminder_core/const/model/model_court.dart';
 import 'package:tennisreminder_core/const/model/model_court_alarm.dart';
 import 'package:tennisreminder_core/const/value/keys.dart';
 import 'package:tennisreminder_core/const/value/text_style.dart';
+import 'package:intl/intl.dart';
 import '../../const/static/global.dart';
 
 import 'package:flutter/foundation.dart';
@@ -39,7 +40,6 @@ class TabAlarm extends StatelessWidget {
           });
         }
 */
-
         final sortedEntries = grouped.entries.toList()
           ..sort((a, b) => a.value.first.courtName.compareTo(b.value.first.courtName));
 
@@ -56,10 +56,18 @@ class TabAlarm extends StatelessWidget {
                 ),
                 const SizedBox(height: 8),
                 ...entry.value.map((alarm) {
-                  final timeStr = '${alarm.alarmHour.toString().padLeft(2, '0')}:${alarm.alarmMinute.toString().padLeft(2, '0')}';
+
+                  print('🔥 알람 시간: ${alarm.alarmDateTime}'); // 디버깅용 로그
                   final weekdayMap = {
                     1: '월', 2: '화', 3: '수', 4: '목', 5: '금', 6: '토', 7: '일'
                   };
+                  final dateTime = alarm.alarmDateTime?.toDate();
+                  final displayDate = dateTime != null
+                      ? '${dateTime.month}월 ${dateTime.day}일'
+                      : '날짜 없음';
+                  final displayTime = dateTime != null
+                      ? '${dateTime.hour.toString().padLeft(2, '0')}:${dateTime.minute.toString().padLeft(2, '0')}'
+                      : '시간 없음';
                   return Container(
                     margin: const EdgeInsets.only(bottom: 12),
                     padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
@@ -73,15 +81,18 @@ class TabAlarm extends StatelessWidget {
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
+
                             Text(
-                              '${weekdayMap[alarm.alarmWeekday]}요일',
+                              DateFormat('M월 d일', 'ko_KR').format(alarm.alarmDateTime!.toDate()),
                               style: TS.s14w500(Color(0xFFF7D245)),
                             ),
                             Gaps.v4,
-                            Text(
-                              timeStr,
-                              style: TS.s20w500(colorWhite)
-                            ),
+
+                            if (alarm.alarmDateTime != null)
+                              Text(
+                                DateFormat('a h시 mm분', 'ko_KR').format(alarm.alarmDateTime!.toDate()),
+                                style: const TextStyle(color: Colors.white),
+                              ),
                           ],
                         ),
 

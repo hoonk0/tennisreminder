@@ -44,6 +44,10 @@ Future<void> main() async {
   }
 
   runApp(const ProviderScope(child: MyApp()));
+
+
+
+
 }
 
 ///알람 세팅
