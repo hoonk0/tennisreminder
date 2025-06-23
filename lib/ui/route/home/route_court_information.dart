@@ -71,275 +71,342 @@ class _RouteCourtInformationState extends State<RouteCourtInformation> {
                 children: [
                   Expanded(
                     child: Padding(
-                      padding: const EdgeInsets.only(bottom: 100), // reserve space for button
+                      padding: const EdgeInsets.only(bottom: 100),
+                      // reserve space for button
                       child: ListView(
                         children: [
-                  /// 코트 사진 - full width with rounded bottom corners
-                  Stack(
-                    children: [
-                      ClipRRect(
-                        borderRadius: const BorderRadius.only(
-                          bottomLeft: Radius.circular(20),
-                          bottomRight: Radius.circular(20),
-                        ),
-                        child: Container(
-                          height: 300,
-                          width: double.infinity,
-                          decoration: BoxDecoration(
-                            image: DecorationImage(
-                              image: widget.court.imageUrls != null && widget.court.imageUrls!.isNotEmpty
-                                  ? NetworkImage(widget.court.imageUrls!.first)
-                                  : const AssetImage('assets/images/mainicon.png') as ImageProvider,
-                              fit: widget.court.imageUrls != null && widget.court.imageUrls!.isNotEmpty
-                                  ? BoxFit.cover
-                                  : BoxFit.contain,
-                              alignment: Alignment.center,
-                            ),
-                            color: colorWhite,
-                          ),
-                        ),
-                      ),
-                      // Left-aligned back button
-                      Positioned(
-                        top: 20,
-                        left: 20,
-                        child: GestureDetector(
-                          onTap: (){
-                            Navigator.of(context).pop();
-                          },
-                          child: Container(
-                              padding: const EdgeInsets.all(8),
-                              decoration: BoxDecoration(
-                                color: Colors.white.withOpacity(0.8),
-                                shape: BoxShape.circle,
-                              ),
-                              child: Icon(Icons.arrow_back, color: Colors.black,)),
-                        ),
-                      ),
-                      // Favorite (heart) icon at top right
-                      Positioned(
-                        top: 20,
-                        right: 20,
-                        child: ValueListenableBuilder(
-                          valueListenable: Global.vnFavoriteCourts,
-                          builder: (context, favoriteCourts, child) {
-                            final isFavorite = favoriteCourts.any((e) => e.uid == widget.court.uid);
-                            return GestureDetector(
-                              onTap: () async {
-                                final userUid = FirebaseAuth.instance.currentUser?.uid;
-                                if (userUid == null) return;
-
-                                final courtRef = FirebaseFirestore.instance
-                                    .collection(keyCourt)
-                                    .doc(widget.court.uid);
-
-                                if (isFavorite) {
-                                  Global.vnFavoriteCourts.value =
-                                      favoriteCourts.where((e) => e.uid != widget.court.uid).toList();
-                                  await courtRef.update({
-                                    keyLikedUserUids: FieldValue.arrayRemove([userUid]),
-                                  });
-                                } else {
-                                  Global.vnFavoriteCourts.value = [
-                                    ...favoriteCourts,
-                                    widget.court,
-                                  ];
-                                  await courtRef.update({
-                                    keyLikedUserUids: FieldValue.arrayUnion([userUid]),
-                                  });
-                                }
-                              },
-                              child: Container(
-                                padding: const EdgeInsets.all(8),
-                                decoration: BoxDecoration(
-                                  color: Colors.white.withOpacity(0.8),
-                                  shape: BoxShape.circle,
+                          /// 코트 사진 - full width with rounded bottom corners
+                          Stack(
+                            children: [
+                              ClipRRect(
+                                borderRadius: const BorderRadius.only(
+                                  bottomLeft: Radius.circular(20),
+                                  bottomRight: Radius.circular(20),
                                 ),
-                                child: Icon(
-                                  isFavorite ? Icons.favorite : Icons.favorite_border,
-                                  color: isFavorite ? colorMain900 : Colors.black,
-                                  size: 20,
-                                ),
-                              ),
-                            );
-                          },
-                        ),
-                      ),
-                    ],
-                  ),
-
-                  /// 컨테이너
-                  Column(
-                    children: [
-                      Stack(
-                        clipBehavior: Clip.none,
-                        children: [
-                          Transform.translate(
-                            offset: const Offset(0, -30),
-                            child: Container(
-                              width: double.infinity,
-                              padding: const EdgeInsets.all(20),
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.circular(20),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.black.withOpacity(0.08),
-                                    blurRadius: 10,
-                                    spreadRadius: 0,
-                                    offset: Offset(0, -6), // sharper top shadow only
-                                  ),
-
-                                ],
-                              ),
-                              child: Column(
-                                children: [
-                                  Text(
-                                    widget.court.courtName,
-                                    style: TS.s24w600(colorGray900),
-                                  ),
-                                  Gaps.v8,
-                                  Text(
-                                    widget.court.courtAddress,
-                                      style: TS.s14w400(colorGray600),
-                                  ),
-
-                                  Gaps.v8,
-                                  if ((widget.court.courtInfo1?.isNotEmpty ?? false) ||
-                                      (widget.court.courtInfo2?.isNotEmpty ?? false) ||
-                                      (widget.court.courtInfo3?.isNotEmpty ?? false) ||
-                                      (widget.court.courtInfo4?.isNotEmpty ?? false) ||
-                                      (widget.court.reservationSchedule?.isNotEmpty ?? false))
-                                    Text(
-                                      [
-                                        if (widget.court.courtInfo1?.isNotEmpty ?? false) widget.court.courtInfo1!,
-                                        if (widget.court.courtInfo2?.isNotEmpty ?? false) widget.court.courtInfo2!,
-                                        if (widget.court.courtInfo3?.isNotEmpty ?? false) widget.court.courtInfo3!,
-                                        if (widget.court.courtInfo4?.isNotEmpty ?? false) widget.court.courtInfo4!,
-                                        if (widget.court.reservationSchedule?.isNotEmpty ?? false)
-                                          '예약: ${widget.court.reservationSchedule!}',
-                                      ].join(' · '),
-                                      style: const TS.s14w400(colorGray900),
-                                      textAlign: TextAlign.center,
+                                child: Container(
+                                  height: 300,
+                                  width: double.infinity,
+                                  decoration: BoxDecoration(
+                                    image: DecorationImage(
+                                      image:
+                                          widget.court.imageUrls != null &&
+                                                  widget
+                                                      .court
+                                                      .imageUrls!
+                                                      .isNotEmpty
+                                              ? NetworkImage(
+                                                widget.court.imageUrls!.first,
+                                              )
+                                              : const AssetImage(
+                                                    'assets/images/mainicon.png',
+                                                  )
+                                                  as ImageProvider,
+                                      fit:
+                                          widget.court.imageUrls != null &&
+                                                  widget
+                                                      .court
+                                                      .imageUrls!
+                                                      .isNotEmpty
+                                              ? BoxFit.cover
+                                              : BoxFit.contain,
+                                      alignment: Alignment.center,
                                     ),
-
-                                  CustomDivider(margin: EdgeInsets.symmetric(vertical: 20, horizontal: 20), width: double.infinity,),
-
-                                  ///코트별 알람설정하기
-                                  CourtReservationSection(court: widget.court),
-
-           /*                       /// 알람 설정하기 section
-                                  Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        '알람 설정하기',
-                                        style: TS.s16w600(colorGray900),),
-                                      Gaps.v6,
-                                      const Text(
-                                        '원하는 시간에 예약 알람을 받을 수 있어요.',
-                                        style: TS.s14w400(colorGray600),
-                                      ),
-                                      Gaps.v12,
-                                      BasicButton(
-                                        title: '알람 설정하기',
-                                        onTap: () {
-                                          showModalBottomSheet(
-                                            context: context,
-                                            isScrollControlled: true,
-                                            builder: (context) {
-                                              return BottomSheetNotification(court: widget.court, vnAlarmSet: vnAlarmSet);
-                                            },
-                                          );
-                                        },
-                                      ),
-                                      Gaps.v4,
-                                      ValueListenableBuilder(
-                                        valueListenable: Global.vnCourtAlarms,
-                                        builder: (context, courtAlarms, _) {
-                                          final hasAlarm = courtAlarms.any((e) => e.courtUid == widget.court.uid);
-                                          return BasicButton(
-                                            title: '모든 알람 삭제하기',
-                                            colorBg: hasAlarm ? colorMain900 : colorGray400,
-                                            onTap: () async {
-                                              Utils.toast(desc: '해당 코트 알람이 삭제되었습니다.');
-
-                                              if (!hasAlarm) return;
-
-                                              vnAlarmSet.value = false;
-
-                                              final userUid = FirebaseAuth.instance.currentUser?.uid;
-                                              final courtUid = widget.court.uid;
-
-                                              if (userUid != null) {
-                                                final snapshot = await FirebaseFirestore.instance
-                                                    .collection(keyCourtAlarms)
-                                                    .where(keyUserUid, isEqualTo: userUid)
-                                                    .where(keyCourtUid, isEqualTo: courtUid)
-                                                    .get();
-
-                                                for (final doc in snapshot.docs) {
-                                                  await doc.reference.delete();
-                                                }
-
-                                                Global.vnCourtAlarms.value = courtAlarms
-                                                    .where((e) => e.courtUid != courtUid)
-                                                    .toList();
-                                              }
-                                            },
-                                          );
-                                        },
-                                      ),
-                                    ],
+                                    color: colorWhite,
                                   ),
-                                  CustomDivider(margin: EdgeInsets.symmetric(vertical: 20, horizontal: 20), width: double.infinity,),
-*/
-                                  ///코트위치 표시
-                                  Column(
-                                    children: [
-                                      Text("코트 위치 표시",style: TS.s16w600(colorGray900),),
-                                      Gaps.v5,
-                                  SizedBox(
-                                    height: MediaQuery.of(context).size.height * 0.5, // 지도 크기 늘리기
-                                    child: GoogleMap(
-                                      initialCameraPosition: CameraPosition(
-                                        target: LatLng(widget.court.latitude, widget.court.longitude),
-                                        zoom: 16,
-                                      ),
-                                      markers: {
-                                        Marker(
-                                          markerId: MarkerId(widget.court.uid),
-                                          position: LatLng(widget.court.latitude, widget.court.longitude),
-                                          infoWindow: InfoWindow(
-                                            title: widget.court.courtName,
-                                          ),
-                                          onTap: () {
-                                            // Could zoom or center if needed
-                                          },
-                                        ),
+                                ),
+                              ),
+                              // Left-aligned back button
+                              Positioned(
+                                top: 20,
+                                left: 20,
+                                child: GestureDetector(
+                                  onTap: () {
+                                    Navigator.of(context).pop();
+                                  },
+                                  child: Container(
+                                    padding: const EdgeInsets.all(8),
+                                    decoration: BoxDecoration(
+                                      color: Colors.white.withOpacity(0.8),
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: Icon(
+                                      Icons.arrow_back,
+                                      color: Colors.black,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              // Favorite (heart) icon at top right
+                              Positioned(
+                                top: 20,
+                                right: 20,
+                                child: ValueListenableBuilder(
+                                  valueListenable: Global.vnFavoriteCourts,
+                                  builder: (context, favoriteCourts, child) {
+                                    final isFavorite = favoriteCourts.any(
+                                      (e) => e.uid == widget.court.uid,
+                                    );
+                                    return GestureDetector(
+                                      onTap: () async {
+                                        final userUid =
+                                            FirebaseAuth
+                                                .instance
+                                                .currentUser
+                                                ?.uid;
+                                        if (userUid == null) return;
+
+                                        final courtRef = FirebaseFirestore
+                                            .instance
+                                            .collection(keyCourt)
+                                            .doc(widget.court.uid);
+
+                                        if (isFavorite) {
+                                          Global.vnFavoriteCourts.value =
+                                              favoriteCourts
+                                                  .where(
+                                                    (e) =>
+                                                        e.uid !=
+                                                        widget.court.uid,
+                                                  )
+                                                  .toList();
+                                          await courtRef.update({
+                                            keyLikedUserUids:
+                                                FieldValue.arrayRemove([
+                                                  userUid,
+                                                ]),
+                                          });
+                                        } else {
+                                          Global.vnFavoriteCourts.value = [
+                                            ...favoriteCourts,
+                                            widget.court,
+                                          ];
+                                          await courtRef.update({
+                                            keyLikedUserUids:
+                                                FieldValue.arrayUnion([
+                                                  userUid,
+                                                ]),
+                                          });
+                                        }
                                       },
-                                      myLocationEnabled: true,
-                                      myLocationButtonEnabled: true,
-                                      onMapCreated: _onMapCreated,
+                                      child: Container(
+                                        padding: const EdgeInsets.all(8),
+                                        decoration: BoxDecoration(
+                                          color: Colors.white.withOpacity(0.8),
+                                          shape: BoxShape.circle,
+                                        ),
+                                        child: Icon(
+                                          isFavorite
+                                              ? Icons.favorite
+                                              : Icons.favorite_border,
+                                          color:
+                                              isFavorite
+                                                  ? colorMain900
+                                                  : Colors.black,
+                                          size: 20,
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                ),
+                              ),
+                            ],
+                          ),
+
+                          /// 컨테이너
+                          Column(
+                            children: [
+                              Stack(
+                                clipBehavior: Clip.none,
+                                children: [
+                                  Transform.translate(
+                                    offset: const Offset(0, -30),
+                                    child: Container(
+                                      width: double.infinity,
+                                      padding: const EdgeInsets.all(20),
+                                      decoration: BoxDecoration(
+                                        color: Colors.white,
+                                        borderRadius: BorderRadius.circular(20),
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color: Colors.black.withOpacity(
+                                              0.08,
+                                            ),
+                                            blurRadius: 10,
+                                            spreadRadius: 0,
+                                            offset: Offset(
+                                              0,
+                                              -6,
+                                            ), // sharper top shadow only
+                                          ),
+                                        ],
+                                      ),
+                                      child: Column(
+                                        children: [
+                                          Column(
+                                            //crossAxisAlignment: CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                widget.court.courtName,
+                                                style: TS.s24w600(colorGray900),
+                                              ),
+                                              Gaps.v8,
+                                              Text(
+                                                widget.court.courtAddress,
+                                                style: TS.s14w400(colorGray600),
+                                              ),
+
+                                              Gaps.v8,
+                                              if ((widget
+                                                          .court
+                                                          .courtInfo1
+                                                          ?.isNotEmpty ??
+                                                      false) ||
+                                                  (widget
+                                                          .court
+                                                          .courtInfo2
+                                                          ?.isNotEmpty ??
+                                                      false) ||
+                                                  (widget
+                                                          .court
+                                                          .courtInfo3
+                                                          ?.isNotEmpty ??
+                                                      false) ||
+                                                  (widget
+                                                          .court
+                                                          .courtInfo4
+                                                          ?.isNotEmpty ??
+                                                      false))
+                                                Text(
+                                                  [
+                                                    if (widget
+                                                            .court
+                                                            .courtInfo1
+                                                            ?.isNotEmpty ??
+                                                        false)
+                                                      widget.court.courtInfo1!,
+                                                    if (widget
+                                                            .court
+                                                            .courtInfo2
+                                                            ?.isNotEmpty ??
+                                                        false)
+                                                      widget.court.courtInfo2!,
+                                                    if (widget
+                                                            .court
+                                                            .courtInfo3
+                                                            ?.isNotEmpty ??
+                                                        false)
+                                                      widget.court.courtInfo3!,
+                                                    if (widget
+                                                            .court
+                                                            .courtInfo4
+                                                            ?.isNotEmpty ??
+                                                        false)
+                                                      widget.court.courtInfo4!,
+                                                  ].join(' · '),
+                                                  style: const TS.s14w400(
+                                                    colorGray900,
+                                                  ),
+                                                  textAlign: TextAlign.center,
+                                                ),
+
+                                            ],
+                                          ),
+
+
+                                          CustomDivider(
+                                            margin: EdgeInsets.symmetric(
+                                              vertical: 20,
+                                              horizontal: 20,
+                                            ),
+                                            width: double.infinity,
+                                          ),
+
+                                          ///코트관련정보
+                                          Column(
+                                              crossAxisAlignment: CrossAxisAlignment.start,
+                                              mainAxisAlignment: MainAxisAlignment.start,
+                                              children: [Text('코트 관련 정보'),
+                                              Gaps.v5,
+                                              Row(children: [Icon(Icons.phone),Icon(Icons.phone),Icon(Icons.phone)],)
+                                              ]),
+
+                                          ///코트별 알람설정하기
+                                          CourtReservationSection(
+                                            court: widget.court,
+                                          ),
+
+                                          CustomDivider(
+                                            margin: EdgeInsets.symmetric(
+                                              vertical: 20,
+                                              horizontal: 20,
+                                            ),
+                                            width: double.infinity,
+                                          ),
+
+                                          ///코트위치 표시
+                                          Column(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            mainAxisAlignment: MainAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                "코트 위치 표시",
+                                                style: TS.s16w600(colorGray900),
+                                              ),
+                                              Gaps.v5,
+                                              SizedBox(
+                                                height:
+                                                MediaQuery.of(
+                                                  context,
+                                                ).size.height *
+                                                    0.5, // 지도 크기 늘리기
+                                                child: GoogleMap(
+                                                  initialCameraPosition:
+                                                  CameraPosition(
+                                                    target: LatLng(
+                                                      widget.court.latitude,
+                                                      widget
+                                                          .court
+                                                          .longitude,
+                                                    ),
+                                                    zoom: 16,
+                                                  ),
+                                                  markers: {
+                                                    Marker(
+                                                      markerId: MarkerId(
+                                                        widget.court.uid,
+                                                      ),
+                                                      position: LatLng(
+                                                        widget.court.latitude,
+                                                        widget.court.longitude,
+                                                      ),
+                                                      infoWindow: InfoWindow(
+                                                        title:
+                                                        widget
+                                                            .court
+                                                            .courtName,
+                                                      ),
+                                                      onTap: () {
+                                                        // Could zoom or center if needed
+                                                      },
+                                                    ),
+                                                  },
+                                                  myLocationEnabled: true,
+                                                  myLocationButtonEnabled: true,
+                                                  onMapCreated: _onMapCreated,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ],
+                                      ),
                                     ),
                                   ),
-                                    ],
-                                  ),
-
-
                                 ],
                               ),
-                            ),
+                            ],
                           ),
-                        ],
-                      ),
 
-                    ],
-                  ),
-
-
-
- /*                 /// Test Notification Button - styled as chip/outlined button aligned left
+                          /*                 /// Test Notification Button - styled as chip/outlined button aligned left
                   Align(
                     alignment: Alignment.centerLeft,
                     child: OutlinedButton.icon(
@@ -394,16 +461,19 @@ class _RouteCourtInformationState extends State<RouteCourtInformation> {
                         if (uri != null) {
                           final canLaunch = await canLaunchUrl(uri);
                           if (canLaunch) {
-                            final launched = await launchUrl(uri, mode: LaunchMode.externalApplication);
-                          } else {
-                          }
-                        } else {
-                        }
-                      } else {
-                      }
+                            final launched = await launchUrl(
+                              uri,
+                              mode: LaunchMode.externalApplication,
+                            );
+                          } else {}
+                        } else {}
+                      } else {}
                     },
                     child: Container(
-                      padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 20),
+                      padding: const EdgeInsets.symmetric(
+                        vertical: 14,
+                        horizontal: 20,
+                      ),
                       decoration: BoxDecoration(
                         color: Colors.white.withOpacity(0.95),
                         borderRadius: BorderRadius.circular(30),
@@ -426,8 +496,8 @@ class _RouteCourtInformationState extends State<RouteCourtInformation> {
                 ),
               ),
 
-            /// Bottom buttons: "모든 알람 삭제하기" and "예약하러 가기"
-            /*Container(
+              /// Bottom buttons: "모든 알람 삭제하기" and "예약하러 가기"
+              /*Container(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
               decoration: BoxDecoration(
                 color: Colors.white,
@@ -446,7 +516,77 @@ class _RouteCourtInformationState extends State<RouteCourtInformation> {
             ],
           ),
         ),
-      ),);
+      ),
+    );
   }
 }
 
+
+
+
+/*                       /// 알람 설정하기 section
+                                                                            Column(
+                                                                              crossAxisAlignment: CrossAxisAlignment.start,
+                                                                              children: [
+                                          Text(
+                                            '알람 설정하기',
+                                            style: TS.s16w600(colorGray900),),
+                                          Gaps.v6,
+                                          const Text(
+                                            '원하는 시간에 예약 알람을 받을 수 있어요.',
+                                            style: TS.s14w400(colorGray600),
+                                          ),
+                                          Gaps.v12,
+                                          BasicButton(
+                                            title: '알람 설정하기',
+                                            onTap: () {
+                                              showModalBottomSheet(
+                                                context: context,
+                                                isScrollControlled: true,
+                                                builder: (context) {
+                                                  return BottomSheetNotification(court: widget.court, vnAlarmSet: vnAlarmSet);
+                                                },
+                                              );
+                                            },
+                                          ),
+                                          Gaps.v4,
+                                          ValueListenableBuilder(
+                                            valueListenable: Global.vnCourtAlarms,
+                                            builder: (context, courtAlarms, _) {
+                                              final hasAlarm = courtAlarms.any((e) => e.courtUid == widget.court.uid);
+                                              return BasicButton(
+                                                title: '모든 알람 삭제하기',
+                                                colorBg: hasAlarm ? colorMain900 : colorGray400,
+                                                onTap: () async {
+                                                  Utils.toast(desc: '해당 코트 알람이 삭제되었습니다.');
+
+                                                  if (!hasAlarm) return;
+
+                                                  vnAlarmSet.value = false;
+
+                                                  final userUid = FirebaseAuth.instance.currentUser?.uid;
+                                                  final courtUid = widget.court.uid;
+
+                                                  if (userUid != null) {
+                                                    final snapshot = await FirebaseFirestore.instance
+                                                        .collection(keyCourtAlarms)
+                                                        .where(keyUserUid, isEqualTo: userUid)
+                                                        .where(keyCourtUid, isEqualTo: courtUid)
+                                                        .get();
+
+                                                    for (final doc in snapshot.docs) {
+                                                      await doc.reference.delete();
+                                                    }
+
+                                                    Global.vnCourtAlarms.value = courtAlarms
+                                                        .where((e) => e.courtUid != courtUid)
+                                                        .toList();
+                                                  }
+                                                },
+                                              );
+                                            },
+                                          ),
+                                                                              ],
+                                                                            ),
+                                                                            CustomDivider(margin: EdgeInsets.symmetric(vertical: 20, horizontal: 20), width: double.infinity,),
+                                          */

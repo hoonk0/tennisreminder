@@ -11,6 +11,7 @@ import '../../const/static/global.dart';
 import '../../ui/dialog/dialog_confirm.dart';
 
 
+///특정일에 알람
 class CourtNotificationFixedDayEachMonth {
   /// 🔔 FCM 토큰 출력
   static Future<void> printFcmToken() async {
@@ -34,9 +35,8 @@ class CourtNotificationFixedDayEachMonth {
     final now = DateTime.now();
 
     for (int i = 0; i < 6; i++) {
-      final targetMonth = Timestamp.fromDate(
-        DateTime(now.year, now.month + i, reservationDay, reservationHour),
-      );
+      final targetDateTime = DateTime(now.year, now.month + i, reservationDay, reservationHour).subtract(const Duration(minutes: 10));
+      final targetMonth = Timestamp.fromDate(targetDateTime);
 
       final querySnapshot = await FirebaseFirestore.instance
           .collection(keyCourtAlarms)
@@ -101,6 +101,7 @@ class CourtNotificationFixedDayEachMonth {
   }
 }
 
+///플레이 몇일전 알람
 class CourtNotificationDaysBeforePlay {
   static Future<void> saveAlarmToFirestoreExternal({
     required ModelCourt court,
@@ -132,4 +133,75 @@ class CourtNotificationDaysBeforePlay {
         .map((e) => ModelCourtAlarm.fromJson(e.data()))
         .toList();
   }
+}
+
+///특정투 특정요일 알람
+
+/// 매달 N번째 주의 특정 요일 알람
+class CourtNotificationNthWeekdayOfMonth {
+  /// 🔔 알람을 Firestore에 저장
+  static Future<void> saveAlarmToFirestore({
+    required BuildContext context,
+    required ModelCourt court,
+    required int reservationWeekNumber, // 예: 2번째 주
+    required int reservationWeekday,    // 예: 월요일 = 1
+    required int reservationHour,       // 예: 오전 9시
+  }) async {
+    final fcmToken = await FirebaseMessaging.instance.getToken();
+    if (fcmToken == null) {
+      throw Exception('FCM 토큰을 가져올 수 없습니다.');
+    }
+
+    final userUid = FirebaseAuth.instance.currentUser?.uid ?? '';
+    final now = DateTime.now();
+
+    for (int i = 0; i < 6; i++) {
+      final base = DateTime(now.year, now.month + i, 1);
+      final int baseWeekday = base.weekday;
+
+      // 첫 번째 reservationWeekday가 몇 번째 날인지 계산
+      int offset = (reservationWeekday - baseWeekday + 7) % 7;
+      int day = 1 + offset + (reservationWeekNumber - 1) * 7;
+
+      if (day > DateTime(now.year, now.month + i + 1, 0).day) continue; // 유효하지 않은 날짜는 건너뜀
+
+      final targetDate = DateTime(now.year, now.month + i, day, reservationHour).subtract(const Duration(minutes: 10));
+      final targetTimestamp = Timestamp.fromDate(targetDate);
+
+      final querySnapshot = await FirebaseFirestore.instance
+          .collection(keyCourtAlarms)
+          .where(keyUserUid, isEqualTo: userUid)
+          .where(keyCourtUid, isEqualTo: court.uid)
+          .where(keyAlarmDateTime, isEqualTo: targetTimestamp)
+          .get();
+/*
+
+      if (querySnapshot.docs.isNotEmpty) {
+        showDialog(
+          context: context,
+          builder: (context) => const DialogConfirm(
+            desc: '이미 알림이 설정되어 있습니다.',
+          ),
+        );
+        continue;
+      }
+*/
+
+      final data = {
+        keyCourtUid: court.uid,
+        keyUserUid: userUid,
+        keyCourtName: court.courtName,
+        keyAlarmDateTime: targetTimestamp,
+        keyAlarmEnabled: true,
+        keyDateCreate: Timestamp.now(),
+        keyFcmToken: fcmToken,
+      };
+
+      await FirebaseFirestore.instance.collection(keyCourtAlarms).add(data);
+
+
+    }
+  }
+
+
 }
