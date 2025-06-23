@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:tennisreminder_app/ui/component/basic_button_shadow.dart';
 import 'package:tennisreminder_app/ui/dialog/dialog_confirm.dart';
 import 'package:tennisreminder_app/ui/dialog/dialog_notification_confirm.dart';
 import 'package:tennisreminder_core/const/model/model_court.dart';
@@ -21,7 +22,8 @@ class CourtReservationSection extends StatelessWidget {
 
     switch (ruleType) {
       case ReservationRuleType.fixedDayEachMonth:
-        return BasicButton(
+        return BasicButtonShadow(
+
           title: '알람 등록하기',
           onTap: () async {
             // 예약일과 시간 정보가 있어야 함
@@ -45,7 +47,7 @@ class CourtReservationSection extends StatelessWidget {
           },
         );
       case ReservationRuleType.daysBeforePlay:
-        return BasicButton(
+        return BasicButtonShadow(
           title: '플레이 일정 선택하기',
           onTap: () {
             final vnSelectedDate = ValueNotifier<DateTime?>(DateTime.now());
@@ -67,7 +69,7 @@ class CourtReservationSection extends StatelessWidget {
           },
         );
       case ReservationRuleType.nthWeekdayOfMonth:
-        return BasicButton(
+        return BasicButtonShadow(
           title: '알람 등록하기',
           onTap: () async {
             final reservationWeekNumber = court.reservationInfo?.reservationWeekNumber;
@@ -96,7 +98,7 @@ class CourtReservationSection extends StatelessWidget {
           },
         );
       case ReservationRuleType.etc:
-        return BasicButton(
+        return BasicButtonShadow(
           colorBg: colorGray400,
           title: '알람 서비스를 제공하지 않는 코트입니다',
           onTap: () {

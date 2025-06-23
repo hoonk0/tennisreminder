@@ -5,7 +5,6 @@ import 'package:tennisreminder_core/const/value/gaps.dart';
 import '../../const/static/global.dart';
 import '../../service/stream/stream_me.dart';
 import '../component/main_app_bar.dart';
-import '../tab/tab_favorite.dart';
 import '../tab/tab_home.dart';
 import '../tab/tab_alarm.dart';
 import '../tab/tab_profile.dart';

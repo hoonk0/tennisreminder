@@ -8,7 +8,9 @@ import 'package:tennisreminder_core/const/value/gaps.dart';
 import 'package:tennisreminder_core/const/value/text_style.dart';
 
 import '../../service/notification/court_notification_setting_upgrade.dart';
+import '../../service/utils/utils.dart';
 import '../component/basic_button.dart';
+import '../dialog/dialog_confirm.dart';
 
 void BottomSheetCalendar(
     BuildContext context, {
@@ -260,8 +262,10 @@ class _CalendarBottomSheetState extends State<CalendarBottomSheet> {
                   return BasicButton(
                     title: date != null ? '${date.month}월 ${date.day}일 저장' : '날짜 선택',
                     onTap: () async {
+
                       if (date != null && widget.reservationHour.trim().isNotEmpty) {
                         try {
+
                           final parts = widget.reservationHour.trim().split(':');
                           final hour = int.tryParse(parts[0]);
                           final minute = parts.length > 1 ? int.tryParse(parts[1]) : 0;
@@ -282,6 +286,10 @@ class _CalendarBottomSheetState extends State<CalendarBottomSheet> {
                               court: widget.court,
                               selectedDateTime: selectedDateTime,
                             );
+
+                            Utils.toast(desc: '${date.month}월 ${date.day}일 ${widget.reservationHour}에 알림이 등록 되었습니다.');
+
+                            Navigator.pop(context);
                           } else {
                             print("⚠️ 유효하지 않은 예약 시간 형식: ${widget.reservationHour}");
                           }

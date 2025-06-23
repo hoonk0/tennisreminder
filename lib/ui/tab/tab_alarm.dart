@@ -124,20 +124,26 @@ class TabAlarm extends StatelessWidget {
                                 return e;
                               }).toList();
                             } else {
-                              // 켜질 때: 글로벌/파베 재등록
-                              final newAlarm = alarm.copyWith(alarmEnabled: true, dateCreate: Timestamp.now());
-
-                              await FirebaseFirestore.instance
+                              // 켜질 때: 알람을 Firestore에서 in-place로 업데이트
+                              final snapshot = await FirebaseFirestore.instance
                                   .collection(keyCourtAlarms)
-                                  .add(newAlarm.toJson());
+                                  .where(keyUserUid, isEqualTo: userUid)
+                                  .where(keyCourtUid, isEqualTo: alarm.courtUid)
+                                  .where(keyDateCreate, isEqualTo: alarm.dateCreate)
+                                  .get();
 
-                              Global.vnCourtAlarms.value = [
-                                ...Global.vnCourtAlarms.value.where((e) =>
-                                  !(e.dateCreate == alarm.dateCreate &&
+                              for (final doc in snapshot.docs) {
+                                await doc.reference.update({'alarmEnabled': true});
+                              }
+
+                              Global.vnCourtAlarms.value = Global.vnCourtAlarms.value.map((e) {
+                                if (e.dateCreate == alarm.dateCreate &&
                                     e.userUid == userUid &&
-                                    e.courtUid == alarm.courtUid)),
-                                newAlarm,
-                              ];
+                                    e.courtUid == alarm.courtUid) {
+                                  return e.copyWith(alarmEnabled: true);
+                                }
+                                return e;
+                              }).toList();
                             }
                           },
                           activeColor: const Color(0xFFF7D245), // 노란색
