@@ -46,12 +46,12 @@ class CourtNotificationFixedDayEachMonth {
           .get();
 
       if (querySnapshot.docs.isNotEmpty) {
-        showDialog(
+/*        showDialog(
           context: context,
           builder: (context) => const DialogConfirm(
             desc: '이미 알림이 설정되어 있습니다.',
           ),
-        );
+        );*/
         continue;
       }
 
@@ -174,18 +174,16 @@ class CourtNotificationNthWeekdayOfMonth {
           .where(keyCourtUid, isEqualTo: court.uid)
           .where(keyAlarmDateTime, isEqualTo: targetTimestamp)
           .get();
-/*
 
       if (querySnapshot.docs.isNotEmpty) {
-        showDialog(
+/*        showDialog(
           context: context,
           builder: (context) => const DialogConfirm(
             desc: '이미 알림이 설정되어 있습니다.',
           ),
-        );
+        );*/
         continue;
       }
-*/
 
       final data = {
         keyCourtUid: court.uid,

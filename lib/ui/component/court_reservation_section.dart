@@ -68,7 +68,7 @@ class CourtReservationSection extends StatelessWidget {
         );
       case ReservationRuleType.nthWeekdayOfMonth:
         return BasicButton(
-          title: 'n번째 요일 알람 설정',
+          title: '알람 등록하기',
           onTap: () async {
             final reservationWeekNumber = court.reservationInfo?.reservationWeekNumber;
             final reservationWeekday = court.reservationInfo?.reservationWeekday;
@@ -87,7 +87,7 @@ class CourtReservationSection extends StatelessWidget {
                 context: context,
                 barrierDismissible: false,
                 builder: (_) => DialogConfirm(
-                  desc: '매달 ${reservationWeekNumber}번째 주의 ${_weekdayToStr(reservationWeekday)}\n${reservationHour}시에 예약 알림이 등록되었습니다.',
+                  desc: '매달 ${reservationWeekNumber}번째주 ${_weekdayToStr(reservationWeekday)}요일 ${reservationHour}시에\n예약 알림이 등록되었습니다.',
                 ),
               );
             } else {
@@ -106,6 +106,10 @@ class CourtReservationSection extends StatelessWidget {
       default:
         return const SizedBox.shrink();
     }
+  }
+  static String _weekNumber(int weekday) {
+    const weekdays = ['첫', '둘', '셋', '넷', '다섯'];
+    return weekdays[(weekday - 1) % 5];
   }
   static String _weekdayToStr(int weekday) {
     const weekdays = ['월', '화', '수', '목', '금', '토', '일'];
