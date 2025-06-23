@@ -13,6 +13,48 @@ import '../dialog/dialog_logout.dart';
 import '../route/route_splash.dart';
 
 class TabProfile extends StatelessWidget {
+
+  Future<void> _showDeleteDialog(BuildContext context) async {
+    if (!context.mounted) return;
+    showDialog(
+      context: context,
+      builder: (context) => DialogLogout(
+        title: '회원탈퇴',
+        desc: '정말로 회원탈퇴를 진행하시겠습니까?\n이 작업은 되돌릴 수 없습니다.',
+        buttonLabel: '회원탈퇴',
+        imagePath: 'assets/icons/delete.svg',
+        // 적절한 SVG 경로로 변경
+        onTapLogOut: () async {
+          Navigator.of(context).pop(); // 다이얼로그 닫기
+          await _handleDeleteAccount(context);
+        },
+      ),
+    );
+  }
+
+  Future<void> _handleDeleteAccount(BuildContext context) async {
+    final globalUser = Global.userNotifier.value;
+
+    if (globalUser == null) {
+      Utils.log.w('No global user data');
+      Utils.toast(desc: '사용자 정보가 없습니다.');
+      if (context.mounted) {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (_) => const RouteSplash()),
+        );
+      }
+      return;
+    }
+
+    final success = await Utils.deleteAccount();
+    if (success && context.mounted) {
+      Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(builder: (_) => const RouteSplash()),
+            (route) => false,
+      );
+    }
+  }
+
   final VoidCallback? onTapBookmark;
 
 /*
@@ -169,8 +211,8 @@ class TabProfile extends StatelessWidget {
           Spacer(),
 
         GestureDetector(
-            onTap: (){
-
+            onTap: () {
+              _showDeleteDialog(context);
             },
             child: Text('회원탈퇴', style: TS.s14w400(colorGray600).copyWith(decoration: TextDecoration.underline))),
           Gaps.v20,

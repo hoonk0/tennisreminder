@@ -20,7 +20,7 @@ class StreamMe {
         try {
           Global.userNotifier.value = ModelUser.fromJson(event.data()!);
         } catch (e, s) {
-          Utils.toast(desc: 'This user is not exist');
+          Utils.toast(desc: '유저가 존재하지 않습니다.');
           final pref = await SharedPreferences.getInstance();
           pref.remove(keyUid);
           Navigator.of(Global.contextSplash!).pushAndRemoveUntil(MaterialPageRoute(builder: (context) => const RouteSplash()), (route) => false);
