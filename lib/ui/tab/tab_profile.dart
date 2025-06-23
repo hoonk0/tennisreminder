@@ -1,7 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:tennisreminder_app/ui/component/custom_divider.dart';
 import 'package:tennisreminder_core/const/model/model_court.dart';
+import 'package:tennisreminder_core/const/model/model_court_alarm.dart';
 import 'package:tennisreminder_core/const/value/colors.dart';
 import 'package:tennisreminder_core/const/value/gaps.dart';
 import 'package:tennisreminder_core/const/value/text_style.dart';
@@ -13,6 +15,7 @@ import '../route/route_splash.dart';
 class TabProfile extends StatelessWidget {
   final VoidCallback? onTapBookmark;
 
+/*
 
   Future<void> _addDummyCourts() async {
     final batch = FirebaseFirestore.instance.batch();
@@ -41,44 +44,87 @@ class TabProfile extends StatelessWidget {
 
     await batch.commit();
   }
+*/
 
   const TabProfile({super.key, this.onTapBookmark});
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+      padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           Gaps.v16,
-          ElevatedButton(
-            onPressed: _addDummyCourts,
-            child: const Text('샘플 코트 10개 추가'),
-          ),
-
-          Gaps.v16,
 
           ///선호코트 수
-          Row(
-            children: [
-              Container(
-                padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(8.0),
-                  border: Border.all(color: colorBlack),
+          Container(
+            padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.95),
+              borderRadius: BorderRadius.circular(8),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.1),
+                  blurRadius: 10,
+                  offset: Offset(0, 4),
                 ),
-                child: Text('선호코트 수'),
-              ),
-            ],
+              ],
+            ),
+            child: Column(
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text('알람 코트 수'),
+                  ValueListenableBuilder<List<ModelCourtAlarm>>(
+                    valueListenable: Global.vnCourtAlarms,
+                    builder: (context, list, _) {
+                      final alarmCount = list.length;
+                      final courtCount = list.map((e) => e.courtUid).toSet().length;
+                      return Text('$courtCount개의 코트');
+                    },
+                  )
+                  ],
+                ),
+                CustomDivider(width: double.infinity, padding: EdgeInsets.symmetric(horizontal: 20), margin: EdgeInsets.symmetric(vertical: 5),),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text('알람 수'),
+                    ValueListenableBuilder<List<ModelCourtAlarm>>(
+                      valueListenable: Global.vnCourtAlarms,
+                      builder: (context, list, _) {
+                        final alarmCount = list.length;
+                        final courtCount = list.map((e) => e.courtUid).toSet().length;
+                        return Text('$alarmCount개의 알람');
+                      },
+                    )
+                  ],
+                ),
+              ],
+            ),
           ),
           Gaps.v16,
           /// 내 정보 변경 항목들
+/*
           MenuTitle(
             label: '내 정보 변경',
             icon: Icons.person_outline,
             onTap: () {
-           /*   Navigator.of(context).push(MaterialPageRoute(
+           */
+/*   Navigator.of(context).push(MaterialPageRoute(
+                  builder: (context) => const RouteProfileMyInformation()));*//*
+
+            },
+          ),
+*/
+
+          MenuTitle(
+            label: '건의사항',
+            icon: Icons.mail_outline,
+            onTap: () {
+              /*   Navigator.of(context).push(MaterialPageRoute(
                   builder: (context) => const RouteProfileMyInformation()));*/
             },
           ),
@@ -119,6 +165,15 @@ class TabProfile extends StatelessWidget {
               );
             },
           ),
+
+          Spacer(),
+
+        GestureDetector(
+            onTap: (){
+
+            },
+            child: Text('회원탈퇴', style: TS.s14w400(colorGray600).copyWith(decoration: TextDecoration.underline))),
+          Gaps.v20,
         ],
       ),
     );
