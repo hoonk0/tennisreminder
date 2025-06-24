@@ -260,7 +260,7 @@ class _CalendarBottomSheetState extends State<CalendarBottomSheet> {
                 valueListenable: vnSelectedDay,
                 builder: (context, date, _) {
                   return BasicButton(
-                    title: date != null ? '${date.month}월 ${date.day}일 저장' : '날짜 선택',
+                    title: date != null ? '${date.month}월 ${date.day}일 플레이' : '날짜 선택',
                     onTap: () async {
 
                       if (date != null && widget.reservationHour.trim().isNotEmpty) {
@@ -277,7 +277,7 @@ class _CalendarBottomSheetState extends State<CalendarBottomSheet> {
                               date.day,
                               hour,
                               minute,
-                            ).subtract(const Duration(minutes: 10));
+                            ).subtract(const Duration(minutes: 10)).subtract(Duration(days: widget.court.reservationInfo?.daysBeforePlay ??0));
                             print('🕓 저장된 예약 시간: $selectedDateTime');
                             widget.vnSelectedDate.value = selectedDateTime;
 
@@ -287,9 +287,8 @@ class _CalendarBottomSheetState extends State<CalendarBottomSheet> {
                               selectedDateTime: selectedDateTime,
                             );
 
-                            Utils.toast(desc: '${date.month}월 ${date.day}일 ${widget.reservationHour}에 알림이 등록 되었습니다.');
+                            Utils.toast(desc:'${date.month}월 ${date.day}일 예약을 위한 알림이 등록 되었습니다.');
 
-                            Navigator.pop(context);
                           } else {
                             print("⚠️ 유효하지 않은 예약 시간 형식: ${widget.reservationHour}");
                           }

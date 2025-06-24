@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tennisreminder_app/ui/component/custom_divider.dart';
+import 'package:tennisreminder_app/ui/route/my_page/route_user_opinion.dart';
 import 'package:tennisreminder_core/const/model/model_court.dart';
 import 'package:tennisreminder_core/const/model/model_court_alarm.dart';
 import 'package:tennisreminder_core/const/value/colors.dart';
@@ -99,7 +100,7 @@ class TabProfile extends StatelessWidget {
         children: <Widget>[
           Gaps.v16,
 
-          ///선호코트 수
+          ///유저 코트 수
           Container(
             padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
             decoration: BoxDecoration(
@@ -144,6 +145,20 @@ class TabProfile extends StatelessWidget {
                     )
                   ],
                 ),
+                CustomDivider(width: double.infinity, padding: EdgeInsets.symmetric(horizontal: 20), margin: EdgeInsets.symmetric(vertical: 5),),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text('선호 코트 수'),
+                    ValueListenableBuilder<List<ModelCourt>>(
+                      valueListenable: Global.vnFavoriteCourts,
+                      builder: (context, list, _) {
+                        final courtCount = list.length;
+                        return Text('$courtCount개의 코트');
+                      },
+                    )
+                  ],
+                ),
               ],
             ),
           ),
@@ -166,8 +181,8 @@ class TabProfile extends StatelessWidget {
             label: '건의사항',
             icon: Icons.mail_outline,
             onTap: () {
-              /*   Navigator.of(context).push(MaterialPageRoute(
-                  builder: (context) => const RouteProfileMyInformation()));*/
+                 Navigator.of(context).push(MaterialPageRoute(
+                  builder: (context) => const RouteUserOpinion()));
             },
           ),
 

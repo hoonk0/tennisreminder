@@ -67,6 +67,15 @@ class CourtNotificationFixedDayEachMonth {
 
       await FirebaseFirestore.instance.collection(keyCourtAlarms).add(data);
 
+      final snapshot = await FirebaseFirestore.instance
+          .collection(keyCourtAlarms)
+          .where(keyUserUid, isEqualTo: userUid)
+          .get();
+
+      Global.vnCourtAlarms.value = snapshot.docs
+          .map((e) => ModelCourtAlarm.fromJson(e.data()))
+          .toList();
+
       showDialog(
         context: context,
         barrierDismissible: false,
@@ -112,9 +121,25 @@ class CourtNotificationDaysBeforePlay {
       throw Exception('FCM 토큰을 가져올 수 없습니다.');
     }
 
+    final userUid = FirebaseAuth.instance.currentUser?.uid ?? '';
+
+    // 중복 알람 체크: 이미 같은 날짜, 같은 court_uid로 등록된 알람이 있는지 확인
+    final querySnapshot = await FirebaseFirestore.instance
+        .collection(keyCourtAlarms)
+        .where(keyUserUid, isEqualTo: userUid)
+        .where(keyCourtUid, isEqualTo: court.uid)
+        .where(keyAlarmDateTime, isEqualTo: Timestamp.fromDate(selectedDateTime))
+        .get();
+
+    if (querySnapshot.docs.isNotEmpty) {
+      // 이미 같은 시간, 같은 코트의 알람이 있으면 저장 및 알람 설정을 하지 않음
+      print('[SKIP] 이미 같은 시간에 알람이 존재함: $selectedDateTime');
+      return;
+    }
+
     final data = {
       keyCourtUid: court.uid,
-      keyUserUid: FirebaseAuth.instance.currentUser?.uid ?? '',
+      keyUserUid: userUid,
       keyCourtName: court.courtName,
       keyAlarmDateTime: Timestamp.fromDate(selectedDateTime),
       keyAlarmEnabled: true,
@@ -126,7 +151,7 @@ class CourtNotificationDaysBeforePlay {
 
     final snapshot = await FirebaseFirestore.instance
         .collection(keyCourtAlarms)
-        .where(keyUserUid, isEqualTo: FirebaseAuth.instance.currentUser?.uid)
+        .where(keyUserUid, isEqualTo: userUid)
         .get();
 
     Global.vnCourtAlarms.value = snapshot.docs
@@ -135,7 +160,6 @@ class CourtNotificationDaysBeforePlay {
   }
 }
 
-///특정투 특정요일 알람
 
 /// 매달 N번째 주의 특정 요일 알람
 class CourtNotificationNthWeekdayOfMonth {
@@ -196,6 +220,15 @@ class CourtNotificationNthWeekdayOfMonth {
       };
 
       await FirebaseFirestore.instance.collection(keyCourtAlarms).add(data);
+
+      final snapshot = await FirebaseFirestore.instance
+          .collection(keyCourtAlarms)
+          .where(keyUserUid, isEqualTo: userUid)
+          .get();
+
+      Global.vnCourtAlarms.value = snapshot.docs
+          .map((e) => ModelCourtAlarm.fromJson(e.data()))
+          .toList();
 
 
     }

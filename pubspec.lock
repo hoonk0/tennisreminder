@@ -852,10 +852,10 @@ packages:
     dependency: "direct main"
     description:
       name: logger
-      sha256: be4b23575aac7ebf01f225a241eb7f6b5641eeaf43c6a8613510fc2f8cf187d1
+      sha256: "2621da01aabaf223f8f961e751f2c943dbb374dc3559b982f200ccedadaa6999"
       url: "https://pub.dev"
     source: hosted
-    version: "2.5.0"
+    version: "2.6.0"
   matcher:
     dependency: transitive
     description:
@@ -1306,7 +1306,7 @@ packages:
     description:
       path: "."
       ref: main
-      resolved-ref: "2c434f29de6c32ef596880963fc07ba8129819d0"
+      resolved-ref: "115a0a6dbb014de8ad6e0ff892384532124751df"
       url: "https://github.com/hoonk0/tennisreminder_core.git"
     source: git
     version: "1.0.0+1"

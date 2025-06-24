@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:tennisreminder_core/const/value/colors.dart';
@@ -13,6 +12,7 @@ class BasicButtonShadow extends StatelessWidget {
   final double width;
   final void Function()? onTap;
   final Color borderColor;
+  final bool showIcon;
 
   const BasicButtonShadow({
     required this.title,
@@ -21,6 +21,7 @@ class BasicButtonShadow extends StatelessWidget {
     this.titleColorBg = colorGray900,
     this.titleFontSize = 18,
     this.borderColor = Colors.transparent,
+    this.showIcon = true,
     required this.onTap,
     super.key,
   });
@@ -48,13 +49,15 @@ class BasicButtonShadow extends StatelessWidget {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Image.asset(
-             'assets/images/mainicon.png',
-             width: 30,
-             height: 30,
-             fit: BoxFit.cover,
-            ),
-            Gaps.h5,
+            if (showIcon) ...[
+              Image.asset(
+                'assets/images/mainicon.png',
+                width: 30,
+                height: 30,
+                fit: BoxFit.cover,
+              ),
+              Gaps.h5,
+            ],
             Text(
                 title,
                 style: TS.s16w600(colorMain900),
