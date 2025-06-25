@@ -68,89 +68,124 @@ class TabAlarm extends StatelessWidget {
                   final displayTime = dateTime != null
                       ? '${dateTime.hour.toString().padLeft(2, '0')}:${dateTime.minute.toString().padLeft(2, '0')}'
                       : '시간 없음';
-                  return Container(
-                    margin: const EdgeInsets.only(bottom: 12),
-                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF1C5D43),
-                      borderRadius: BorderRadius.circular(16),
+                  return Dismissible(
+                    key: ValueKey(alarm.dateCreate.toString()), // Unique key
+                    direction: DismissDirection.endToStart,
+                    background: Container(
+                      alignment: Alignment.centerRight,
+                      padding: const EdgeInsets.only(right: 20),
+                      color: Colors.red,
+                      child: const Icon(Icons.close, color: Colors.white),
                     ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
+                    onDismissed: (_) async {
+                      final userUid = FirebaseAuth.instance.currentUser?.uid;
+                      if (userUid == null) return;
 
-                            Text(
-                              DateFormat('M월 d일', 'ko_KR').format(alarm.alarmDateTime!.toDate()),
-                              style: TS.s14w500(Color(0xFFF7D245)),
-                            ),
-                            Gaps.v4,
+                      final snapshot = await FirebaseFirestore.instance
+                          .collection(keyCourtAlarms)
+                          .where(keyUserUid, isEqualTo: userUid)
+                          .where(keyCourtUid, isEqualTo: alarm.courtUid)
+                          .where(keyDateCreate, isEqualTo: alarm.dateCreate)
+                          .get();
 
-                            if (alarm.alarmDateTime != null)
+                      for (final doc in snapshot.docs) {
+                        await doc.reference.delete();
+                      }
+
+                      Global.vnCourtAlarms.value = Global.vnCourtAlarms.value
+                          .where((e) => !(e.dateCreate == alarm.dateCreate &&
+                                          e.userUid == userUid &&
+                                          e.courtUid == alarm.courtUid))
+                          .toList();
+                    },
+                    child: Container(
+                      margin: const EdgeInsets.only(bottom: 12),
+                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF1C5D43),
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+
                               Text(
-                                DateFormat('a h시 mm분', 'ko_KR').format(alarm.alarmDateTime!.toDate()),
-                                style: const TextStyle(color: Colors.white),
+                                DateFormat('M월 d일', 'ko_KR').format(alarm.alarmDateTime!.toDate()),
+                                style: TS.s14w500(Color(0xFFF7D245)),
                               ),
-                          ],
-                        ),
+                              Gaps.v4,
 
-                        Switch(
-                          value: alarm.alarmEnabled,
-                          onChanged: (bool value) async {
-                            final userUid = FirebaseAuth.instance.currentUser?.uid;
-                            if (userUid == null) return;
+                              if (alarm.alarmDateTime != null)
+                                Text(
+                                  DateFormat('a h시 mm분', 'ko_KR').format(alarm.alarmDateTime!.toDate()),
+                                  style: const TextStyle(color: Colors.white),
+                                ),
+                            ],
+                          ),
 
-                            if (!value) {
-                              // 꺼질 때: UI 유지, 글로벌/파베 삭제
-                              final snapshot = await FirebaseFirestore.instance
-                                  .collection(keyCourtAlarms)
-                                  .where(keyUserUid, isEqualTo: userUid)
-                                  .where(keyCourtUid, isEqualTo: alarm.courtUid)
-                                  .where(keyDateCreate, isEqualTo: alarm.dateCreate)
-                                  .get();
+                          Switch(
+                            value: alarm.alarmEnabled,
+                            onChanged: (bool value) async {
+                              final userUid = FirebaseAuth.instance.currentUser?.uid;
+                              if (userUid == null) return;
 
-                              for (final doc in snapshot.docs) {
-                                await doc.reference.delete();
-                              }
+                              if (!value) {
+                                // 꺼질 때: UI 유지, 글로벌/파베 삭제
+                                final snapshot = await FirebaseFirestore.instance
+                                    .collection(keyCourtAlarms)
+                                    .where(keyUserUid, isEqualTo: userUid)
+                                    .where(keyCourtUid, isEqualTo: alarm.courtUid)
+                                    .where(keyDateCreate, isEqualTo: alarm.dateCreate)
+                                    .get();
 
-                              Global.vnCourtAlarms.value = Global.vnCourtAlarms.value.map((e) {
-                                if (e.dateCreate == alarm.dateCreate &&
-                                    e.userUid == userUid &&
-                                    e.courtUid == alarm.courtUid) {
-                                  return e.copyWith(alarmEnabled: false); // UI 상태만 꺼짐으로 유지
+                                for (final doc in snapshot.docs) {
+                                  await doc.reference.delete();
                                 }
-                                return e;
-                              }).toList();
-                            } else {
-                              // 켜질 때: 알람을 Firestore에서 in-place로 업데이트
-                              final snapshot = await FirebaseFirestore.instance
-                                  .collection(keyCourtAlarms)
-                                  .where(keyUserUid, isEqualTo: userUid)
-                                  .where(keyCourtUid, isEqualTo: alarm.courtUid)
-                                  .where(keyDateCreate, isEqualTo: alarm.dateCreate)
-                                  .get();
 
-                              for (final doc in snapshot.docs) {
-                                await doc.reference.update({'alarmEnabled': true});
+                                Global.vnCourtAlarms.value = Global.vnCourtAlarms.value.map((e) {
+                                  if (e.dateCreate == alarm.dateCreate &&
+                                      e.userUid == userUid &&
+                                      e.courtUid == alarm.courtUid) {
+                                    return e.copyWith(alarmEnabled: false); // UI 상태만 꺼짐으로 유지
+                                  }
+                                  return e;
+                                }).toList();
+                              } else {
+                                // 켤 때: 새로 Firebase에 저장
+                                final userUid = FirebaseAuth.instance.currentUser?.uid;
+                                if (userUid == null) return;
+
+                                final data = {
+                                  keyUserUid: userUid,
+                                  keyCourtUid: alarm.courtUid,
+                                  keyCourtName: alarm.courtName,
+                                  keyAlarmDateTime: alarm.alarmDateTime,
+                                  keyDateCreate: alarm.dateCreate,
+                                  'alarmEnabled': true,
+                                };
+
+                                await FirebaseFirestore.instance.collection(keyCourtAlarms).add(data);
+
+                                // 로컬 ValueNotifier 업데이트
+                                Global.vnCourtAlarms.value = Global.vnCourtAlarms.value.map((e) {
+                                  if (e.dateCreate == alarm.dateCreate &&
+                                      e.userUid == userUid &&
+                                      e.courtUid == alarm.courtUid) {
+                                    return e.copyWith(alarmEnabled: true);
+                                  }
+                                  return e;
+                                }).toList();
                               }
-
-                              Global.vnCourtAlarms.value = Global.vnCourtAlarms.value.map((e) {
-                                if (e.dateCreate == alarm.dateCreate &&
-                                    e.userUid == userUid &&
-                                    e.courtUid == alarm.courtUid) {
-                                  return e.copyWith(alarmEnabled: true);
-                                }
-                                return e;
-                              }).toList();
-                            }
-                          },
-                          activeColor: const Color(0xFFF7D245), // 노란색
-                          inactiveThumbColor: Colors.white, // 꺼졌을 때 흰색
-                          inactiveTrackColor: Colors.grey.shade400,
-                        ),
-                      ],
+                            },
+                            activeColor: const Color(0xFFF7D245), // 노란색
+                            inactiveThumbColor: Colors.white, // 꺼졌을 때 흰색
+                            inactiveTrackColor: Colors.grey.shade400,
+                          ),
+                        ],
+                      ),
                     ),
                   );
                 }),
