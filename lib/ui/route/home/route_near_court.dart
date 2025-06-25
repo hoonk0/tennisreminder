@@ -1,12 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:tennisreminder_app/ui/component/loading_bar.dart';
 import 'package:tennisreminder_app/ui/route/home/route_court_information.dart';
 import 'package:tennisreminder_core/const/model/model_court.dart';
 import 'package:tennisreminder_core/const/value/colors.dart';
 import 'package:tennisreminder_core/const/value/gaps.dart';
 import 'package:tennisreminder_core/const/value/text_style.dart';
 
+import '../../../const/static/global.dart';
 import '../../../service/map/location_service.dart';
 import '../../component/card_court_inform.dart';
+
+
 
 class RouteNearCourt extends StatefulWidget {
   const RouteNearCourt({super.key});
@@ -15,13 +19,14 @@ class RouteNearCourt extends StatefulWidget {
   State<RouteNearCourt> createState() => _RouteNearCourtState();
 }
 
-class _RouteNearCourtState extends State<RouteNearCourt> {
-  final ValueNotifier<List<ModelCourt>> vnNearbyCourts = ValueNotifier([]);
+class _RouteNearCourtState extends State<RouteNearCourt> with WidgetsBindingObserver {
+  late final ValueNotifier<List<ModelCourt>> vnNearbyCourts = Global.vnNearbyCourts;
   bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     LocationService.loadNearbyCourts(
       onSuccess: (courts) {
         vnNearbyCourts.value = courts;
@@ -40,6 +45,41 @@ class _RouteNearCourtState extends State<RouteNearCourt> {
   }
 
   @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      // 앱이 다시 포그라운드로 돌아왔을 때 위치 갱신
+      _isLoading = true;
+      LocationService.loadNearbyCourts(
+        onSuccess: (courts) {
+          vnNearbyCourts.value = courts;
+          if (mounted) {
+            setState(() {
+              _isLoading = false;
+            });
+          }
+        },
+        onError: (e) {
+          debugPrint('❌ 위치 접근 오류 (포그라운드 복귀): $e');
+          if (mounted) {
+            setState(() {
+              _isLoading = false;
+            });
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('위치 정보를 다시 가져오지 못했습니다.')),
+            );
+          }
+        },
+      );
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text('근처 코트 찾기'),),
@@ -55,7 +95,7 @@ class _RouteNearCourtState extends State<RouteNearCourt> {
                     if (nearbyCourts.isEmpty) {
                       return Center(
                         child: _isLoading
-                            ? const CircularProgressIndicator()
+                            ? const LoadingBar()
                             : const Text('주변 10km 이내의 코트를 찾을 수 없습니다.'),
                       );
                     }

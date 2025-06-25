@@ -18,4 +18,10 @@ class Global {
   static ValueNotifier<ModelUser?> userNotifier = ValueNotifier(null);
   static ValueNotifier<List<ModelCourt>> vnFavoriteCourts = ValueNotifier([]);
   static ValueNotifier<List<ModelCourtAlarm>> vnCourtAlarms = ValueNotifier([]);
+  static ValueNotifier<List<ModelCourt>> vnNearbyCourts = ValueNotifier([]);
+}
+
+class WeatherCache {
+  static List<Map<String, dynamic>>? forecast;
+  static List<Map<String, dynamic>>? hourly;
 }

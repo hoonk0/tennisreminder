@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:tennisreminder_app/ui/component/loading_bar.dart';
 import 'package:tennisreminder_core/const/value/colors.dart';
 import 'package:tennisreminder_core/const/value/gaps.dart';
 import 'dart:convert';
-import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:tennisreminder_core/const/value/text_style.dart';
 
@@ -21,17 +21,7 @@ class _RouteWeatherAlarmState extends State<RouteWeatherAlarm> {
   @override
   void initState() {
     super.initState();
-
-    ///캐시된 데이터 보여주던가
-    loadForecastFromCache().then((cached) async {
-      if (cached != null) {
-        vnForecastNotifier.value = cached;
-      }
-      ///6시간 지나면 새로 불러오기
-      if (await shouldFetchWeather()) {
-        fetchWeather();
-      }
-    });
+    fetchWeather();
   }
 
   ///날씨불러오기
@@ -42,7 +32,7 @@ class _RouteWeatherAlarmState extends State<RouteWeatherAlarm> {
     final url = Uri.parse(
       'https://api.open-meteo.com/v1/forecast'
       '?latitude=$lat&longitude=$lon'
-      '&daily=temperature_2m_min,temperature_2m_max,weathercode'
+      '&daily=temperature_2m_min,temperature_2m_max,weathercode,precipitation_probability_mean'
       '&hourly=temperature_2m,weathercode,precipitation_probability'
       '&timezone=Asia%2FSeoul',
     );
@@ -57,6 +47,7 @@ class _RouteWeatherAlarmState extends State<RouteWeatherAlarm> {
       final maxTemps = List<double>.from(data['daily']['temperature_2m_max']);
       final minTemps = List<double>.from(data['daily']['temperature_2m_min']);
       final weatherCodes = List<int>.from(data['daily']['weathercode']);
+      final dailyPops = List<num>.from(data['daily']['precipitation_probability_mean']);
 
       ///추출한 데이터 합체
       vnForecastNotifier.value = List.generate(times.length, (index) {
@@ -65,9 +56,9 @@ class _RouteWeatherAlarmState extends State<RouteWeatherAlarm> {
           'min': minTemps[index],
           'max': maxTemps[index],
           'icon': weatherCodes[index],
+          'pop': dailyPops[index],
         };
       });
-      await saveForecastToCache(vnForecastNotifier.value);
       debugPrint('✅ Open-Meteo 예보 수신 성공: ${vnForecastNotifier.value.length}일치');
 
       // ---- Extract today's hourly weather ----
@@ -80,7 +71,7 @@ class _RouteWeatherAlarmState extends State<RouteWeatherAlarm> {
       vnHourlyNotifier.value = [];
       for (int i = 0; i < hourlyTimes.length; i++) {
         final time = DateTime.parse(hourlyTimes[i]).toLocal();
-        if (time.day == now.day && time.month == now.month && time.year == now.year) {
+        if (time.isAfter(now) && time.isBefore(now.add(const Duration(hours: 24)))) {
           vnHourlyNotifier.value.add({
             'hour': time.hour,
             'temp': hourlyTemps[i],
@@ -96,29 +87,6 @@ class _RouteWeatherAlarmState extends State<RouteWeatherAlarm> {
     }
   }
 
-  ///6시간 지났는지 비교하여 업데이트
-  Future<bool> shouldFetchWeather() async {
-    final prefs = await SharedPreferences.getInstance();
-    final lastUpdatedMillis = prefs.getInt('weather_last_updated');
-    if (lastUpdatedMillis == null) return true;
-    final lastUpdated = DateTime.fromMillisecondsSinceEpoch(lastUpdatedMillis);
-    return DateTime.now().difference(lastUpdated) > const Duration(hours: 6);
-  }
-
-  ///날씨예보 저장
-  Future<void> saveForecastToCache(List<Map<String, dynamic>> forecast) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('cached_forecast', jsonEncode(forecast));
-    await prefs.setInt('weather_last_updated', DateTime.now().millisecondsSinceEpoch);
-  }
-
-  Future<List<Map<String, dynamic>>?> loadForecastFromCache() async {
-    final prefs = await SharedPreferences.getInstance();
-    final jsonString = prefs.getString('cached_forecast');
-    if (jsonString == null) return null;
-    final List<dynamic> decoded = jsonDecode(jsonString);
-    return decoded.map((e) => Map<String, dynamic>.from(e)).toList();
-  }
 
   ///맵코드 -> 날씨이미지 경로로 변경
   String mapWeatherCodeToAsset(int code) {
@@ -144,7 +112,7 @@ class _RouteWeatherAlarmState extends State<RouteWeatherAlarm> {
           future: fetchWeather(),
           builder: (context, snapshot) {
             return snapshot.connectionState != ConnectionState.done
-                ? const Center(child: CircularProgressIndicator())
+                ? const Center(child: LoadingBar())
                 : SingleChildScrollView(
                     padding: const EdgeInsets.all(20),
                     child: Column(
@@ -204,6 +172,7 @@ class _RouteWeatherAlarmState extends State<RouteWeatherAlarm> {
                                         Text('${h['hour']}시', style: const TextStyle(color: Colors.black)),
                                         Image.asset(mapWeatherCodeToAsset(h['icon']), width: 32, height: 32),
                                         Text('${h['temp'].round()}°', style: const TextStyle(color: Colors.black)),
+                                        Text('${h['pop']}%', style: const TextStyle(fontSize: 12, color: Colors.grey)),
                                       ],
                                     ),
                                   );
@@ -237,7 +206,14 @@ class _RouteWeatherAlarmState extends State<RouteWeatherAlarm> {
                                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                     children: [
                                       Text(_weekdayKorKor(date.weekday), style: const TextStyle(color: Colors.black)),
-                                      Image.asset(mapWeatherCodeToAsset(item['icon']), width: 32, height: 32),
+                                      Row(
+                                        children: [
+                                          Image.asset(mapWeatherCodeToAsset(item['icon']), width: 32, height: 32),
+                              /*            Text(
+                                            ' ${item['pop']}%'
+                                          )*/
+                                        ],
+                                      ),
                                       Text(
                                         '${item['max'].round()}° / ${item['min'].round()}°',
                                         style: const TextStyle(color: Colors.black),

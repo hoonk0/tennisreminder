@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:tennisreminder_app/ui/component/loading_bar.dart';
 import 'package:tennisreminder_core/const/model/moderl_filter_all_courts.dart';
 
 import '../../const/static/global.dart';
@@ -46,7 +47,7 @@ class _PaginationCourtState extends ConsumerState<PaginationCourt> {
     final courtState = ref.watch(providerCourtAll(widget.filter));
 
     if (courtState is CourtLoading) {
-      return const Center(child: CircularProgressIndicator());
+      return const Center(child: LoadingBar());
     }
 
     if (courtState is CourtError) {
@@ -65,7 +66,7 @@ class _PaginationCourtState extends ConsumerState<PaginationCourt> {
           return pState is CourtFetchMore
               ? const Padding(
                   padding: EdgeInsets.symmetric(vertical: 16),
-                  child: Center(child: CircularProgressIndicator()),
+                  child: Center(child: LoadingBar()),
                 )
               : const SizedBox.shrink();
         }

@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 // import 'package:cloud_firestore/cloud_firestore.dart' as MasonryGridView;
 import 'package:flutter/material.dart';
+import 'package:tennisreminder_app/ui/component/loading_bar.dart';
 import 'package:tennisreminder_app/ui/route/home/route_court_favorite.dart';
 import 'package:tennisreminder_app/ui/route/home/route_near_court.dart';
 import 'package:tennisreminder_core/const/model/model_court.dart';
@@ -184,7 +185,7 @@ class _TabHomeState extends State<TabHome> {
                     .get(),
                 builder: (context, snapshot) {
                   if (!snapshot.hasData) {
-                    return const Center(child: CircularProgressIndicator());
+                    return const Center(child: LoadingBar());
                   }
 
                   final courts = snapshot.data!.docs
