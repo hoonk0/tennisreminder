@@ -19,15 +19,24 @@ class RouteWeatherAlarm extends StatefulWidget {
 class _RouteWeatherAlarmState extends State<RouteWeatherAlarm> {
   final vnForecastNotifier = Global.vnForecast;
   final vnHourlyNotifier = Global.vnHourly;
+  static DateTime? _lastWeatherFetchedTime;
 
   @override
   void initState() {
     super.initState();
-    if (vnForecastNotifier.value.isNotEmpty && vnHourlyNotifier.value.isNotEmpty) {
-      debugPrint('🔁 기존 날씨 데이터 사용');
-      return;
-    }
-    fetchWeather();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final now = DateTime.now();
+      final isCacheEmpty = vnForecastNotifier.value.isEmpty || vnHourlyNotifier.value.isEmpty;
+      final isExpired = _lastWeatherFetchedTime == null || now.difference(_lastWeatherFetchedTime!).inHours >= 6;
+
+      if (isCacheEmpty || isExpired) {
+        debugPrint('🌦 fetchWeather 실행 (데이터 없음 또는 6시간 경과)');
+        fetchWeather();
+      } else {
+        debugPrint('🔁 기존 날씨 데이터 사용 (캐시 유효)');
+      }
+    });
   }
 
   ///날씨불러오기
@@ -87,6 +96,7 @@ class _RouteWeatherAlarmState extends State<RouteWeatherAlarm> {
         }
       }
       // ---- end hourly ----
+      _lastWeatherFetchedTime = DateTime.now();
     } else {
       debugPrint('❌ Open-Meteo 요청 실패: ${response.statusCode}');
       debugPrint('응답 내용: ${response.body}');
