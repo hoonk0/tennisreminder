@@ -11,6 +11,7 @@ import 'package:tennisreminder_core/const/value/text_style.dart';
 import '../../const/static/global.dart';
 import '../../service/utils/utils.dart';
 import '../dialog/dialog_logout.dart';
+import '../route/my_page/route_profile_privacy_policy.dart';
 import '../route/route_splash.dart';
 
 class TabProfile extends StatelessWidget {
@@ -191,8 +192,8 @@ class TabProfile extends StatelessWidget {
             label: '개인정보 처리방침 및 이용약관',
             icon: Icons.info_outline_rounded,
             onTap: () {
-          /*    Navigator.of(context).push(MaterialPageRoute(
-                  builder: (context) => const RouteProfilePrivacyPolicy()));*/
+              Navigator.of(context).push(MaterialPageRoute(
+                  builder: (context) => const RouteProfilePrivacyPolicy()));
             },
           ),
           const Divider(height: 1, color: colorGray200),

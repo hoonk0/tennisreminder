@@ -196,7 +196,13 @@ class _TabHomeState extends State<TabHome> {
                   final randomCourts = courts.take(3).toList();
 
                   return Column(
-                    children: randomCourts.map((court) => CardCourtSummary(court: court)).toList(),
+                    children: List.generate(
+                      randomCourts.length,
+                      (index) => Padding(
+                        padding: EdgeInsets.only(bottom: index == randomCourts.length - 1 ? 0 :10),
+                        child: CardCourtSummary(court: randomCourts[index]),
+                      ),
+                    ),
                   );
                 },
               ),
