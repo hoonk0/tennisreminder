@@ -145,12 +145,13 @@ class _RouteCourtInformationState extends State<RouteCourtInformation> {
                                   );
                                   return GestureDetector(
                                     onTap: () async {
-                                      final userUid =
-                                          FirebaseAuth
-                                              .instance
-                                              .currentUser
-                                              ?.uid;
-                                      if (userUid == null) return;
+                                      final currentUser = Global.userNotifier.value;
+                                      final userUid = currentUser?.uid;
+                                      debugPrint("❤️ 좋아요 버튼 클릭됨 - 현재 유저 UID: $userUid, user_type: ${currentUser?.userType}");
+                                      if (userUid == null || currentUser?.userType != UserType.user) {
+                                        debugPrint("❌ user_type이 'UserType.user'가 아니거나 로그인되지 않음 - 좋아요 처리 중단");
+                                        return;
+                                      }
 
                                       final courtRef = FirebaseFirestore
                                           .instance
@@ -158,6 +159,7 @@ class _RouteCourtInformationState extends State<RouteCourtInformation> {
                                           .doc(widget.court.uid);
 
                                       if (isFavorite) {
+                                        debugPrint("➖ 좋아요 제거: ${widget.court.uid}");
                                         Global.vnFavoriteCourts.value =
                                             favoriteCourts
                                                 .where(
@@ -173,6 +175,7 @@ class _RouteCourtInformationState extends State<RouteCourtInformation> {
                                               ]),
                                         });
                                       } else {
+                                        debugPrint("➕ 좋아요 추가: ${widget.court.uid}");
                                         Global.vnFavoriteCourts.value = [
                                           ...favoriteCourts,
                                           widget.court,
@@ -317,6 +320,112 @@ class _RouteCourtInformationState extends State<RouteCourtInformation> {
                                           width: double.infinity,
                                         ),
 
+                                        Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          mainAxisAlignment: MainAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              "코트 정보",
+                                              style: TS.s16w600(colorGray900),
+                                            ),
+                                            Gaps.v8,
+                                            // 코트 정보 표시 (실내/실외, 샤워시설 등)
+                                            // 2개씩 한 줄에 배치
+                                            Row(
+                                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                              children: [
+                                                CourtContainerInformation(
+                                                  label: '실내/실외',
+                                                  value: '실내',
+                                                  imagePath: 'assets/icons/weather.png',
+                                                ),
+                                                CourtContainerInformation(
+                                                  label: '실내/실외',
+                                                  value: '실내',
+                                                  imagePath: 'assets/icons/weather.png',
+                                                ),
+                                              ],
+                                            ),
+                                            Gaps.v5,
+                                            Row(
+                                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                              children: [
+                                                Expanded(
+                                                  child: Container(
+                                                    padding: const EdgeInsets.only(right: 8),
+                                                    child: Row(
+                                                      children: [
+                                                        Icon(Icons.sports_tennis),
+                                                        SizedBox(width: 8),
+                                                        Text('화장실', style: TS.s14w400(colorGray900)),
+                                                        Spacer(),
+                                                        Text('O', style: TS.s14w400(colorGray900)),
+                                                      ],
+                                                    ),
+                                                  ),
+                                                ),
+                                                Expanded(
+                                                  child: Container(
+                                                    padding: const EdgeInsets.only(left: 8),
+                                                    child: Row(
+                                                      children: [
+                                                        Icon(Icons.shower_outlined),
+                                                        SizedBox(width: 8),
+                                                        Text('샤워시설', style: TS.s14w400(colorGray900)),
+                                                        Spacer(),
+                                                        Text('O', style: TS.s14w400(colorGray900)),
+                                                      ],
+                                                    ),
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+
+                                            Row(
+                                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                              children: [
+                                                Expanded(
+                                                  child: Container(
+                                                    padding: const EdgeInsets.only(right: 8),
+                                                    child: Row(
+                                                      children: [
+                                                        Icon(Icons.sports_tennis),
+                                                        SizedBox(width: 8),
+                                                        Text('화장실', style: TS.s14w400(colorGray900)),
+                                                        Spacer(),
+                                                        Text('O', style: TS.s14w400(colorGray900)),
+                                                      ],
+                                                    ),
+                                                  ),
+                                                ),
+                                                Expanded(
+                                                  child: Container(
+                                                    padding: const EdgeInsets.only(left: 8),
+                                                    child: Row(
+                                                      children: [
+                                                        Icon(Icons.shower_outlined),
+                                                        SizedBox(width: 8),
+                                                        Text('샤워시설', style: TS.s14w400(colorGray900)),
+                                                        Spacer(),
+                                                        Text('O', style: TS.s14w400(colorGray900)),
+                                                      ],
+                                                    ),
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ],
+                                        ),
+
+
+                                        CustomDivider(
+                                          margin: EdgeInsets.symmetric(
+                                            vertical: 20,
+                                            horizontal: 20,
+                                          ),
+                                          width: double.infinity,
+                                        ),
+
                                         ///코트위치 표시
                                         Column(
                                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -425,6 +534,39 @@ class _RouteCourtInformationState extends State<RouteCourtInformation> {
   }
 }
 
+
+
+
+class CourtContainerInformation extends StatelessWidget {
+  final String label;
+  final String value;
+  final String imagePath;
+
+  const CourtContainerInformation({
+    required this.label,
+    required this.value,
+    required this.imagePath,
+    Key? key,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 4),
+        child: Row(
+          children: [
+            Image.asset(imagePath, width: 18, height: 18),
+            SizedBox(width: 8),
+            Text(label, style: TS.s14w400(colorGray900)),
+            Spacer(),
+            Text(value, style: TS.s14w400(colorGray900)),
+          ],
+        ),
+      ),
+    );
+  }
+}
 
 
 

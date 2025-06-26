@@ -5,6 +5,8 @@ import 'package:flutter_svg/svg.dart';
 import 'package:naver_login_sdk/naver_login_sdk.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sizer/sizer.dart';
+import 'package:tennisreminder_app/ui/route/auth/route_auth_find_pw.dart';
+import 'package:tennisreminder_app/ui/route/auth/route_auth_sign_up.dart';
 import 'package:tennisreminder_app/ui/route/auth/route_auth_sns_sign_up.dart';
 import 'package:tennisreminder_core/const/model/model_user.dart';
 import 'package:tennisreminder_core/const/value/colors.dart';
@@ -14,6 +16,7 @@ import 'package:tennisreminder_core/const/value/keys.dart';
 import 'package:tennisreminder_core/const/value/text_style.dart';
 import '../../../const/static/global.dart';
 import '../../../service/utils/utils.dart';
+import '../../component/textfield_border.dart';
 import '../../dialog/dialog_confirm.dart';
 import '../route_main.dart';
 import '../route_splash.dart';
@@ -113,7 +116,6 @@ class _RouteLoginState extends State<RouteAuthLogin> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         crossAxisAlignment: CrossAxisAlignment.center ,
                         children: [
-                          const Spacer(flex: 1),
 
                           ///로고
                           Column(
@@ -123,7 +125,7 @@ class _RouteLoginState extends State<RouteAuthLogin> {
                                 'assets/images/mainlogo.png',
                                 width: 200,
                               ),
-                              Gaps.v30,
+                              Gaps.v20,
 
                               const Text(
                                 '공공기관 테니스코트\n예약 알리미',
@@ -132,7 +134,71 @@ class _RouteLoginState extends State<RouteAuthLogin> {
                               ),
                             ],
                           ),
-                          Gaps.v32,
+                          Gaps.v20,
+
+                          /// 아이디 텍스트필드
+                          TextFieldBorder(
+                            controller: tecEmail,
+                            keyboardType: TextInputType.emailAddress,
+                            hintText: '아이디(이메일) 입력',
+                          ),
+                          Gaps.v10,
+
+                          /// 비밀번호 텍스트필드
+                          ValueListenableBuilder<bool>(
+                            valueListenable: vnObscureTextNotifier,
+                            builder: (context, obscureText, child) {
+                              return TextFieldBorder(
+                                controller: tecPw,
+                                obscureText: obscureText,
+                                hintText: '비밀번호 입력',
+                              );
+                            },
+                          ),
+
+                          Gaps.v16,
+                          ///회원가입, 아이디, 비밀번호 찾기
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+
+                              /// 비밀번호 찾기
+                              _WidgetText(
+                                title: '비밀번호 찾기',
+                                onTap: () {
+                                  FocusManager.instance.primaryFocus?.unfocus();
+                                  Navigator.of(context).push(
+                                    MaterialPageRoute(
+                                      builder: (context) => const RouteAuthFindPw(),
+                                    ),
+                                  );
+                                },
+                              ),
+
+                              Container(
+                                margin: const EdgeInsets.symmetric(horizontal: 10),
+                                width: 1,
+                                height: 12,
+                                color: colorGray400,
+                              ),
+
+                              ///회원가입
+                              _WidgetText(
+                                title: '회원가입',
+                                onTap: () {
+                                  FocusManager.instance.primaryFocus?.unfocus();
+
+                                  Navigator.of(context).push(
+                                    MaterialPageRoute(
+                                      builder: (context) => const RouteAuthSignUp(),
+                                    ),
+                                  );
+                                },
+                              ),
+                            ],
+                          ),
+
+                          Gaps.v26,
 
                           /// SNS 로그인
                           Row(
@@ -213,8 +279,6 @@ class _RouteLoginState extends State<RouteAuthLogin> {
                             ],
                           ),
                           Gaps.v40,
-                          ElevatedButton(onPressed: (){Navigator.of(context).push(MaterialPageRoute(
-                                          builder: (context) => RouteMain()));}, child: Text('메인'))
                         ],
                       ),
                     ),
@@ -342,6 +406,31 @@ Future<void> _googleLogin(BuildContext context) async {
   }
 }
 
+
+class _WidgetText extends StatelessWidget {
+  final String title;
+  final void Function()? onTap;
+
+  const _WidgetText({
+    required this.title,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        color: Colors.transparent,
+        child: Text(
+          title,
+          style: const TS.s13w500(colorGray500),
+          textAlign: TextAlign.center,
+        ),
+      ),
+    );
+  }
+}
 
 
 class _LoginBox extends StatelessWidget {

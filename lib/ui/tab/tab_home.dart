@@ -179,10 +179,10 @@ class _TabHomeState extends State<TabHome> {
                 ),
               ),*/
               Gaps.v5,
-              FutureBuilder<QuerySnapshot>(
-                future: FirebaseFirestore.instance
+              StreamBuilder<QuerySnapshot>(
+                stream: FirebaseFirestore.instance
                     .collection(keyCourt)
-                    .get(),
+                    .snapshots(),
                 builder: (context, snapshot) {
                   if (!snapshot.hasData) {
                     return const Center(child: LoadingBar());
@@ -193,14 +193,14 @@ class _TabHomeState extends State<TabHome> {
                       .toList();
 
                   courts.shuffle();
-                  final randomCourts = courts.take(3).toList();
+                  final selectedCourts = courts.take(3).toList();
 
                   return Column(
                     children: List.generate(
-                      randomCourts.length,
+                      selectedCourts.length,
                       (index) => Padding(
-                        padding: EdgeInsets.only(bottom: index == randomCourts.length - 1 ? 0 :10),
-                        child: CardCourtSummary(court: randomCourts[index]),
+                        padding: EdgeInsets.only(bottom: index == selectedCourts.length - 1 ? 0 : 10),
+                        child: CardCourtSummary(court: selectedCourts[index]),
                       ),
                     ),
                   );
