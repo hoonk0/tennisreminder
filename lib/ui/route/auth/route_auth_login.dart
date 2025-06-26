@@ -16,6 +16,7 @@ import 'package:tennisreminder_core/const/value/keys.dart';
 import 'package:tennisreminder_core/const/value/text_style.dart';
 import '../../../const/static/global.dart';
 import '../../../service/utils/utils.dart';
+import '../../component/basic_button.dart';
 import '../../component/textfield_border.dart';
 import '../../dialog/dialog_confirm.dart';
 import '../route_main.dart';
@@ -197,21 +198,30 @@ class _RouteLoginState extends State<RouteAuthLogin> {
                               ),
                             ],
                           ),
+                          Gaps.v16,
 
-                          Gaps.v26,
+                          /// 로그인
+                          BasicButton(
+                            title: '로그인',
+                            onTap: () {
+                              loginCheck(context);
+                            },
+                          ),
+                          Gaps.v16,
+
+
 
                           /// SNS 로그인
                           Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-
                               /// 구글 로그인
                               _LoginBox(
                                 imgUrl: 'assets/images/google.svg',
                                 onTap: () => _googleLogin(context),
                               ),
+                              Gaps.h10,
 
-                              Gaps.v10,
                               ///카카오 로그인
                               GestureDetector(
                                 onTap: () async {
@@ -252,8 +262,6 @@ class _RouteLoginState extends State<RouteAuthLogin> {
                                   ),
                                 ),
                               ),
-
-
                               Gaps.h20,
                            /*   /// 네이버 로그인
                               SizedBox(
