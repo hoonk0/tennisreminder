@@ -7,6 +7,7 @@
  * See a full list of supported triggers at https://firebase.google.com/docs/functions
  */
 
+// require("dotenv").config();
 const moment = require("moment-timezone");
 
 const {onRequest} = require("firebase-functions/v2/https");
@@ -17,6 +18,7 @@ const admin = require("firebase-admin");
 admin.initializeApp();
 
 const { onSchedule } = require("firebase-functions/v2/scheduler");
+// ✅ [기능 1] 특정 시간에 푸시 알림 전송 (FCM)
 // 선택된 시간에 맞춰 알림 전송 (Asia/Seoul 시간대 기준)
 exports.sendDailyAlarm = onSchedule(
   {
@@ -95,10 +97,41 @@ exports.sendDailyAlarm = onSchedule(
   }
 );
 
-// Create and deploy your first functions
-// https://firebase.google.com/docs/functions/get-started
+///이메일
 
-// exports.helloWorld = onRequest((request, response) => {
-//   logger.info("Hello logs!", {structuredData: true});
-//   response.send("Hello from Firebase!");
-// });
+const nodemailer = require("nodemailer");
+
+// ✅ [기능 2] 이메일 인증 전송 (SMTP)
+exports.sendEmail = onRequest(async (req, res) => {
+  const to = req.query.to;
+  const subject = req.query.subject;
+  const content = req.query.content;
+
+  if (!to || !subject || !content) {
+    res.status(400).send("Missing required parameters");
+    return;
+  }
+
+  const transporter = nodemailer.createTransport({
+    service: "gmail",
+    auth: {
+      user: "tennisreminder1@gmail.com",
+      pass: "kodnveghzjfcqezl",
+    },
+  });
+
+  const mailOptions = {
+    from: "tennisreminder1@gmail.com",
+    to,
+    subject,
+    text: content,
+  };
+
+  try {
+    await transporter.sendMail(mailOptions);
+    res.status(200).send("Email sent successfully");
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Failed to send email");
+  }
+});
