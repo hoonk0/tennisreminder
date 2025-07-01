@@ -31,7 +31,7 @@ class CourtNotificationFixedDayEachMonth {
       throw Exception('FCM 토큰을 가져올 수 없습니다.');
     }
 
-    final userUid = FirebaseAuth.instance.currentUser?.uid ?? '';
+    final userUid = Global.uid;
     final now = DateTime.now();
 
     for (int i = 0; i < 6; i++) {
@@ -40,7 +40,7 @@ class CourtNotificationFixedDayEachMonth {
 
       final querySnapshot = await FirebaseFirestore.instance
           .collection(keyCourtAlarms)
-          .where(keyUserUid, isEqualTo: userUid)
+          .where(keyUid, isEqualTo: userUid)
           .where(keyCourtUid, isEqualTo: court.uid)
           .where(keyAlarmDateTime, isEqualTo: targetMonth)
           .get();
@@ -57,7 +57,7 @@ class CourtNotificationFixedDayEachMonth {
 
       final data = {
         keyCourtUid: court.uid,
-        keyUserUid: userUid,
+        keyUid: userUid,
         keyCourtName: court.courtName,
         keyAlarmDateTime: targetMonth,
         keyAlarmEnabled: true,
@@ -65,26 +65,28 @@ class CourtNotificationFixedDayEachMonth {
         keyFcmToken: fcmToken,
       };
 
+      debugPrint('📌 알림 저장 시 Global.uid: ${Global.uid}');
       await FirebaseFirestore.instance.collection(keyCourtAlarms).add(data);
 
       final snapshot = await FirebaseFirestore.instance
           .collection(keyCourtAlarms)
-          .where(keyUserUid, isEqualTo: userUid)
+          .where(keyUid, isEqualTo: userUid)
           .get();
 
       Global.vnCourtAlarms.value = snapshot.docs
           .map((e) => ModelCourtAlarm.fromJson(e.data()))
           .toList();
-
+/*
       showDialog(
         context: context,
         barrierDismissible: false,
         builder: (_) => DialogConfirm(desc: '매달 ${reservationDay}일 ${reservationHour}시\n예약을 위한 알림이 등록되었습니다.'),
-      );
+      );*/
     }
   }
 
-  /// 🧠 알림 설정 확인 및 포그라운드 리스너 등록
+
+  /// 알림 설정 확인 및 포그라운드 리스너 등록
   static Future<void> checkNotificationSetup() async {
     print('🔍 알림 설정 체크 시작');
 
@@ -121,12 +123,12 @@ class CourtNotificationDaysBeforePlay {
       throw Exception('FCM 토큰을 가져올 수 없습니다.');
     }
 
-    final userUid = FirebaseAuth.instance.currentUser?.uid ?? '';
+    final userUid = Global.uid;
 
     // 중복 알람 체크: 이미 같은 날짜, 같은 court_uid로 등록된 알람이 있는지 확인
     final querySnapshot = await FirebaseFirestore.instance
         .collection(keyCourtAlarms)
-        .where(keyUserUid, isEqualTo: userUid)
+        .where(keyUid, isEqualTo: userUid)
         .where(keyCourtUid, isEqualTo: court.uid)
         .where(keyAlarmDateTime, isEqualTo: Timestamp.fromDate(selectedDateTime))
         .get();
@@ -139,7 +141,7 @@ class CourtNotificationDaysBeforePlay {
 
     final data = {
       keyCourtUid: court.uid,
-      keyUserUid: userUid,
+      keyUid: userUid,
       keyCourtName: court.courtName,
       keyAlarmDateTime: Timestamp.fromDate(selectedDateTime),
       keyAlarmEnabled: true,
@@ -147,11 +149,12 @@ class CourtNotificationDaysBeforePlay {
       keyFcmToken: fcmToken,
     };
 
+    debugPrint('📌 알림 저장 시 Global.uid: ${Global.uid}');
     await FirebaseFirestore.instance.collection(keyCourtAlarms).add(data);
 
     final snapshot = await FirebaseFirestore.instance
         .collection(keyCourtAlarms)
-        .where(keyUserUid, isEqualTo: userUid)
+        .where(keyUid, isEqualTo: userUid)
         .get();
 
     Global.vnCourtAlarms.value = snapshot.docs
@@ -159,7 +162,6 @@ class CourtNotificationDaysBeforePlay {
         .toList();
   }
 }
-
 
 /// 매달 N번째 주의 특정 요일 알람
 class CourtNotificationNthWeekdayOfMonth {
@@ -176,7 +178,7 @@ class CourtNotificationNthWeekdayOfMonth {
       throw Exception('FCM 토큰을 가져올 수 없습니다.');
     }
 
-    final userUid = FirebaseAuth.instance.currentUser?.uid ?? '';
+    final userUid = Global.uid;
     final now = DateTime.now();
 
     for (int i = 0; i < 6; i++) {
@@ -194,7 +196,7 @@ class CourtNotificationNthWeekdayOfMonth {
 
       final querySnapshot = await FirebaseFirestore.instance
           .collection(keyCourtAlarms)
-          .where(keyUserUid, isEqualTo: userUid)
+          .where(keyUid, isEqualTo: userUid)
           .where(keyCourtUid, isEqualTo: court.uid)
           .where(keyAlarmDateTime, isEqualTo: targetTimestamp)
           .get();
@@ -211,7 +213,7 @@ class CourtNotificationNthWeekdayOfMonth {
 
       final data = {
         keyCourtUid: court.uid,
-        keyUserUid: userUid,
+        keyUid: userUid,
         keyCourtName: court.courtName,
         keyAlarmDateTime: targetTimestamp,
         keyAlarmEnabled: true,
@@ -219,11 +221,12 @@ class CourtNotificationNthWeekdayOfMonth {
         keyFcmToken: fcmToken,
       };
 
+      debugPrint('📌 알림 저장 시 Global.uid: ${Global.uid}');
       await FirebaseFirestore.instance.collection(keyCourtAlarms).add(data);
 
       final snapshot = await FirebaseFirestore.instance
           .collection(keyCourtAlarms)
-          .where(keyUserUid, isEqualTo: userUid)
+          .where(keyUid, isEqualTo: userUid)
           .get();
 
       Global.vnCourtAlarms.value = snapshot.docs

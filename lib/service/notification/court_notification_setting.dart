@@ -93,7 +93,7 @@ class _CourtNotificationSettingsState extends State<CourtNotificationSettings> {
       );
       final data = {
         keyCourtUid: widget.court.uid,
-        keyUserUid: FirebaseAuth.instance.currentUser?.uid ?? '',
+        keyUid: FirebaseAuth.instance.currentUser?.uid ?? '',
         keyCourtName: widget.court.courtName,
         keyAlarmWeekday: selectedWeekday.value,
         keyAlarmHour: selectedTime.hour,
@@ -109,7 +109,7 @@ class _CourtNotificationSettingsState extends State<CourtNotificationSettings> {
 
       final snapshot = await _firestore
           .collection(keyCourtAlarms)
-          .where(keyUserUid, isEqualTo: FirebaseAuth.instance.currentUser?.uid)
+          .where(keyUid, isEqualTo: FirebaseAuth.instance.currentUser?.uid)
           .get();
 
       Global.vnCourtAlarms.value = snapshot.docs

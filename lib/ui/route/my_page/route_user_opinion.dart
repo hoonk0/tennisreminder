@@ -58,7 +58,7 @@ class RouteUserOpinion extends StatelessWidget {
                   final opinion = ModelUserOpinion(
                     opinionUid: const Uuid().v4(),
                     title: tecTitle.text.trim(),
-                    uid: keyUserUid,
+                    uid: keyUid,
                     content: tecContent.text.trim(),
                     dateCreate: Timestamp.now(),
                     email: null,

@@ -1,3 +1,4 @@
+/*
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -56,6 +57,7 @@ class _TabAlarmState extends State<TabAlarm> {
         for (final alarm in alarms) {
           grouped.putIfAbsent(alarm.courtUid, () => []).add(alarm);
         }
+*/
 /*
 
         for (final entry in grouped.entries) {
@@ -65,7 +67,8 @@ class _TabAlarmState extends State<TabAlarm> {
             return aMinutes.compareTo(bMinutes);
           });
         }
-*/
+*//*
+
         final sortedEntries = grouped.entries.toList()
           ..sort((a, b) => a.value.first.courtName.compareTo(b.value.first.courtName));
 
@@ -216,4 +219,4 @@ class _TabAlarmState extends State<TabAlarm> {
       },
     );
   }
-}
+}*/

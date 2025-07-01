@@ -24,11 +24,14 @@ import 'firebase_options.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await initializeDateFormatting('ko_KR');
+
+  print('🟡 Firebase 초기화 시작');
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  print('🟢 Firebase 초기화 완료');
+
   AuthRepository.initialize(appKey: '26476b06b753504ad14bb998f377645f');
 
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   await initializeNotification();
-
 
   KakaoSdk.init(
     nativeAppKey: 'de368876dad11f1f070baef6058f8d49',
@@ -37,15 +40,14 @@ Future<void> main() async {
 
   final user = FirebaseAuth.instance.currentUser;
   if (user != null) {
+    print('✅ 로그인된 사용자 UID: ${user.uid}');
     await _loadFavoriteCourts();
     await syncCourtAlarms(user.uid);
+  } else {
+    print('❌ 로그인된 사용자 없음 (FirebaseAuth.currentUser == null)');
   }
 
   runApp(const ProviderScope(child: MyApp()));
-
-
-
-
 }
 
 ///알람 세팅
@@ -101,7 +103,7 @@ Future<void> _loadFavoriteCourts() async {
 Future<void> syncCourtAlarms(String uid) async {
   final snapshot = await FirebaseFirestore.instance
       .collection(keyCourtAlarms)
-      .where(keyUserUid, isEqualTo: uid)
+      .where(keyUid, isEqualTo: uid)
       .orderBy(keyDateCreate, descending: true)
       .get();
 

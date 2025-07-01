@@ -320,6 +320,7 @@ class _RouteCourtInformationState extends State<RouteCourtInformation> {
                                           width: double.infinity,
                                         ),
 
+/*                                        ///코트정보
                                         Column(
                                           crossAxisAlignment: CrossAxisAlignment.start,
                                           mainAxisAlignment: MainAxisAlignment.start,
@@ -424,7 +425,7 @@ class _RouteCourtInformationState extends State<RouteCourtInformation> {
                                             horizontal: 20,
                                           ),
                                           width: double.infinity,
-                                        ),
+                                        ),*/
 
                                         ///코트위치 표시
                                         Column(
