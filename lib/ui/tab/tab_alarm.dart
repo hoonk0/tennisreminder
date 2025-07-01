@@ -1,7 +1,11 @@
 // ignore_for_file: unused_import
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:tennisreminder_core/const/model/model_court_alarm.dart';
+import 'package:tennisreminder_core/const/value/colors.dart';
+import 'package:tennisreminder_core/const/value/gaps.dart';
 import 'package:tennisreminder_core/const/value/keys.dart';
+import 'package:tennisreminder_core/const/value/text_style.dart';
 
 import '../../const/static/global.dart';
 
@@ -75,61 +79,93 @@ class _TabAlarmState extends State<TabAlarm> {
               children: [
                 Text(
                   courtName,
-                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  style: TS.s16w500(colorGray900),
                 ),
-                const SizedBox(height: 8),
+                Gaps.v8,
                 ...courtAlarms.map((alarm) {
-                  final dateTime = alarm.alarmDateTime?.toDate();
-                  final timeStr = dateTime != null
-                      ? '${dateTime.month}월 ${dateTime.day}일 ${dateTime.hour}시 ${dateTime.minute.toString().padLeft(2, '0')}분'
-                      : '시간 정보 없음';
+                  return Container(
+                    margin: const EdgeInsets.only(bottom: 12),
+                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF1C5D43),
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            if (alarm.alarmDateTime != null)
+                              Text(
+                                DateFormat('M월 d일', 'ko_KR').format(alarm.alarmDateTime!.toDate()),
+                                style: TS.s14w500(Color(0xFFF7D245)),
+                              ),
+                            const SizedBox(height: 4),
+                            if (alarm.alarmDateTime != null)
+                              Text(
+                                DateFormat('a h시 mm분', 'ko_KR').format(alarm.alarmDateTime!.toDate()),
+                                style: const TextStyle(color: Colors.white),
+                              ),
+                          ],
+                        ),
+                        Switch(
+                          value: alarm.alarmEnabled,
+                          onChanged: (bool value) async {
+                            final userUid = FirebaseAuth.instance.currentUser?.uid;
+                            if (userUid == null) return;
 
-                  return ListTile(
-                    title: Text(timeStr),
-                    trailing: GestureDetector(
-                      onTap: () async {
-                        final querySnapshot = await FirebaseFirestore.instance
-                            .collection(keyCourtAlarms)
-                            .where(keyUid, isEqualTo: Global.uid)
-                            .where(keyCourtUid, isEqualTo: alarm.courtUid)
-                            .where(keyAlarmDateTime, isEqualTo: alarm.alarmDateTime)
-                            .limit(1)
-                            .get();
+                            if (!value) {
+                              final snapshot = await FirebaseFirestore.instance
+                                  .collection(keyCourtAlarms)
+                                  .where(keyUid, isEqualTo: userUid)
+                                  .where(keyCourtUid, isEqualTo: alarm.courtUid)
+                                  .where(keyDateCreate, isEqualTo: alarm.dateCreate)
+                                  .get();
 
-                        if (querySnapshot.docs.isNotEmpty) {
-                          // 알림이 존재하면 Firestore에서 삭제하고 UI에서 alarmEnabled만 false로 업데이트
-                          await querySnapshot.docs.first.reference.delete();
-                          Global.vnCourtAlarms.value = Global.vnCourtAlarms.value.map((a) {
-                            return (a.courtUid == alarm.courtUid &&
-                                    a.alarmDateTime?.toDate().toIso8601String() ==
-                                        alarm.alarmDateTime?.toDate().toIso8601String())
-                                ? a.copyWith(alarmEnabled: false)
-                                : a;
-                          }).toList();
-                        } else {
-                          // 알림이 없으면 Firestore에 추가하고 UI에서 alarmEnabled true로 업데이트
-                          final newAlarm = alarm.copyWith(alarmEnabled: true);
-                          await FirebaseFirestore.instance.collection(keyCourtAlarms).add({
-                            ...newAlarm.toJson(),
-                            keyUid: Global.uid ?? '',
-                          });
-                          Global.vnCourtAlarms.value = Global.vnCourtAlarms.value.map((a) {
-                            return (a.courtUid == alarm.courtUid &&
-                                    a.alarmDateTime?.toDate().toIso8601String() ==
-                                        alarm.alarmDateTime?.toDate().toIso8601String())
-                                ? newAlarm
-                                : a;
-                          }).toList();
-                        }
-                      },
-                      child: Icon(
-                        alarm.alarmEnabled ? Icons.notifications_active : Icons.notifications_off,
-                        color: alarm.alarmEnabled ? Colors.green : Colors.grey,
-                      ),
+                              for (final doc in snapshot.docs) {
+                                await doc.reference.delete();
+                              }
+
+                              Global.vnCourtAlarms.value = Global.vnCourtAlarms.value.map((e) {
+                                if (e.dateCreate == alarm.dateCreate &&
+                                    e.uid == userUid &&
+                                    e.courtUid == alarm.courtUid) {
+                                  return e.copyWith(alarmEnabled: false);
+                                }
+                                return e;
+                              }).toList();
+                            } else {
+                              final data = {
+                                keyUid: userUid,
+                                keyCourtUid: alarm.courtUid,
+                                keyCourtName: alarm.courtName,
+                                keyAlarmDateTime: alarm.alarmDateTime,
+                                keyDateCreate: alarm.dateCreate,
+                                'alarmEnabled': true,
+                              };
+
+                              await FirebaseFirestore.instance.collection(keyCourtAlarms).add(data);
+
+                              Global.vnCourtAlarms.value = Global.vnCourtAlarms.value.map((e) {
+                                if (e.dateCreate == alarm.dateCreate &&
+                                    e.uid == userUid &&
+                                    e.courtUid == alarm.courtUid) {
+                                  return e.copyWith(alarmEnabled: true);
+                                }
+                                return e;
+                              }).toList();
+                            }
+                          },
+                          activeColor: const Color(0xFFF7D245),
+                          inactiveThumbColor: Colors.white,
+                          inactiveTrackColor: Colors.grey.shade400,
+                        ),
+                      ],
                     ),
                   );
                 }),
-                const Divider(thickness: 1),
+                Gaps.v5,
               ],
             );
           }).toList(),

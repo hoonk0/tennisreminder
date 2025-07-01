@@ -78,7 +78,7 @@ class Utils {
       // 화면 위쪽에 표시
       backgroundColor: colorMain900,
       textColor: colorWhite,
-      fontSize: 12,
+      fontSize: 10,
       toastLength: Toast.LENGTH_SHORT,
       timeInSecForIosWeb: (duration / 1000).round(),
       // 커스텀 스타일을 위해 텍스트 패딩과 radius를 간접적으로 반영
