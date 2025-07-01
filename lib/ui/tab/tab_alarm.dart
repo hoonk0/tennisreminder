@@ -38,8 +38,7 @@ class _TabAlarmState extends State<TabAlarm> {
       return;
     }
 
-    // 🔄 캐시 초기화
-    Global.vnCourtAlarms.value = [];
+    // 🔄 초기화 제거: 기존 데이터 유지하여 깜빡임 방지
 
     final snapshot = await FirebaseFirestore.instance
         .collection(keyCourtAlarms)
@@ -83,6 +82,7 @@ class _TabAlarmState extends State<TabAlarm> {
                 ),
                 Gaps.v8,
                 ...courtAlarms.map((alarm) {
+                  print('📍Switch 렌더링: alarmEnabled=${alarm.alarmEnabled}, courtUid=${alarm.courtUid}, dateCreate=${alarm.dateCreate}');
                   return Container(
                     margin: const EdgeInsets.only(bottom: 12),
                     padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
@@ -112,44 +112,52 @@ class _TabAlarmState extends State<TabAlarm> {
                         Switch(
                           value: alarm.alarmEnabled,
                           onChanged: (bool value) async {
-                            final userUid = FirebaseAuth.instance.currentUser?.uid;
-                            if (userUid == null) return;
+                            final userUid = Global.uid;
+                            print('🧪 스위치 변경 감지됨: value=$value, userUid=$userUid');
+                            if (userUid == null || userUid.isEmpty) return;
 
                             if (!value) {
+                              print('🔻 삭제 프로세스 시작: courtUid=${alarm.courtUid}, dateCreate=${alarm.dateCreate}, userUid=$userUid');
+                              print('🗑️ 알람 OFF 요청: courtUid=${alarm.courtUid}, dateCreate=${alarm.dateCreate}, userUid=$userUid');
+
                               final snapshot = await FirebaseFirestore.instance
                                   .collection(keyCourtAlarms)
-                                  .where(keyUid, isEqualTo: userUid)
+                                  .where(keyUid, isEqualTo: userUid) // keyUserUid가 아닌 keyUid 사용 중이라면 여기도 일치시켜야 함
                                   .where(keyCourtUid, isEqualTo: alarm.courtUid)
                                   .where(keyDateCreate, isEqualTo: alarm.dateCreate)
                                   .get();
 
+                              print('📦 삭제 대상 문서 개수: ${snapshot.docs.length}');
                               for (final doc in snapshot.docs) {
                                 await doc.reference.delete();
+                                print('🧨 삭제된 문서 ID: ${doc.id}');
                               }
 
                               Global.vnCourtAlarms.value = Global.vnCourtAlarms.value.map((e) {
                                 if (e.dateCreate == alarm.dateCreate &&
-                                    e.uid == userUid &&
+                                    e.uid == userUid && // `userUid`가 아니라 `uid` 필드일 가능성 고려
                                     e.courtUid == alarm.courtUid) {
                                   return e.copyWith(alarmEnabled: false);
                                 }
                                 return e;
                               }).toList();
+
+                              print('🧼 UI 상태 업데이트 완료 (alarmEnabled: false)');
                             } else {
+                              print('🆕 알람 추가 시도: courtUid=${alarm.courtUid}, dateCreate=${alarm.dateCreate}, userUid=$userUid');
                               final data = {
                                 keyUid: userUid,
                                 keyCourtUid: alarm.courtUid,
                                 keyCourtName: alarm.courtName,
                                 keyAlarmDateTime: alarm.alarmDateTime,
                                 keyDateCreate: alarm.dateCreate,
-                                'alarmEnabled': true,
+                                keyAlarmEnabled: true,
                               };
 
                               await FirebaseFirestore.instance.collection(keyCourtAlarms).add(data);
 
                               Global.vnCourtAlarms.value = Global.vnCourtAlarms.value.map((e) {
                                 if (e.dateCreate == alarm.dateCreate &&
-                                    e.uid == userUid &&
                                     e.courtUid == alarm.courtUid) {
                                   return e.copyWith(alarmEnabled: true);
                                 }

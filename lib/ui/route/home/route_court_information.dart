@@ -137,76 +137,84 @@ class _RouteCourtInformationState extends State<RouteCourtInformation> {
                             Positioned(
                               top: 20,
                               right: 20,
-                              child: ValueListenableBuilder(
-                                valueListenable: Global.vnFavoriteCourts,
-                                builder: (context, favoriteCourts, child) {
-                                  final isFavorite = favoriteCourts.any(
-                                    (e) => e.uid == widget.court.uid,
-                                  );
-                                  return GestureDetector(
-                                    onTap: () async {
-                                      final currentUser = Global.userNotifier.value;
-                                      final userUid = currentUser?.uid;
-                                      debugPrint("❤️ 좋아요 버튼 클릭됨 - 현재 유저 UID: $userUid, user_type: ${currentUser?.userType}");
-                                      if (userUid == null || currentUser?.userType != UserType.user) {
-                                        debugPrint("❌ user_type이 'UserType.user'가 아니거나 로그인되지 않음 - 좋아요 처리 중단");
-                                        return;
-                                      }
+                              child: Row(
+                                children: [
 
-                                      final courtRef = FirebaseFirestore
-                                          .instance
-                                          .collection(keyCourt)
-                                          .doc(widget.court.uid);
+                                  Container(
+                                    child: Text("dd"),
+                                  ),
+                                  ValueListenableBuilder(
+                                    valueListenable: Global.vnFavoriteCourts,
+                                    builder: (context, favoriteCourts, child) {
+                                      final isFavorite = favoriteCourts.any(
+                                        (e) => e.uid == widget.court.uid,
+                                      );
+                                      return GestureDetector(
+                                        onTap: () async {
+                                          final currentUser = Global.userNotifier.value;
+                                          final userUid = currentUser?.uid;
+                                          debugPrint("❤️ 좋아요 버튼 클릭됨 - 현재 유저 UID: $userUid, user_type: ${currentUser?.userType}");
+                                          if (userUid == null || currentUser?.userType != UserType.user) {
+                                            debugPrint("❌ user_type이 'UserType.user'가 아니거나 로그인되지 않음 - 좋아요 처리 중단");
+                                            return;
+                                          }
 
-                                      if (isFavorite) {
-                                        debugPrint("➖ 좋아요 제거: ${widget.court.uid}");
-                                        Global.vnFavoriteCourts.value =
-                                            favoriteCourts
-                                                .where(
-                                                  (e) =>
-                                                      e.uid !=
-                                                      widget.court.uid,
-                                                )
-                                                .toList();
-                                        await courtRef.update({
-                                          keyLikedUserUids:
-                                              FieldValue.arrayRemove([
-                                                userUid,
-                                              ]),
-                                        });
-                                      } else {
-                                        debugPrint("➕ 좋아요 추가: ${widget.court.uid}");
-                                        Global.vnFavoriteCourts.value = [
-                                          ...favoriteCourts,
-                                          widget.court,
-                                        ];
-                                        await courtRef.update({
-                                          keyLikedUserUids:
-                                              FieldValue.arrayUnion([
-                                                userUid,
-                                              ]),
-                                        });
-                                      }
-                                    },
-                                    child: Container(
-                                      padding: const EdgeInsets.all(8),
-                                      decoration: BoxDecoration(
-                                        color: Colors.white.withOpacity(0.8),
-                                        shape: BoxShape.circle,
-                                      ),
-                                      child: Icon(
-                                        isFavorite
-                                            ? Icons.favorite
-                                            : Icons.favorite_border,
-                                        color:
+                                          final courtRef = FirebaseFirestore
+                                              .instance
+                                              .collection(keyCourt)
+                                              .doc(widget.court.uid);
+
+                                          if (isFavorite) {
+                                            debugPrint("➖ 좋아요 제거: ${widget.court.uid}");
+                                            Global.vnFavoriteCourts.value =
+                                                favoriteCourts
+                                                    .where(
+                                                      (e) =>
+                                                          e.uid !=
+                                                          widget.court.uid,
+                                                    )
+                                                    .toList();
+                                            await courtRef.update({
+                                              keyLikedUserUids:
+                                                  FieldValue.arrayRemove([
+                                                    userUid,
+                                                  ]),
+                                            });
+                                          } else {
+                                            debugPrint("➕ 좋아요 추가: ${widget.court.uid}");
+                                            Global.vnFavoriteCourts.value = [
+                                              ...favoriteCourts,
+                                              widget.court,
+                                            ];
+                                            await courtRef.update({
+                                              keyLikedUserUids:
+                                                  FieldValue.arrayUnion([
+                                                    userUid,
+                                                  ]),
+                                            });
+                                          }
+                                        },
+                                        child: Container(
+                                          padding: const EdgeInsets.all(8),
+                                          decoration: BoxDecoration(
+                                            color: Colors.white.withOpacity(0.8),
+                                            shape: BoxShape.circle,
+                                          ),
+                                          child: Icon(
                                             isFavorite
-                                                ? colorMain900
-                                                : Colors.black,
-                                        size: 20,
-                                      ),
-                                    ),
-                                  );
-                                },
+                                                ? Icons.favorite
+                                                : Icons.favorite_border,
+                                            color:
+                                                isFavorite
+                                                    ? colorMain900
+                                                    : Colors.black,
+                                            size: 20,
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                ],
                               ),
                             ),
                           ],
@@ -310,6 +318,39 @@ class _RouteCourtInformationState extends State<RouteCourtInformation> {
                                               ),
 
                                           ],
+                                        ),
+                                        CustomDivider(
+                                          margin: EdgeInsets.symmetric(
+                                            vertical: 20,
+                                            horizontal: 20,
+                                          ),
+                                          width: double.infinity,
+                                        ),
+
+                                        GestureDetector(
+                                          onTap: () async {
+                                            final url = widget.court.reservationUrl;
+                                            if (url != null && await canLaunch(url)) {
+                                              await launch(url);
+                                            } else {
+                                              Utils.toast(desc: '예약사이트를 제공하지 않는 코트입니다.');
+                                            }
+                                          },
+                                          child: Row(
+                                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                            children: [
+                                              Text(
+                                                "예약 사이트 바로가기",
+                                                style: TS.s16w600(colorGray900),
+                                              ),
+                                              const SizedBox(width: 8),
+                                              const Icon(
+                                                Icons.open_in_new,
+                                                size: 20,
+                                                color: colorGray600,
+                                              ),
+                                            ],
+                                          ),
                                         ),
 
                                         CustomDivider(
