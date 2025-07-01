@@ -69,7 +69,7 @@ class _RouteAuthSnsSignUpState extends State<RouteAuthSnsSignUp> {
                         debugPrint('시작하기 버튼 클릭');
                         final modelUser = ModelUser(
                           uid: widget.uid,
-                          email: widget.email ?? 'kakaoLogin',
+                          email: widget.email ?? 'SNS',
                           loginType: widget.loginType,
                           dateCreate: Timestamp.now(),
                         );

@@ -225,14 +225,11 @@ class _RouteLoginState extends State<RouteAuthLogin> {
                               ///카카오 로그인
                               GestureDetector(
                                 onTap: () async {
-                                  debugPrint('✅ Kakao login button tapped');
                                   final String? uid = await Utils.onKakaoTap();
                                   if (uid != null) {
-                                    debugPrint('✅ Kakao login returned UID: $uid');
                                     final userDs = await FirebaseFirestore.instance.collection(keyUser).where(keyUid, isEqualTo: uid).get();
                                     // 회원가입이 안됨
                                     if (userDs.docs.isEmpty) {
-                                      debugPrint('🆕 No existing user found. Navigating to Kakao signup');
                                       Navigator.of(context).push(
                                         MaterialPageRoute(
                                           builder: (context) => RouteAuthSnsSignUp(
@@ -243,9 +240,9 @@ class _RouteLoginState extends State<RouteAuthLogin> {
                                         ),
                                       );
                                     }
+
                                     // 회원가입이 되어있음
                                     else {
-                                      debugPrint('🙆‍♂️ User exists. Proceeding to RouteSplash');
                                       final pref = await SharedPreferences.getInstance();
                                       pref.setString(keyUid, uid);
                                       Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (context) => const RouteSplash()), (route) => false);

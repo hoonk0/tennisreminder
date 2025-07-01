@@ -25,17 +25,15 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await initializeDateFormatting('ko_KR');
 
-  print('🟡 Firebase 초기화 시작');
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-  print('🟢 Firebase 초기화 완료');
 
   AuthRepository.initialize(appKey: '26476b06b753504ad14bb998f377645f');
 
   await initializeNotification();
 
   KakaoSdk.init(
-    nativeAppKey: 'de368876dad11f1f070baef6058f8d49',
-    loggingEnabled: true,
+    nativeAppKey: 'a68764f8b9c47a0adfaaa1c72d4f7ef2',
+    javaScriptAppKey: 'b7483b27f8dca683d382b98e5d85c550',
   );
 
   final user = FirebaseAuth.instance.currentUser;
