@@ -5,15 +5,13 @@ import 'package:tennisreminder_core/const/value/colors.dart';
 import 'package:tennisreminder_core/const/value/gaps.dart';
 import 'package:tennisreminder_core/const/value/text_style.dart';
 
+import '../../service/map/location_service.dart';
+
 class CardCourtInform extends StatelessWidget {
   final ModelCourt court;
   final VoidCallback? onTap;
 
-  const CardCourtInform({
-    super.key,
-    required this.court,
-    this.onTap,
-  });
+  const CardCourtInform({super.key, required this.court, this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -38,11 +36,16 @@ class CardCourtInform extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 ClipRRect(
-                  borderRadius: BorderRadius.only(topLeft: Radius.circular(8), bottomLeft:Radius.circular(8) ),
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(8),
+                    bottomLeft: Radius.circular(8),
+                  ),
                   child: Image(
-                    image: court.imageUrls != null && court.imageUrls!.isNotEmpty
-                        ? NetworkImage(court.imageUrls!.first)
-                        : const AssetImage('assets/images/mainicon.png') as ImageProvider,
+                    image:
+                        court.imageUrls != null && court.imageUrls!.isNotEmpty
+                            ? NetworkImage(court.imageUrls!.first)
+                            : const AssetImage('assets/images/mainicon.png')
+                                as ImageProvider,
                     width: 70,
                     height: 70,
                     fit: BoxFit.cover,
@@ -53,21 +56,20 @@ class CardCourtInform extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        court.courtName,
-                          style: TS.s12w500(colorGray700),
-                      ),
+                      Text(court.courtName, style: TS.s12w500(colorGray700)),
                       Gaps.v4,
-                      Text(
-                        court.courtAddress,
-                        style: TS.s12w500(colorGray500),
-                      ),
+                      Text(court.courtAddress, style: TS.s12w500(colorGray500)),
                     ],
                   ),
                 ),
+
+                Text(
+                  '${LocationService.courtDistances[court.uid]?.toStringAsFixed(1) ?? '?'} km',
+                  style: TS.s12w500(colorGray500),
+                ),
+                Gaps.h12,
               ],
             ),
-
           ],
         ),
       ),
