@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tennisreminder_app/ui/component/loading_bar.dart';
+import 'package:tennisreminder_app/ui/route/home/route_court_information.dart';
 import 'package:tennisreminder_core/const/model/moderl_filter_all_courts.dart';
+import 'package:tennisreminder_core/const/value/colors.dart';
 
 import '../../const/static/global.dart';
 import '../../ui/component/retainable_scroll_controller.dart';
@@ -72,29 +74,35 @@ class _PaginationCourtState extends ConsumerState<PaginationCourt> {
         }
 
         final court = courts[index];
-        return Container(
-          margin: const EdgeInsets.only(bottom: 12),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(8),
-            border: Border.all(color: Colors.grey.shade300),
-          ),
-          child: ListTile(
-            leading: SizedBox(
-              width: 56,
-              height: 56,
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(6),
-                child: court.imageUrls?.isNotEmpty == true
-                    ? Image.network(
-                        court.imageUrls!.first,
-                        fit: BoxFit.cover,
-                        errorBuilder: (_, __, ___) => Image.asset('assets/images/mainicon.png'),
-                      )
-                    : Image.asset('assets/images/mainicon.png'),
-              ),
+        return GestureDetector(
+          onTap: (){
+            Navigator.of(context).push(MaterialPageRoute(
+                            builder: (context) => RouteCourtInformation(court: court)));
+          },
+          child: Container(
+            margin: const EdgeInsets.only(bottom: 12),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: Colors.grey.shade300),
             ),
-            title: Text(court.courtName),
-            subtitle: const Text('10km 이내 위치'),
+            child: ListTile(
+              leading: SizedBox(
+                width: 56,
+                height: 56,
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(6),
+                  child: court.imageUrls?.isNotEmpty == true
+                      ? Image.network(
+                          court.imageUrls!.first,
+                          fit: BoxFit.cover,
+                          errorBuilder: (_, __, ___) => Image.asset('assets/images/mainicon.png'),
+                        )
+                      : Image.asset('assets/images/mainicon.png'),
+                ),
+              ),
+              title: Text(court.courtName),
+              subtitle: Text(court.courtAddress),
+            ),
           ),
         );
       },
