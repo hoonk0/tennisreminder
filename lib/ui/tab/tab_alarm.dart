@@ -83,93 +83,125 @@ class _TabAlarmState extends State<TabAlarm> {
                 Gaps.v8,
                 ...courtAlarms.map((alarm) {
                   print('📍Switch 렌더링: alarmEnabled=${alarm.alarmEnabled}, courtUid=${alarm.courtUid}, dateCreate=${alarm.dateCreate}');
-                  return Container(
-                    margin: const EdgeInsets.only(bottom: 12),
-                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF1C5D43),
-                      borderRadius: BorderRadius.circular(16),
+                  return Dismissible(
+                    key: Key(alarm.dateCreate.toString()),
+                    direction: DismissDirection.endToStart,
+                    background: Container(
+                      alignment: Alignment.centerRight,
+                      padding: const EdgeInsets.only(right: 20),
+                      color: Colors.red,
+                      child: const Icon(Icons.delete, color: Colors.white),
                     ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            if (alarm.alarmDateTime != null)
-                              Text(
-                                DateFormat('M월 d일', 'ko_KR').format(alarm.alarmDateTime!.toDate()),
-                                style: TS.s14w500(Color(0xFFF7D245)),
-                              ),
-                            const SizedBox(height: 4),
-                            if (alarm.alarmDateTime != null)
-                              Text(
-                                DateFormat('a h시 mm분', 'ko_KR').format(alarm.alarmDateTime!.toDate()),
-                                style: const TextStyle(color: Colors.white),
-                              ),
-                          ],
-                        ),
-                        Switch(
-                          value: alarm.alarmEnabled,
-                          onChanged: (bool value) async {
-                            final userUid = Global.uid;
-                            print('🧪 스위치 변경 감지됨: value=$value, userUid=$userUid');
-                            if (userUid == null || userUid.isEmpty) return;
+                    onDismissed: (_) async {
+                      final userUid = Global.uid;
+                      if (userUid == null || userUid.isEmpty) return;
 
-                            if (!value) {
-                              print('🔻 삭제 프로세스 시작: courtUid=${alarm.courtUid}, dateCreate=${alarm.dateCreate}, userUid=$userUid');
-                              print('🗑️ 알람 OFF 요청: courtUid=${alarm.courtUid}, dateCreate=${alarm.dateCreate}, userUid=$userUid');
+                      final snapshot = await FirebaseFirestore.instance
+                          .collection(keyCourtAlarms)
+                          .where(keyUid, isEqualTo: userUid)
+                          .where(keyCourtUid, isEqualTo: alarm.courtUid)
+                          .where(keyDateCreate, isEqualTo: alarm.dateCreate)
+                          .get();
 
-                              final snapshot = await FirebaseFirestore.instance
-                                  .collection(keyCourtAlarms)
-                                  .where(keyUid, isEqualTo: userUid) // keyUserUid가 아닌 keyUid 사용 중이라면 여기도 일치시켜야 함
-                                  .where(keyCourtUid, isEqualTo: alarm.courtUid)
-                                  .where(keyDateCreate, isEqualTo: alarm.dateCreate)
-                                  .get();
+                      for (final doc in snapshot.docs) {
+                        await doc.reference.delete();
+                      }
 
-                              print('📦 삭제 대상 문서 개수: ${snapshot.docs.length}');
-                              for (final doc in snapshot.docs) {
-                                await doc.reference.delete();
-                                print('🧨 삭제된 문서 ID: ${doc.id}');
+                      Global.vnCourtAlarms.value = Global.vnCourtAlarms.value
+                          .where((e) =>
+                              !(e.dateCreate == alarm.dateCreate &&
+                                e.uid == userUid &&
+                                e.courtUid == alarm.courtUid))
+                          .toList();
+                    },
+                    child: Container(
+                      margin: const EdgeInsets.only(bottom: 12),
+                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF1C5D43),
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              if (alarm.alarmDateTime != null)
+                                Text(
+                                  DateFormat('M월 d일', 'ko_KR').format(alarm.alarmDateTime!.toDate()),
+                                  style: TS.s14w500(Color(0xFFF7D245)),
+                                ),
+                              const SizedBox(height: 4),
+                              if (alarm.alarmDateTime != null)
+                                Text(
+                                  DateFormat('a h시 mm분', 'ko_KR').format(alarm.alarmDateTime!.toDate()),
+                                  style: const TextStyle(color: Colors.white),
+                                ),
+                            ],
+                          ),
+                          Switch(
+                            value: alarm.alarmEnabled,
+                            onChanged: (bool value) async {
+                              final userUid = Global.uid;
+                              print('🧪 스위치 변경 감지됨: value=$value, userUid=$userUid');
+                              if (userUid == null || userUid.isEmpty) return;
+
+                              if (!value) {
+                                print('🔻 삭제 프로세스 시작: courtUid=${alarm.courtUid}, dateCreate=${alarm.dateCreate}, userUid=$userUid');
+                                print('🗑️ 알람 OFF 요청: courtUid=${alarm.courtUid}, dateCreate=${alarm.dateCreate}, userUid=$userUid');
+
+                                final snapshot = await FirebaseFirestore.instance
+                                    .collection(keyCourtAlarms)
+                                    .where(keyUid, isEqualTo: userUid)
+                                    .where(keyCourtUid, isEqualTo: alarm.courtUid)
+                                    .where(keyDateCreate, isEqualTo: alarm.dateCreate)
+                                    .get();
+
+                                print('📦 삭제 대상 문서 개수: ${snapshot.docs.length}');
+                                for (final doc in snapshot.docs) {
+                                  await doc.reference.delete();
+                                  print('🧨 삭제된 문서 ID: ${doc.id}');
+                                }
+
+                                Global.vnCourtAlarms.value = Global.vnCourtAlarms.value.map((e) {
+                                  if (e.dateCreate == alarm.dateCreate &&
+                                      e.uid == userUid &&
+                                      e.courtUid == alarm.courtUid) {
+                                    return e.copyWith(alarmEnabled: false);
+                                  }
+                                  return e;
+                                }).toList();
+
+                                print('🧼 UI 상태 업데이트 완료 (alarmEnabled: false)');
+                              } else {
+                                print('🆕 알람 추가 시도: courtUid=${alarm.courtUid}, dateCreate=${alarm.dateCreate}, userUid=$userUid');
+                                final data = {
+                                  keyUid: userUid,
+                                  keyCourtUid: alarm.courtUid,
+                                  keyCourtName: alarm.courtName,
+                                  keyAlarmDateTime: alarm.alarmDateTime,
+                                  keyDateCreate: alarm.dateCreate,
+                                  keyAlarmEnabled: true,
+                                };
+
+                                await FirebaseFirestore.instance.collection(keyCourtAlarms).add(data);
+
+                                Global.vnCourtAlarms.value = Global.vnCourtAlarms.value.map((e) {
+                                  if (e.dateCreate == alarm.dateCreate &&
+                                      e.courtUid == alarm.courtUid) {
+                                    return e.copyWith(alarmEnabled: true);
+                                  }
+                                  return e;
+                                }).toList();
                               }
-
-                              Global.vnCourtAlarms.value = Global.vnCourtAlarms.value.map((e) {
-                                if (e.dateCreate == alarm.dateCreate &&
-                                    e.uid == userUid && // `userUid`가 아니라 `uid` 필드일 가능성 고려
-                                    e.courtUid == alarm.courtUid) {
-                                  return e.copyWith(alarmEnabled: false);
-                                }
-                                return e;
-                              }).toList();
-
-                              print('🧼 UI 상태 업데이트 완료 (alarmEnabled: false)');
-                            } else {
-                              print('🆕 알람 추가 시도: courtUid=${alarm.courtUid}, dateCreate=${alarm.dateCreate}, userUid=$userUid');
-                              final data = {
-                                keyUid: userUid,
-                                keyCourtUid: alarm.courtUid,
-                                keyCourtName: alarm.courtName,
-                                keyAlarmDateTime: alarm.alarmDateTime,
-                                keyDateCreate: alarm.dateCreate,
-                                keyAlarmEnabled: true,
-                              };
-
-                              await FirebaseFirestore.instance.collection(keyCourtAlarms).add(data);
-
-                              Global.vnCourtAlarms.value = Global.vnCourtAlarms.value.map((e) {
-                                if (e.dateCreate == alarm.dateCreate &&
-                                    e.courtUid == alarm.courtUid) {
-                                  return e.copyWith(alarmEnabled: true);
-                                }
-                                return e;
-                              }).toList();
-                            }
-                          },
-                          activeColor: const Color(0xFFF7D245),
-                          inactiveThumbColor: Colors.white,
-                          inactiveTrackColor: Colors.grey.shade400,
-                        ),
-                      ],
+                            },
+                            activeColor: const Color(0xFFF7D245),
+                            inactiveThumbColor: Colors.white,
+                            inactiveTrackColor: Colors.grey.shade400,
+                          ),
+                        ],
+                      ),
                     ),
                   );
                 }),

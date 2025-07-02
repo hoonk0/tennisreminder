@@ -209,7 +209,7 @@ class Utils {
   static Future<String?> onKakaoTap() async {
     FocusManager.instance.primaryFocus?.unfocus();
 
-    Fluttertoast.showToast(msg: '카카오 로그인을 시도중입니다.');
+    Utils.toast(desc: '카카오 로그인을 시도중입니다.');
 
     // [1] 카카오톡이 설치되어있는지 확인
     bool isInstalled;

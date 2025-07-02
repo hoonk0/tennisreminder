@@ -213,7 +213,7 @@ class TabProfile extends StatelessWidget {
                         MaterialPageRoute(builder: (_) => const RouteSplash()),
                         (route) => false,
                       );
-                      Utils.toast(desc: '로그아웃 되었습니다. 재로그인 해주시기 바랍니다.');
+                      Utils.toast(desc: '로그아웃 되었습니다.\n재로그인 해주시기 바랍니다.');
                     }
                   },
                   title: '정말 로그아웃 하시겠어요?',

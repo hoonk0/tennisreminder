@@ -287,7 +287,7 @@ class _CalendarBottomSheetState extends State<CalendarBottomSheet> {
                               selectedDateTime: selectedDateTime,
                             );
 
-                            Utils.toast(desc:'${date.month}월 ${date.day}일 예약을 위한 알림이 등록 되었습니다.');
+                            Utils.toast(desc:'${date.month}월 ${date.day}일\n예약을 위한 알림이 등록 되었습니다.');
 
                           } else {
                             print("⚠️ 유효하지 않은 예약 시간 형식: ${widget.reservationHour}");

@@ -49,19 +49,25 @@ class BasicButtonShadow extends StatelessWidget {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            if (showIcon) ...[
+            if (showIcon)
               Image.asset(
                 'assets/images/mainicon.png',
                 width: 30,
                 height: 30,
                 fit: BoxFit.cover,
+              )
+            else
+              Image.asset(
+                'assets/images/mainicon.png',
+                width: 30,
+                height: 30,
+                fit: BoxFit.cover,
+                color: colorGray600,
               ),
-              Gaps.h5,
-            ],
+            Gaps.h5,
             Text(
-                title,
-                style: TS.s16w600(colorMain900),
-
+              title,
+              style: TS.s16w600(showIcon ? colorMain900 : colorGray600),
             ),
           ],
         ),

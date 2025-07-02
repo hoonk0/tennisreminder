@@ -100,7 +100,8 @@ class CourtReservationSection extends StatelessWidget {
       case ReservationRuleType.etc:
         return BasicButtonShadow(
           colorBg: colorGray400,
-          title: '알람 서비스를 제공하지 않는 코트입니다',
+          showIcon: false,
+          title: '알람 서비스 미제공 코트',
           onTap: () {
 
           },

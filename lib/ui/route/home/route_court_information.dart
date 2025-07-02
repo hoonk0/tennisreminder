@@ -256,11 +256,14 @@ class _RouteCourtInformationState extends State<RouteCourtInformation> {
                                             Text(
                                               widget.court.courtName,
                                               style: TS.s24w600(colorGray900),
+
                                             ),
                                             Gaps.v8,
                                             Text(
                                               widget.court.courtAddress,
                                               style: TS.s14w400(colorGray600),
+                                              maxLines: 1,
+                                              overflow: TextOverflow.ellipsis,
                                             ),
 
                                             Gaps.v8,
