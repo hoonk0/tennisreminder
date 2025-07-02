@@ -101,7 +101,11 @@ class _PaginationCourtState extends ConsumerState<PaginationCourt> {
                 ),
               ),
               title: Text(court.courtName),
-              subtitle: Text(court.courtAddress),
+              subtitle: Text(
+                court.courtAddress,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
             ),
           ),
         );
