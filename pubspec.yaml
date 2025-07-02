@@ -83,6 +83,7 @@ dependencies:
   dynamic_tabbar: ^1.0.9
   flutter_riverpod: ^2.5.1
 
+
   #선택 패키지
   dropdown_button2: ^2.3.9
   android_intent_plus: ^5.0.3
@@ -101,7 +102,7 @@ dev_dependencies:
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   flutter_lints: ^5.0.0
-
+  flutter_launcher_icons: ^0.14.4
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
 
@@ -142,5 +143,5 @@ flutter:
 flutter_launcher_icons:
   android: true
   ios: true
-  image_path: assets/icons/app_icon.png
+  image_path: assets/images/mainicon.png
   remove_alpha_ios: true
