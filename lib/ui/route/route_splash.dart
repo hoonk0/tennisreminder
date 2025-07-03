@@ -33,6 +33,7 @@ class _RouteSplashState extends ConsumerState<RouteSplash> {
 
       WidgetsBinding.instance.addPostFrameCallback(
         (timeStamp) async {
+          await Future.delayed(const Duration(milliseconds: 500));
 
           /// FirebaseAuth에 등록되어 있지 않음: 아무것도 안함
           if (uid == null) {
@@ -41,7 +42,6 @@ class _RouteSplashState extends ConsumerState<RouteSplash> {
 
           /// FirebaseAuth에 등록되어 있음
           else {
-
             StreamMe.listenMe();
 
             Navigator.of(context).pushReplacement(
