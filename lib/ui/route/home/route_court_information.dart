@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:tennisreminder_app/service/map/google_map_screen.dart';
 import 'package:tennisreminder_app/service/map/naver_map_screen.dart';
@@ -59,6 +60,21 @@ class _RouteCourtInformationState extends State<RouteCourtInformation> {
     _mapController = controller;
     // Show the info window for this court's marker after map loads
     _mapController.showMarkerInfoWindow(MarkerId(widget.court.uid));
+  }
+
+  void _openNaverMapApp() async {
+    final name = widget.court.courtAddress ?? '코트 위치';
+    final appUrl = Uri.parse('nmap://place?lat=${widget.court.latitude}&lng=${widget.court.longitude}&name=$name');
+    // Web fallback: open Naver Map search for the name (address-based search)
+    final url = Uri.encodeFull('https://map.naver.com/v5/search/$name');
+
+    if (await canLaunchUrl(appUrl)) {
+      await launchUrl(appUrl);
+    } else if (await canLaunchUrl(Uri.parse(url))) {
+      await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
+    } else {
+      debugPrint('❌ 네이버 지도 앱 및 웹 모두 실행할 수 없습니다.');
+    }
   }
 
   @override
@@ -141,9 +157,6 @@ class _RouteCourtInformationState extends State<RouteCourtInformation> {
                               child: Row(
                                 children: [
 
-                                  Container(
-                                    child: Text("dd"),
-                                  ),
                                   ValueListenableBuilder(
                                     valueListenable: Global.vnFavoriteCourts,
                                     builder: (context, favoriteCourts, child) {
@@ -348,10 +361,11 @@ class _RouteCourtInformationState extends State<RouteCourtInformation> {
                                                 style: TS.s16w600(colorGray900),
                                               ),
                                               const SizedBox(width: 8),
-                                              const Icon(
-                                                Icons.open_in_new,
-                                                size: 20,
-                                                color: colorGray600,
+                                              Image.asset(
+                                                'assets/icons/reservationicon.png',
+                                                width: 24,
+                                                height: 24,
+                                                fit: BoxFit.cover,
                                               ),
                                             ],
                                           ),
@@ -477,11 +491,28 @@ class _RouteCourtInformationState extends State<RouteCourtInformation> {
                                           crossAxisAlignment: CrossAxisAlignment.start,
                                           mainAxisAlignment: MainAxisAlignment.start,
                                           children: [
-                                            Text(
-                                              "코트 위치",
-                                              style: TS.s16w600(colorGray900),
+                                            Row(
+                                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                              children: [
+                                                Text(
+                                                  "코트 위치",
+                                                  style: TS.s16w600(colorGray900),
+                                                ),
+
+                                                GestureDetector(
+                                                  onTap: () {
+                                                    _openNaverMapApp();
+                                                  },
+                                                  child: Image.asset(
+                                                    'assets/icons/mapicon.png',
+                                                    width: 24,
+                                                    height: 24,
+                                                    fit: BoxFit.cover,
+                                                  ),
+                                                ),
+                                              ],
                                             ),
-                                            Gaps.v5,
+                                            Gaps.v10,
                                            ///네이버맵
                                             NaverMapScreen(court: widget.court,),
 

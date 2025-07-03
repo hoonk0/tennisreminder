@@ -37,8 +37,8 @@ class NaverMapScreen extends StatelessWidget {
             target: NLatLng(court.latitude, court.longitude),
             zoom: 16,
           ),
-       //   zoomControlEnable: false,
           locationButtonEnable: false,
+          zoomGesturesEnable: true,
         ),
         onMapReady: (controller) {
           controller.addOverlay(
@@ -49,10 +49,9 @@ class NaverMapScreen extends StatelessWidget {
             ),
           );
         },
-        onMapTapped: (point, coord) {
+/*        onMapTapped: (point, coord) {
           _openNaverMapApp();
-        },
-        zoomGesturesEnable: true,
+        },*/
       ),
     );
   }
