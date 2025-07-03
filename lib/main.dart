@@ -1,5 +1,6 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_naver_map/flutter_naver_map.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:kakao_flutter_sdk/kakao_flutter_sdk.dart';
 import 'package:kakao_map_plugin/kakao_map_plugin.dart';
@@ -34,6 +35,13 @@ Future<void> main() async {
   KakaoSdk.init(
     nativeAppKey: 'a68764f8b9c47a0adfaaa1c72d4f7ef2',
     javaScriptAppKey: 'b7483b27f8dca683d382b98e5d85c550',
+  );
+
+  await FlutterNaverMap().init(
+    clientId: '5s09r12irx',
+    onAuthFailed: (ex) {
+      print('네이버 지도 인증 실패: $ex');
+    },
   );
 
   final user = FirebaseAuth.instance.currentUser;

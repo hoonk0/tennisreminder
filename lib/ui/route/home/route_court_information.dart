@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:tennisreminder_app/service/map/google_map_screen.dart';
+import 'package:tennisreminder_app/service/map/naver_map_screen.dart';
 import 'package:tennisreminder_app/service/weather/weather_alarm.dart';
 import 'package:tennisreminder_app/ui/bottom_sheet/bottom_sheet_notification.dart';
 import 'package:tennisreminder_app/ui/bottom_sheet/bottom_sheet_calendar.dart';
@@ -481,7 +482,12 @@ class _RouteCourtInformationState extends State<RouteCourtInformation> {
                                               style: TS.s16w600(colorGray900),
                                             ),
                                             Gaps.v5,
-                                            SizedBox(
+                                           ///네이버맵
+                                            NaverMapScreen(lat: widget.court.latitude, lng: widget.court.longitude)
+
+
+                                           ///구글맵
+                                           /* SizedBox(
                                               height:
                                               MediaQuery.of(
                                                 context,
@@ -522,7 +528,7 @@ class _RouteCourtInformationState extends State<RouteCourtInformation> {
                                                 myLocationButtonEnabled: true,
                                                 onMapCreated: _onMapCreated,
                                               ),
-                                            ),
+                                            ),*/
                                           ],
                                         ),
                                       ],
