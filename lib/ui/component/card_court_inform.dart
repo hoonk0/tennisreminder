@@ -63,11 +63,11 @@ class CardCourtInform extends StatelessWidget {
                   ),
                 ),
 
-                Text(
+ /*               Text(
                   '${LocationService.courtDistances[court.uid]?.toStringAsFixed(1) ?? '?'} km',
                   style: TS.s12w500(colorGray500),
                 ),
-                Gaps.h12,
+                Gaps.h12,*/
               ],
             ),
           ],
