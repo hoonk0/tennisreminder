@@ -483,9 +483,9 @@ class _RouteCourtInformationState extends State<RouteCourtInformation> {
                                             ),
                                             Gaps.v5,
                                            ///네이버맵
-                                            NaverMapScreen(lat: widget.court.latitude, lng: widget.court.longitude)
+                                            NaverMapScreen(court: widget.court,),
 
-
+                                           Gaps.v40,
                                            ///구글맵
                                            /* SizedBox(
                                               height:
