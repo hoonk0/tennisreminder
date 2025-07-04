@@ -16,7 +16,7 @@ val keystoreProperties = Properties().apply {
 }
 
 android {
-    namespace = "com.example.tennisreminder_app"
+    namespace = "com.hoonk.tennisreminder_app"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = "27.0.12077973"
 

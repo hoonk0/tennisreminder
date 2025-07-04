@@ -1,4 +1,4 @@
-package com.example.tennisreminder_app
+package com.hoonk.tennisreminder_app
 
 import io.flutter.embedding.android.FlutterActivity
 
