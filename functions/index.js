@@ -82,7 +82,7 @@ exports.sendDailyAlarm = onSchedule(
             token: fcmToken,
             notification: {
               title: `${alarmData.courtName ?? alarmData.court_name ?? "테니스 코트"} 예약 알림`,
-              body: "곧 예약시간입니다. 준비해주세요!",
+              body: "예약시간 10분 전입니다. 준비해주세요!",
             },
             android: {
               priority: "high",
