@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_naver_map/flutter_naver_map.dart';
@@ -5,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:kakao_flutter_sdk/kakao_flutter_sdk.dart';
 import 'package:kakao_map_plugin/kakao_map_plugin.dart';
 import 'package:intl/date_symbol_data_local.dart';
+import 'package:naver_login_sdk/naver_login_sdk.dart';
 import 'package:sizer/sizer.dart';
 import 'package:tennisreminder_app/service/notification/court_notification_setting_upgrade.dart';
 import 'package:tennisreminder_app/ui/route/route_splash.dart';
@@ -32,11 +35,27 @@ Future<void> main() async {
 
   await initializeNotification();
 
+  ///카카오로그인
   KakaoSdk.init(
     nativeAppKey: 'a68764f8b9c47a0adfaaa1c72d4f7ef2',
     javaScriptAppKey: 'b7483b27f8dca683d382b98e5d85c550',
   );
 
+  ///네이버로그인
+  if (Platform.isIOS) {
+    NaverLoginSDK.initialize(
+      clientId: 'DTY9BzaNLS7fQGjW3Z1T',
+      clientSecret: '9sVNkL7iRd',
+      urlScheme: 'naverDTY9BzaNLS7fQGjW3Z1T', // ✅ iOS에서 필수
+    );
+  } else {
+    NaverLoginSDK.initialize(
+      clientId: 'DTY9BzaNLS7fQGjW3Z1T',
+      clientSecret: '9sVNkL7iRd',
+    );
+  }
+
+  ///네이버맵
   await FlutterNaverMap().init(
     clientId: '5s09r12irx',
     onAuthFailed: (ex) {

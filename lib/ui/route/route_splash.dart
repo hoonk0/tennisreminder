@@ -33,7 +33,7 @@ class _RouteSplashState extends ConsumerState<RouteSplash> {
 
       WidgetsBinding.instance.addPostFrameCallback(
         (timeStamp) async {
-          await Future.delayed(const Duration(milliseconds: 500));
+          await Future.delayed(const Duration(milliseconds: 2000));
 
           /// FirebaseAuth에 등록되어 있지 않음: 아무것도 안함
           if (uid == null) {

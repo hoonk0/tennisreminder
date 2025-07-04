@@ -59,6 +59,22 @@
                     android:scheme="kakaoa68764f8b9c47a0adfaaa1c72d4f7ef2" />
             </intent-filter>
         </activity>
+        <!-- ✅ 네이버 로그인 설정 -->
+        <activity
+            android:name="com.navercorp.nid.flutter.NaverLoginActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <!-- 네이버 로그인 Redirect URI -->
+                <data
+                    android:scheme="naverDTY9BzaNLS7fQGjW3Z1T"
+                    android:host="oauth" />
+            </intent-filter>
+        </activity>
         <!-- Don't delete the meta-data below.
              This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->
 

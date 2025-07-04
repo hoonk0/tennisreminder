@@ -215,20 +215,29 @@ class _RouteLoginState extends State<RouteAuthLogin> {
                           Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              /// 구글 로그인
-                              _LoginBox(
-                                imgUrl: 'assets/images/google.svg',
-                                onTap: () => _googleLogin(context),
+                              /// 네이버 로그인 (공통)
+                              GestureDetector(
+                                onTap: () async {
+                                  _loginForNaver();
+                                },
+                                child: SizedBox(
+                                  width: 56,
+                                  height: 56,
+                                  child: SvgPicture.asset(
+                                    'assets/images/naver.svg',
+                                    width: 24,
+                                    height: 24,
+                                  ),
+                                ),
                               ),
-                              Gaps.h10,
+                              Gaps.h20,
 
-                              ///카카오 로그인
+                              /// 카카오 로그인 (공통)
                               GestureDetector(
                                 onTap: () async {
                                   final String? uid = await Utils.onKakaoTap();
                                   if (uid != null) {
                                     final userDs = await FirebaseFirestore.instance.collection(keyUser).where(keyUid, isEqualTo: uid).get();
-                                    // 회원가입이 안됨
                                     if (userDs.docs.isEmpty) {
                                       Navigator.of(context).push(
                                         MaterialPageRoute(
@@ -239,10 +248,7 @@ class _RouteLoginState extends State<RouteAuthLogin> {
                                           ),
                                         ),
                                       );
-                                    }
-
-                                    // 회원가입이 되어있음
-                                    else {
+                                    } else {
                                       final pref = await SharedPreferences.getInstance();
                                       pref.setString(keyUid, uid);
                                       Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (context) => const RouteSplash()), (route) => false);
@@ -260,27 +266,26 @@ class _RouteLoginState extends State<RouteAuthLogin> {
                                 ),
                               ),
                               Gaps.h20,
-                           /*   /// 네이버 로그인
-                              SizedBox(
-                                height: 48,
-                                child: GestureDetector(
-                                  onTap: _loginForNaver,
-                                  child: SvgPicture.asset(
-                                    'assets/images/naver.svg',
+
+                              /// 플랫폼별 로그인
+                              if (Theme.of(context).platform == TargetPlatform.android)
+                                _LoginBox(
+                                  imgUrl: 'assets/images/google.svg',
+                                  onTap: () => _googleLogin(context),
+                                ),
+                              if (Theme.of(context).platform == TargetPlatform.iOS)
+                                GestureDetector(
+                                  onTap: () async {},
+                                  child: SizedBox(
+                                    width: 56,
+                                    height: 56,
+                                    child: SvgPicture.asset(
+                                      'assets/images/apple.svg',
+                                      width: 24,
+                                      height: 24,
+                                    ),
                                   ),
                                 ),
-                              ),
-                              Gaps.h20,
-                              /// 애플 로그인
-                              SizedBox(
-                                height: 48,
-                                child: GestureDetector(
-                                  onTap: _loginForNaver,
-                                  child: SvgPicture.asset(
-                                    'assets/images/apple.svg',
-                                  ),
-                                ),
-                              ),*/
                             ],
                           ),
                           Gaps.v40,
@@ -296,43 +301,49 @@ class _RouteLoginState extends State<RouteAuthLogin> {
       ),
     );
   }
-/*
+
   /// 네이버 로그인
   void _loginForNaver() async {
     FocusManager.instance.primaryFocus?.unfocus();
 
     Utils.toast(desc: '네이버 로그인을 시도중입니다.');
+    print('▶ 네이버 로그인 버튼 클릭됨');
 
     /// 네이버 로그인 인증
     NaverLoginSDK.authenticate(
       callback: OAuthLoginCallback(
         /// 인증 성공시
         onSuccess: () {
-          Utils.log.d("네이버 로그인 인증 성공");
+          print('✅ 인증 성공 - onSuccess 진입');
+          Utils.log.i('✅ 네이버 인증 성공');
 
+          print('▶ 프로필 요청 직전');
           /// 인증 성공시, 네이버 프로필 가져오기
           NaverLoginSDK.profile(
             callback: ProfileCallback(
               /// 프로필 가져오는거 성공시
               onSuccess: (resultCode, message, response) async {
-                Utils.log.i("[Success-프로필 가져오기 성공]\nresultCode:$resultCode, message:$message, profile:$response");
+                print('✅ 프로필 요청 성공');
+                print('📦 resultCode: $resultCode');
+                print('📦 message: $message');
+                print('📦 response: $response');
+                Utils.log.i("[DEBUG-네이버 로그인] resultCode: $resultCode");
+                Utils.log.i("[DEBUG-네이버 로그인] message: $message");
+                Utils.log.i("[DEBUG-네이버 로그인] raw response: $response");
 
                 final profile = NaverLoginProfile.fromJson(response: response);
-
                 Utils.log.i("profile:$profile");
 
-                /// 프로필 가져왔는데 uid 가 없을 경우
                 if (profile.id == null) {
-                  Utils.log.w("프로필 가져왔는데 uid가 존재하지 않음");
+                  print('⚠️ profile.id가 null');
                   Utils.toast(desc: '네이버 로그인에 실패하였습니다.');
                   return;
                 }
 
-                /// 파베 문서 조회하기
                 final userDs = await FirebaseFirestore.instance.collection(keyUser).where(keyUid, isEqualTo: profile.id).get();
 
-                /// 회원가입이 안됨
                 if (userDs.docs.isEmpty) {
+                  print('➡ 신규회원: 회원가입 페이지 이동');
                   Navigator.of(context).push(
                     MaterialPageRoute(
                       builder: (context) => RouteAuthSnsSignUp(
@@ -342,10 +353,8 @@ class _RouteLoginState extends State<RouteAuthLogin> {
                       ),
                     ),
                   );
-                }
-
-                /// 회원가입이 되어있음
-                else {
+                } else {
+                  print('➡ 기존회원: Splash로 이동');
                   final pref = await SharedPreferences.getInstance();
                   pref.setString(keyUid, profile.id!);
                   Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (context) => const RouteSplash()), (route) => false);
@@ -354,33 +363,34 @@ class _RouteLoginState extends State<RouteAuthLogin> {
 
               /// 프로필 가져오는거 실패시
               onFailure: (httpStatus, message) {
-                Utils.log.w("[Fail-프로필 가져오기 실패]\nhttpsStatus:$httpStatus, message:$message");
+                print('❌ 프로필 요청 실패 - $httpStatus: $message');
                 Utils.toast(desc: message);
               },
 
-              /// 프로핅 가져오는거 에러시
+              /// 프로필 가져오는거 에러시
               onError: (errorCode, message) {
-                Utils.log.e("[Error-프로필 가져오기 에러]\nmessage:$message");
+                print('🚨 프로필 요청 에러 - $errorCode: $message');
                 Utils.toast(desc: message);
               },
             ),
           );
+          print('▶ 프로필 요청 호출 완료');
         },
 
         /// 인증 실패시
         onFailure: (httpStatus, message) {
-          Utils.log.w("[Fail-인증 실패]\nhttpStatus:$httpStatus, message:$message");
+          print('❌ 인증 실패 - $httpStatus: $message');
           Utils.toast(desc: message);
         },
 
         /// 인증 에러시
         onError: (errorCode, message) {
-          Utils.log.e("[Error-인증 에러]\nerrorCode:$errorCode, message:$message");
+          print('🚨 인증 에러 - $errorCode: $message');
           Utils.toast(desc: message);
         },
       ),
     );
-  }*/
+  }
 }
 
 /// 구글 로그인
