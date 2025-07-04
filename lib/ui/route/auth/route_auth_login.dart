@@ -269,9 +269,17 @@ class _RouteLoginState extends State<RouteAuthLogin> {
 
                               /// 플랫폼별 로그인
                               if (Theme.of(context).platform == TargetPlatform.android)
-                                _LoginBox(
-                                  imgUrl: 'assets/images/google.svg',
+                                GestureDetector(
                                   onTap: () => _googleLogin(context),
+                                  child: SizedBox(
+                                    width: 56,
+                                    height: 56,
+                                    child: SvgPicture.asset(
+                                      'assets/images/google.svg',
+                                      width: 24,
+                                      height: 24,
+                                    ),
+                                  ),
                                 ),
                               if (Theme.of(context).platform == TargetPlatform.iOS)
                                 GestureDetector(
@@ -448,35 +456,3 @@ class _WidgetText extends StatelessWidget {
 }
 
 
-class _LoginBox extends StatelessWidget {
-  final String imgUrl;
-  final void Function() onTap;
-
-  const _LoginBox({
-    required this.imgUrl,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Center(
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            SvgPicture.asset(
-              imgUrl,
-              width: 48,
-            ),
-       /*             Gaps.h2,
-            Text(
-              title,
-              style: TS.s16w500(colorTitle),
-            )*/
-          ],
-        ),
-      ),
-    );
-  }
-}
