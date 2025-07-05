@@ -92,6 +92,7 @@ class Utils {
 
   /* static initializeProviders(WidgetRef ref) {}*/
 
+  ///이메일 인증
   static Future<bool> sendEmail(String to, String subject, String content) async {
     final url = Uri.parse('https://sendemail-ppufwn6jcq-uc.a.run.app/sendEmail');
     debugPrint('📨 sendEmail() 호출됨: $to / $subject / $content');
