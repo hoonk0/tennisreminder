@@ -13,7 +13,7 @@ import '../../ui/dialog/dialog_confirm.dart';
 import '../utils/utils.dart';
 
 
-///특정일에 알람
+///특정일에 알람, 옵션0
 class CourtNotificationFixedDayEachMonth {
   /// 🔔 FCM 토큰 출력
   static Future<void> printFcmToken() async {
@@ -139,7 +139,7 @@ class CourtNotificationFixedDayEachMonth {
   }*/
 }
 
-///플레이 몇일전 알람
+///플레이 몇일전 알람, 옵션1
 class CourtNotificationDaysBeforePlay {
   static Future<void> saveAlarmToFirestoreExternal({
     required ModelCourt court,
@@ -214,7 +214,7 @@ class CourtNotificationDaysBeforePlay {
   }
 }
 
-/// 매달 N번째 주의 특정 요일 알람
+/// 매달 N번째 주의 특정 요일 알람, 옵션2
 class CourtNotificationNthWeekdayOfMonth {
   /// 🔔 알람을 Firestore에 저장
   static Future<void> saveAlarmToFirestore({
@@ -234,6 +234,10 @@ class CourtNotificationNthWeekdayOfMonth {
     print('🟡 시스템 알림 권한 상태: ${androidGranted == true ? 'ON' : 'OFF'}');
     if (androidGranted != true) {
       Utils.toast(desc: '알림이 꺼져 있어요.\n[설정 > 알림]에서 테코알의 알림 권한을 켜주세요.');
+      final fcmToken = await FirebaseMessaging.instance.getToken();
+      if (fcmToken == null) {
+        throw Exception('FCM 토큰을 가져올 수 없습니다.');
+      }
       return;
     }
     final fcmToken = await FirebaseMessaging.instance.getToken();
