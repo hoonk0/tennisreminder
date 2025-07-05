@@ -96,7 +96,7 @@ class _RouteNearCourtState extends State<RouteNearCourt> with WidgetsBindingObse
                       return Center(
                         child: _isLoading
                             ? const LoadingBar()
-                            : const Text('주변 10km 이내의 코트를 찾을 수 없습니다.'),
+                            : const Text('주변 5km 이내의 코트를 찾을 수 없습니다.'),
                       );
                     }
                     return ListView(

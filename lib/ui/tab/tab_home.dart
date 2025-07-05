@@ -211,14 +211,14 @@ class _TabHomeState extends State<TabHome> {
 
           Gaps.v20,
 
-          /// 3. 내 주변 10km 코트
+          /// 3. 내 주변 5km 코트
           Text('내 주변 코트', style: Theme.of(context).textTheme.titleMedium),
           Gaps.v5,
           ValueListenableBuilder<List<ModelCourt>>(
             valueListenable: vnNearbyCourts,
             builder: (context, nearbyCourts, _) {
               if (nearbyCourts.isEmpty) {
-                return const Text('주변 10km 이내의 코트를 찾을 수 없습니다.');
+                return const Text('주변 5km 이내의 코트를 찾을 수 없습니다.');
               }
               return Column(
                 children:
