@@ -26,6 +26,7 @@ class CourtNotificationFixedDayEachMonth {
     required int reservationDay,
     required int reservationHour,
   }) async {
+    await checkAndRequestPermission();
     final fcmToken = await FirebaseMessaging.instance.getToken();
     if (fcmToken == null) {
       throw Exception('FCM 토큰을 가져올 수 없습니다.');
@@ -85,7 +86,19 @@ class CourtNotificationFixedDayEachMonth {
     }
   }
 
+  static Future<void> checkAndRequestPermission() async {
+    final settings = await FirebaseMessaging.instance.requestPermission();
+    debugPrint('🔔 [CourtNotificationFixedDayEachMonth] 알림 권한 상태: ${settings.authorizationStatus}');
+  }
 
+  static void setupFirebaseForegroundHandler() {
+    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+      debugPrint('📩 [CourtNotificationFixedDayEachMonth] 포그라운드 메시지 수신: ${message.notification?.title}');
+      // 여기서 FlutterLocalNotificationsPlugin 등으로 알림 띄우기 가능
+    });
+  }
+
+/*
   /// 알림 설정 확인 및 포그라운드 리스너 등록
   static Future<void> checkNotificationSetup() async {
     print('🔍 알림 설정 체크 시작');
@@ -109,7 +122,7 @@ class CourtNotificationFixedDayEachMonth {
       debugPrint('📩 포그라운드 메시지 수신: ${message.notification?.title}');
       // 여기서 FlutterLocalNotificationsPlugin 등으로 알림 띄우기 가능
     });
-  }
+  }*/
 }
 
 ///플레이 몇일전 알람
@@ -118,6 +131,7 @@ class CourtNotificationDaysBeforePlay {
     required ModelCourt court,
     required DateTime selectedDateTime,
   }) async {
+    await checkAndRequestPermission();
     final fcmToken = await FirebaseMessaging.instance.getToken();
     if (fcmToken == null) {
       throw Exception('FCM 토큰을 가져올 수 없습니다.');
@@ -161,6 +175,18 @@ class CourtNotificationDaysBeforePlay {
         .map((e) => ModelCourtAlarm.fromJson(e.data()))
         .toList();
   }
+
+  static Future<void> checkAndRequestPermission() async {
+    final settings = await FirebaseMessaging.instance.requestPermission();
+    debugPrint('🔔 [CourtNotificationDaysBeforePlay] 알림 권한 상태: ${settings.authorizationStatus}');
+  }
+
+  static void setupFirebaseForegroundHandler() {
+    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+      debugPrint('📩 [CourtNotificationDaysBeforePlay] 포그라운드 메시지 수신: ${message.notification?.title}');
+      // 여기서 FlutterLocalNotificationsPlugin 등으로 알림 띄우기 가능
+    });
+  }
 }
 
 /// 매달 N번째 주의 특정 요일 알람
@@ -173,6 +199,7 @@ class CourtNotificationNthWeekdayOfMonth {
     required int reservationWeekday,    // 예: 월요일 = 1
     required int reservationHour,       // 예: 오전 9시
   }) async {
+    await checkAndRequestPermission();
     final fcmToken = await FirebaseMessaging.instance.getToken();
     if (fcmToken == null) {
       throw Exception('FCM 토큰을 가져올 수 없습니다.');
@@ -232,10 +259,19 @@ class CourtNotificationNthWeekdayOfMonth {
       Global.vnCourtAlarms.value = snapshot.docs
           .map((e) => ModelCourtAlarm.fromJson(e.data()))
           .toList();
-
-
     }
   }
 
+  static Future<void> checkAndRequestPermission() async {
+    final settings = await FirebaseMessaging.instance.requestPermission();
+    debugPrint('🔔 [CourtNotificationNthWeekdayOfMonth] 알림 권한 상태: ${settings.authorizationStatus}');
+  }
 
+  static void setupFirebaseForegroundHandler() {
+    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+      debugPrint('📩 [CourtNotificationNthWeekdayOfMonth] 포그라운드 메시지 수신: ${message.notification?.title}');
+      // 여기서 FlutterLocalNotificationsPlugin 등으로 알림 띄우기 가능
+    });
+  }
 }
+

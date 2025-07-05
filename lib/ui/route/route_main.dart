@@ -1,3 +1,4 @@
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:tennisreminder_core/const/value/colors.dart';
@@ -25,6 +26,8 @@ class _RouteMainState extends State<RouteMain> {
     Global.tabIndexNotifier.value = 0;
     pc = PageController(initialPage: 0);
     Global.tabIndexNotifier.addListener(_onTabIndexChanged);
+    // 알림 설정 확인 및 포그라운드 리스너 등록
+
   }
 
   void _onTabIndexChanged() {

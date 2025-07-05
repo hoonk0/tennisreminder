@@ -31,12 +31,12 @@ class _TabAlarmState extends State<TabAlarm> {
   Future<void> loadUserAlarms() async {
     final userUid = Global.uid;
 
-    debugPrint('🔍 Global.uid 기반 사용자: ${userUid!.isNotEmpty ? userUid : '❌ 없음'}');
-
-    if (userUid.isEmpty) {
+    if (userUid == null || userUid.isEmpty) {
+      debugPrint('❌ Global.uid 없음');
       Global.vnCourtAlarms.value = [];
       return;
     }
+    debugPrint('🔍 Global.uid 기반 사용자: $userUid');
 
     // 🔄 초기화 제거: 기존 데이터 유지하여 깜빡임 방지
 
