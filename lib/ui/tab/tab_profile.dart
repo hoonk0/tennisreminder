@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tennisreminder_app/ui/component/custom_divider.dart';
+import 'package:tennisreminder_app/ui/route/my_page/route_setting.dart';
 import 'package:tennisreminder_app/ui/route/my_page/route_user_opinion.dart';
 import 'package:tennisreminder_core/const/model/model_court.dart';
 import 'package:tennisreminder_core/const/model/model_court_alarm.dart';
@@ -186,6 +187,18 @@ class TabProfile extends StatelessWidget {
                   builder: (context) => const RouteUserOpinion()));
             },
           ),
+/*
+
+          const Divider(height: 1, color: colorGray200),
+          MenuTitle(
+            label: '환경설정',
+            icon: Icons.info_outline_rounded,
+            onTap: () {
+              Navigator.of(context).push(MaterialPageRoute(
+                  builder: (context) => const RouteSetting()));
+            },
+          ),
+*/
 
           const Divider(height: 1, color: colorGray200),
           MenuTitle(
@@ -196,6 +209,8 @@ class TabProfile extends StatelessWidget {
                   builder: (context) => const RouteProfilePrivacyPolicy()));
             },
           ),
+
+
           const Divider(height: 1, color: colorGray200),
 
           MenuTitle(

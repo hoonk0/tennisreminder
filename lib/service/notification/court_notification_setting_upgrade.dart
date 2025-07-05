@@ -6,9 +6,11 @@ import 'package:flutter/material.dart';
 import 'package:tennisreminder_core/const/model/model_court.dart';
 import 'package:tennisreminder_core/const/model/model_court_alarm.dart';
 import 'package:tennisreminder_core/const/value/keys.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 import '../../const/static/global.dart';
 import '../../ui/dialog/dialog_confirm.dart';
+import '../utils/utils.dart';
 
 
 ///특정일에 알람
@@ -17,6 +19,7 @@ class CourtNotificationFixedDayEachMonth {
   static Future<void> printFcmToken() async {
     final token = await FirebaseMessaging.instance.getToken();
     print('📱 현재 기기의 FCM 토큰: $token');
+
   }
 
   /// 🔔 알람을 Firestore에 저장
@@ -27,6 +30,17 @@ class CourtNotificationFixedDayEachMonth {
     required int reservationHour,
   }) async {
     await checkAndRequestPermission();
+    // 시스템 알림 권한 상태 로그 추가
+    final flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
+    final androidGranted = await flutterLocalNotificationsPlugin
+        .resolvePlatformSpecificImplementation<
+            AndroidFlutterLocalNotificationsPlugin>()
+        ?.areNotificationsEnabled();
+    print('🟡 시스템 알림 권한 상태: ${androidGranted == true ? 'ON' : 'OFF'}');
+    if (androidGranted != true) {
+      Utils.toast(desc: '알림이 꺼져 있어요.\n[설정 > 알림]에서 테코알의 알림 권한을 켜주세요.');
+      return;
+    }
     final fcmToken = await FirebaseMessaging.instance.getToken();
     if (fcmToken == null) {
       throw Exception('FCM 토큰을 가져올 수 없습니다.');
@@ -132,6 +146,17 @@ class CourtNotificationDaysBeforePlay {
     required DateTime selectedDateTime,
   }) async {
     await checkAndRequestPermission();
+    // 시스템 알림 권한 상태 로그 추가
+    final flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
+    final androidGranted = await flutterLocalNotificationsPlugin
+        .resolvePlatformSpecificImplementation<
+            AndroidFlutterLocalNotificationsPlugin>()
+        ?.areNotificationsEnabled();
+    print('🟡 시스템 알림 권한 상태: ${androidGranted == true ? 'ON' : 'OFF'}');
+    if (androidGranted != true) {
+      Utils.toast(desc: '알림이 꺼져 있어요.\n[설정 > 알림]에서 테코알의 알림 권한을 켜주세요.');
+      return;
+    }
     final fcmToken = await FirebaseMessaging.instance.getToken();
     if (fcmToken == null) {
       throw Exception('FCM 토큰을 가져올 수 없습니다.');
@@ -200,6 +225,17 @@ class CourtNotificationNthWeekdayOfMonth {
     required int reservationHour,       // 예: 오전 9시
   }) async {
     await checkAndRequestPermission();
+    // 시스템 알림 권한 상태 로그 추가
+    final flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
+    final androidGranted = await flutterLocalNotificationsPlugin
+        .resolvePlatformSpecificImplementation<
+            AndroidFlutterLocalNotificationsPlugin>()
+        ?.areNotificationsEnabled();
+    print('🟡 시스템 알림 권한 상태: ${androidGranted == true ? 'ON' : 'OFF'}');
+    if (androidGranted != true) {
+      Utils.toast(desc: '알림이 꺼져 있어요.\n[설정 > 알림]에서 테코알의 알림 권한을 켜주세요.');
+      return;
+    }
     final fcmToken = await FirebaseMessaging.instance.getToken();
     if (fcmToken == null) {
       throw Exception('FCM 토큰을 가져올 수 없습니다.');
@@ -274,4 +310,3 @@ class CourtNotificationNthWeekdayOfMonth {
     });
   }
 }
-

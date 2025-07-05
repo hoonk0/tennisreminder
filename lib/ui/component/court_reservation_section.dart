@@ -1,14 +1,18 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:tennisreminder_app/ui/component/basic_button_shadow.dart';
 import 'package:tennisreminder_app/ui/dialog/dialog_confirm.dart';
 import 'package:tennisreminder_app/ui/dialog/dialog_notification_confirm.dart';
 import 'package:tennisreminder_core/const/model/model_court.dart';
 import 'package:tennisreminder_core/const/value/colors.dart';
 import 'package:tennisreminder_core/const/value/enum.dart';
+import 'package:tennisreminder_core/const/value/keys.dart';
 
 import '../../service/notification/court_notification_setting_upgrade.dart';
+import '../../service/utils/utils.dart';
 import '../bottom_sheet/bottom_sheet_calendar.dart';
+import '../dialog/dialog_confirm_reservation.dart';
 import 'basic_button.dart';
 
 class CourtReservationSection extends StatelessWidget {
@@ -26,6 +30,12 @@ class CourtReservationSection extends StatelessWidget {
 
           title: '알람 등록하기',
           onTap: () async {
+            // 시스템 알림 권한 확인
+            final flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
+            final androidGranted = await flutterLocalNotificationsPlugin
+                .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()
+                ?.areNotificationsEnabled();
+
             // 예약일과 시간 정보가 있어야 함
             final reservationDay = court.reservationInfo?.reservationDay;
             final reservationHour = court.reservationInfo?.reservationHour;
@@ -35,22 +45,29 @@ class CourtReservationSection extends StatelessWidget {
                 reservationDay: reservationDay,
                 reservationHour: reservationHour, context: context,
               );
-              showDialog(
-                context: context,
-                barrierDismissible: false,
-                builder: (_) => DialogConfirm(desc: '매달 ${reservationDay}일 ${reservationHour}시\n예약을 위한 알림이 등록되었습니다.'),
-              );
+
+
+              if (androidGranted != false) {
+                showDialog(
+                  context: context,
+                  barrierDismissible: false,
+                  builder: (_) => DialogConfirm(desc: '매달 ${reservationDay}일 ${reservationHour}시\n예약을 위한 알림이 등록되었습니다.'),
+                );
+              }
+
+
             } else {
               // 예약일 또는 시간이 없을 때 예외 처리 (예: 안내 메시지)
               print('예약일 또는 예약 시간이 없습니다.');
             }
           },
         );
+
       case ReservationRuleType.daysBeforePlay:
         return BasicButtonShadow(
           title: '플레이 일정 선택하기',
-          onTap: () {
-            final vnSelectedDate = ValueNotifier<DateTime?>(DateTime.now());
+          onTap: () async {
+              final vnSelectedDate = ValueNotifier<DateTime?>(DateTime.now());
             final int? hour = court.reservationInfo?.reservationHour;
             if (hour != null) {
               final now = DateTime.now();
@@ -66,12 +83,27 @@ class CourtReservationSection extends StatelessWidget {
               court: court,
               vnSelectedDate: vnSelectedDate,
             );
+
+    /*        showDialog(
+              context: context,
+              barrierDismissible: false,
+              builder: (_) => DialogConfirmReservation(
+                desc: '플레이 0일전에\n예약 알림이 등록되었습니다.',
+              ),
+            );
+*/
           },
         );
       case ReservationRuleType.nthWeekdayOfMonth:
         return BasicButtonShadow(
           title: '알람 등록하기',
           onTap: () async {
+            final flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
+            final androidGranted = await flutterLocalNotificationsPlugin
+                .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()
+                ?.areNotificationsEnabled();
+
+
             final reservationWeekNumber = court.reservationInfo?.reservationWeekNumber;
             final reservationWeekday = court.reservationInfo?.reservationWeekday;
             final reservationHour = court.reservationInfo?.reservationHour;
@@ -85,13 +117,18 @@ class CourtReservationSection extends StatelessWidget {
                 context: context,
               );
 
-              showDialog(
-                context: context,
-                barrierDismissible: false,
-                builder: (_) => DialogConfirm(
-                  desc: '매달 ${reservationWeekNumber}번째주 ${_weekdayToStr(reservationWeekday)}요일 ${reservationHour}시에\n예약 알림이 등록되었습니다.',
-                ),
-              );
+
+              if (androidGranted != false) {
+                showDialog(
+                  context: context,
+                  barrierDismissible: false,
+                  builder: (_) => DialogConfirm(
+                    desc: '매달 ${reservationWeekNumber}번째주 ${_weekdayToStr(reservationWeekday)}요일 ${reservationHour}시에\n예약 알림이 등록되었습니다.',
+                  ),
+                );
+              }
+
+
             } else {
               print('n번째 주, 요일, 시간 중 누락된 정보가 있습니다.');
             }
