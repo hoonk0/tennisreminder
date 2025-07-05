@@ -93,15 +93,27 @@ class Utils {
   /* static initializeProviders(WidgetRef ref) {}*/
 
   static Future<bool> sendEmail(String to, String subject, String content) async {
-    final url = Uri.parse('https://sendemail-rbry5oh57a-du.a.run.app/sendEmail');
-
-    final response = await http.get(url.replace(queryParameters: {
-      'to': to,
-      'subject': subject,
-      'content': content,
-    }));
-
-    return response.statusCode == 200;
+    final url = Uri.parse('https://sendemail-ppufwn6jcq-uc.a.run.app/sendEmail');
+    debugPrint('📨 sendEmail() 호출됨: $to / $subject / $content');
+    try {
+      final response = await http.get(url.replace(queryParameters: {
+        'to': to,
+        'subject': subject,
+        'content': content,
+      }));
+      debugPrint('📧 응답 상태코드: ${response.statusCode}');
+      debugPrint('📧 응답 바디: ${response.body}');
+      if (response.statusCode != 200) {
+        Utils.log.e('📧 이메일 전송 실패 - status: ${response.statusCode}, body: ${response.body}');
+      }
+      return response.statusCode == 200;
+    } catch (e, s) {
+      debugPrint('📧 예외 발생: $e');
+      debugPrint('📌 스택트레이스: $s');
+      Utils.log.e('📧 이메일 전송 중 예외 발생: $e');
+      Utils.log.e('📌 스택트레이스: $s');
+      return false;
+    }
   }
 
   /// 회원탈퇴
