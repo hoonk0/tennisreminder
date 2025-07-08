@@ -1,6 +1,9 @@
+import 'dart:io';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:tennisreminder_app/ui/component/basic_button_shadow.dart';
 import 'package:tennisreminder_app/ui/dialog/dialog_confirm.dart';
 import 'package:tennisreminder_app/ui/dialog/dialog_notification_confirm.dart';
@@ -30,11 +33,21 @@ class CourtReservationSection extends StatelessWidget {
 
           title: '알람 등록하기',
           onTap: () async {
-            // 시스템 알림 권한 확인
             final flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
-            final androidGranted = await flutterLocalNotificationsPlugin
-                .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()
-                ?.areNotificationsEnabled();
+
+            bool? isGranted;
+
+            if (Platform.isAndroid) {
+              isGranted = await flutterLocalNotificationsPlugin
+                  .resolvePlatformSpecificImplementation<
+                      AndroidFlutterLocalNotificationsPlugin>()
+                  ?.areNotificationsEnabled();
+            } else if (Platform.isIOS) {
+              final settings = await FirebaseMessaging.instance.getNotificationSettings();
+              isGranted = settings.authorizationStatus == AuthorizationStatus.authorized;
+            }
+
+            print('🟡 시스템 알림 권한 상태: ${isGranted == true ? 'ON' : 'OFF'}');
 
             // 예약일과 시간 정보가 있어야 함
             final reservationDay = court.reservationInfo?.reservationDay;
@@ -47,7 +60,7 @@ class CourtReservationSection extends StatelessWidget {
               );
 
 
-              if (androidGranted != false) {
+              if (isGranted == true) {
                 showDialog(
                   context: context,
                   barrierDismissible: false,
@@ -99,10 +112,20 @@ class CourtReservationSection extends StatelessWidget {
           title: '알람 등록하기',
           onTap: () async {
             final flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
-            final androidGranted = await flutterLocalNotificationsPlugin
-                .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()
-                ?.areNotificationsEnabled();
 
+            bool? isGranted;
+
+            if (Platform.isAndroid) {
+              isGranted = await flutterLocalNotificationsPlugin
+                  .resolvePlatformSpecificImplementation<
+                      AndroidFlutterLocalNotificationsPlugin>()
+                  ?.areNotificationsEnabled();
+            } else if (Platform.isIOS) {
+              final settings = await FirebaseMessaging.instance.getNotificationSettings();
+              isGranted = settings.authorizationStatus == AuthorizationStatus.authorized;
+            }
+
+            print('🟡 시스템 알림 권한 상태: ${isGranted == true ? 'ON' : 'OFF'}');
 
             final reservationWeekNumber = court.reservationInfo?.reservationWeekNumber;
             final reservationWeekday = court.reservationInfo?.reservationWeekday;
@@ -118,7 +141,7 @@ class CourtReservationSection extends StatelessWidget {
               );
 
 
-              if (androidGranted != false) {
+              if (isGranted == true) {
                 showDialog(
                   context: context,
                   barrierDismissible: false,

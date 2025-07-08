@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -32,12 +33,22 @@ class CourtNotificationFixedDayEachMonth {
     await checkAndRequestPermission();
     // 시스템 알림 권한 상태 로그 추가
     final flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
-    final androidGranted = await flutterLocalNotificationsPlugin
-        .resolvePlatformSpecificImplementation<
-            AndroidFlutterLocalNotificationsPlugin>()
-        ?.areNotificationsEnabled();
-    print('🟡 시스템 알림 권한 상태: ${androidGranted == true ? 'ON' : 'OFF'}');
-    if (androidGranted != true) {
+
+    bool? isGranted;
+
+    if (Platform.isAndroid) {
+      isGranted = await flutterLocalNotificationsPlugin
+          .resolvePlatformSpecificImplementation<
+              AndroidFlutterLocalNotificationsPlugin>()
+          ?.areNotificationsEnabled();
+    } else if (Platform.isIOS) {
+      final settings = await FirebaseMessaging.instance.getNotificationSettings();
+      isGranted = settings.authorizationStatus == AuthorizationStatus.authorized;
+    }
+
+    print('🟡 시스템 알림 권한 상태: ${isGranted == true ? 'ON' : 'OFF'}');
+
+    if (isGranted != true) {
       Utils.toast(desc: '알림이 꺼져 있어요.\n[설정 > 알림]에서 테코알의 알림 권한을 켜주세요.');
       return;
     }
@@ -148,12 +159,22 @@ class CourtNotificationDaysBeforePlay {
     await checkAndRequestPermission();
     // 시스템 알림 권한 상태 로그 추가
     final flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
-    final androidGranted = await flutterLocalNotificationsPlugin
-        .resolvePlatformSpecificImplementation<
-            AndroidFlutterLocalNotificationsPlugin>()
-        ?.areNotificationsEnabled();
-    print('🟡 시스템 알림 권한 상태: ${androidGranted == true ? 'ON' : 'OFF'}');
-    if (androidGranted != true) {
+
+    bool? isGranted;
+
+    if (Platform.isAndroid) {
+      isGranted = await flutterLocalNotificationsPlugin
+          .resolvePlatformSpecificImplementation<
+              AndroidFlutterLocalNotificationsPlugin>()
+          ?.areNotificationsEnabled();
+    } else if (Platform.isIOS) {
+      final settings = await FirebaseMessaging.instance.getNotificationSettings();
+      isGranted = settings.authorizationStatus == AuthorizationStatus.authorized;
+    }
+
+    print('🟡 시스템 알림 권한 상태: ${isGranted == true ? 'ON' : 'OFF'}');
+
+    if (isGranted != true) {
       Utils.toast(desc: '알림이 꺼져 있어요.\n[설정 > 알림]에서 테코알의 알림 권한을 켜주세요.');
       return;
     }
@@ -227,12 +248,22 @@ class CourtNotificationNthWeekdayOfMonth {
     await checkAndRequestPermission();
     // 시스템 알림 권한 상태 로그 추가
     final flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
-    final androidGranted = await flutterLocalNotificationsPlugin
-        .resolvePlatformSpecificImplementation<
-            AndroidFlutterLocalNotificationsPlugin>()
-        ?.areNotificationsEnabled();
-    print('🟡 시스템 알림 권한 상태: ${androidGranted == true ? 'ON' : 'OFF'}');
-    if (androidGranted != true) {
+
+    bool? isGranted;
+
+    if (Platform.isAndroid) {
+      isGranted = await flutterLocalNotificationsPlugin
+          .resolvePlatformSpecificImplementation<
+              AndroidFlutterLocalNotificationsPlugin>()
+          ?.areNotificationsEnabled();
+    } else if (Platform.isIOS) {
+      final settings = await FirebaseMessaging.instance.getNotificationSettings();
+      isGranted = settings.authorizationStatus == AuthorizationStatus.authorized;
+    }
+
+    print('🟡 시스템 알림 권한 상태: ${isGranted == true ? 'ON' : 'OFF'}');
+
+    if (isGranted != true) {
       Utils.toast(desc: '알림이 꺼져 있어요.\n[설정 > 알림]에서 테코알의 알림 권한을 켜주세요.');
       final fcmToken = await FirebaseMessaging.instance.getToken();
       if (fcmToken == null) {

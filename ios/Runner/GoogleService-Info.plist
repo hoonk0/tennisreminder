@@ -2,6 +2,12 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>CLIENT_ID</key>
+	<string>334096525-ibl75ph054q4v3e7moo7tuejbv1loi8s.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.334096525-ibl75ph054q4v3e7moo7tuejbv1loi8s</string>
+	<key>ANDROID_CLIENT_ID</key>
+	<string>334096525-jtngpi6dr47fuknrrs01h2etqlh61ctd.apps.googleusercontent.com</string>
 	<key>API_KEY</key>
 	<string>AIzaSyAC4AGKpBPYL20oLTjxAO8OWWN2KWb4xsg</string>
 	<key>GCM_SENDER_ID</key>
@@ -9,7 +15,7 @@
 	<key>PLIST_VERSION</key>
 	<string>1</string>
 	<key>BUNDLE_ID</key>
-	<string>com.example.tennisreminderApp</string>
+	<string>com.hoonk.tennisreminderApp</string>
 	<key>PROJECT_ID</key>
 	<string>tennisreminder-ecf66</string>
 	<key>STORAGE_BUCKET</key>
@@ -25,6 +31,6 @@
 	<key>IS_SIGNIN_ENABLED</key>
 	<true></true>
 	<key>GOOGLE_APP_ID</key>
-	<string>1:334096525:ios:2a81c64c9755d9a02edac4</string>
+	<string>1:334096525:ios:e436629cc5a4ca582edac4</string>
 </dict>
 </plist>
