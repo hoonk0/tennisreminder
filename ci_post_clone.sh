@@ -1,4 +1,3 @@
 #!/bin/sh
-cd ios
-pod install≈
+cd ios && pod install
 
