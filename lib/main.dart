@@ -31,6 +31,8 @@ Future<void> main() async {
 
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
+  CourtNotificationFixedDayEachMonth.setupFirebaseForegroundHandler();
+
   AuthRepository.initialize(appKey: '26476b06b753504ad14bb998f377645f');
 
   await initializeNotification();
@@ -90,8 +92,22 @@ Future<void> initializeNotification() async {
       .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()
       ?.createNotificationChannel(channel);
 
+  // Initialize FlutterLocalNotificationsPlugin before setting up message listener
+  await flutterLocalNotificationsPlugin.initialize(
+    const InitializationSettings(
+      android: AndroidInitializationSettings('@mipmap/ic_launcher'),
+      iOS: DarwinInitializationSettings(
+        requestAlertPermission: true,
+        requestBadgePermission: true,
+        requestSoundPermission: true,
+
+      ),
+    ),
+  );
+
   FirebaseMessaging.onMessage.listen((RemoteMessage message) {
     if (message.notification != null) {
+      print('📥 포그라운드 메시지 수신: ${message.notification?.title} / ${message.notification?.body}');
       flutterLocalNotificationsPlugin.show(
         0,
         message.notification!.title,
@@ -104,11 +120,24 @@ Future<void> initializeNotification() async {
             priority: Priority.high,
             icon: 'ic_stat_notify',
           ),
+          iOS: DarwinNotificationDetails(
+            presentAlert: true,
+            presentBadge: true,
+            presentSound: true,
+          ),
         ),
       );
     }
   });
+  // 알림 권한 요청 (iOS)
+  await FirebaseMessaging.instance.requestPermission(
+    alert: true,
+    badge: true,
+    sound: true,
+  );
 }
+
+
 
 ///최초1번 글로벌노티파이어 사용을 위해 불러옴
 Future<void> _loadFavoriteCourts() async {

@@ -117,9 +117,29 @@ class CourtNotificationFixedDayEachMonth {
   }
 
   static void setupFirebaseForegroundHandler() {
+    final flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
+
+    const AndroidNotificationDetails androidDetails = AndroidNotificationDetails(
+      'default_channel_id',
+      'Default',
+      importance: Importance.max,
+      priority: Priority.high,
+    );
+
+    const NotificationDetails notificationDetails = NotificationDetails(
+      android: androidDetails,
+      iOS: DarwinNotificationDetails(),
+    );
+
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-      debugPrint('📩 [CourtNotificationFixedDayEachMonth] 포그라운드 메시지 수신: ${message.notification?.title}');
-      // 여기서 FlutterLocalNotificationsPlugin 등으로 알림 띄우기 가능
+      if (message.notification != null) {
+        flutterLocalNotificationsPlugin.show(
+          message.notification.hashCode,
+          message.notification?.title,
+          message.notification?.body,
+          notificationDetails,
+        );
+      }
     });
   }
 
@@ -228,9 +248,29 @@ class CourtNotificationDaysBeforePlay {
   }
 
   static void setupFirebaseForegroundHandler() {
+    final flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
+
+    const AndroidNotificationDetails androidDetails = AndroidNotificationDetails(
+      'default_channel_id',
+      'Default',
+      importance: Importance.max,
+      priority: Priority.high,
+    );
+
+    const NotificationDetails notificationDetails = NotificationDetails(
+      android: androidDetails,
+      iOS: DarwinNotificationDetails(),
+    );
+
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-      debugPrint('📩 [CourtNotificationDaysBeforePlay] 포그라운드 메시지 수신: ${message.notification?.title}');
-      // 여기서 FlutterLocalNotificationsPlugin 등으로 알림 띄우기 가능
+      if (message.notification != null) {
+        flutterLocalNotificationsPlugin.show(
+          message.notification.hashCode,
+          message.notification?.title,
+          message.notification?.body,
+          notificationDetails,
+        );
+      }
     });
   }
 }
@@ -339,9 +379,29 @@ class CourtNotificationNthWeekdayOfMonth {
   }
 
   static void setupFirebaseForegroundHandler() {
+    final flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
+
+    const AndroidNotificationDetails androidDetails = AndroidNotificationDetails(
+      'default_channel_id',
+      'Default',
+      importance: Importance.max,
+      priority: Priority.high,
+    );
+
+    const NotificationDetails notificationDetails = NotificationDetails(
+      android: androidDetails,
+      iOS: DarwinNotificationDetails(),
+    );
+
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-      debugPrint('📩 [CourtNotificationNthWeekdayOfMonth] 포그라운드 메시지 수신: ${message.notification?.title}');
-      // 여기서 FlutterLocalNotificationsPlugin 등으로 알림 띄우기 가능
+      if (message.notification != null) {
+        flutterLocalNotificationsPlugin.show(
+          message.notification.hashCode,
+          message.notification?.title,
+          message.notification?.body,
+          notificationDetails,
+        );
+      }
     });
   }
 }

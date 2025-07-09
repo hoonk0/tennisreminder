@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:naver_login_sdk/naver_login_sdk.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import 'package:sizer/sizer.dart';
 import 'package:tennisreminder_app/ui/route/auth/route_auth_find_pw.dart';
 import 'package:tennisreminder_app/ui/route/auth/route_auth_sign_up.dart';
@@ -283,7 +284,9 @@ class _RouteLoginState extends State<RouteAuthLogin> {
                                 ),
                               if (Theme.of(context).platform == TargetPlatform.iOS)
                                 GestureDetector(
-                                  onTap: () async {},
+                                  onTap: () async {
+                                    _loginForApple();
+                                  },
                                   child: SizedBox(
                                     width: 56,
                                     height: 56,
@@ -399,6 +402,54 @@ class _RouteLoginState extends State<RouteAuthLogin> {
       ),
     );
   }
+
+  ///애플로그인
+  void _loginForApple() async {
+    FocusManager.instance.primaryFocus?.unfocus();
+
+    Utils.toast(desc: '애플 로그인을 시도중입니다.');
+    print('▶ 애플 로그인 버튼 클릭됨');
+
+    try {
+      print('▶ Apple 인증 요청 시작');
+      final credential = await SignInWithApple.getAppleIDCredential(
+        scopes: [
+          AppleIDAuthorizationScopes.email,
+          AppleIDAuthorizationScopes.fullName,
+        ],
+      );
+      print('✅ Apple credential 받음');
+      print('📧 email: ${credential.email}');
+      print('🆔 userIdentifier: ${credential.userIdentifier}');
+
+      final String uid = credential.userIdentifier ?? '';
+      if (uid.isEmpty) {
+        Utils.toast(desc: '애플 로그인 실패: userIdentifier 없음');
+        return;
+      }
+
+      final userDs = await FirebaseFirestore.instance.collection(keyUser).where(keyUid, isEqualTo: uid).get();
+      if (userDs.docs.isEmpty) {
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (context) => RouteAuthSnsSignUp(
+              uid: uid,
+              email: credential.email,
+              loginType: LoginType.apple,
+            ),
+          ),
+        );
+      } else {
+        final pref = await SharedPreferences.getInstance();
+        pref.setString(keyUid, uid);
+        Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (context) => const RouteSplash()), (route) => false);
+      }
+    } catch (e, stack) {
+      print('❌ 예외 발생: $e');
+      print('📍 Stack trace: $stack');
+      Utils.toast(desc: '애플 로그인 실패: ${e.toString()}');
+    }
+  }
 }
 
 /// 구글 로그인
@@ -454,5 +505,4 @@ class _WidgetText extends StatelessWidget {
     );
   }
 }
-
 

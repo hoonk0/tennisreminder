@@ -108,6 +108,7 @@ exports.sendEmail = onRequest(async (req, res) => {
   const content = req.query.content;
 
   if (!to || !subject || !content) {
+  if (!to || !subject || !content) {
     res.status(400).send("Missing required parameters");
     return;
   }

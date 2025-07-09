@@ -50,7 +50,7 @@ dependencies:
   firebase_auth: ^5.1.2
 
   # 로그인
-  sign_in_with_apple: ^6.1.4
+  sign_in_with_apple: ^7.0.1
   kakao_flutter_sdk: ^1.9.7+3
   kakao_flutter_sdk_user: 1.9.7+3
   crypto: ^3.0.3
