@@ -5,10 +5,10 @@ import 'package:flutter_svg/svg.dart';
 import 'package:naver_login_sdk/naver_login_sdk.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
-import 'package:sizer/sizer.dart';
 import 'package:tennisreminder_app/ui/route/auth/route_auth_find_pw.dart';
 import 'package:tennisreminder_app/ui/route/auth/route_auth_sign_up.dart';
 import 'package:tennisreminder_app/ui/route/auth/route_auth_sns_sign_up.dart';
+import 'package:tennisreminder_app/ui/route/route_main.dart';
 import 'package:tennisreminder_core/const/model/model_user.dart';
 import 'package:tennisreminder_core/const/value/colors.dart';
 import 'package:tennisreminder_core/const/value/enum.dart';
@@ -20,7 +20,6 @@ import '../../../service/utils/utils.dart';
 import '../../component/basic_button.dart';
 import '../../component/textfield_border.dart';
 import '../../dialog/dialog_confirm.dart';
-import '../route_main.dart';
 import '../route_splash.dart';
 
 class RouteAuthLogin extends StatefulWidget {
@@ -210,8 +209,6 @@ class _RouteLoginState extends State<RouteAuthLogin> {
                           ),
                           Gaps.v16,
 
-
-
                           /// SNS 로그인
                           Row(
                             mainAxisAlignment: MainAxisAlignment.center,
@@ -299,6 +296,27 @@ class _RouteLoginState extends State<RouteAuthLogin> {
                                 ),
                             ],
                           ),
+                          Gaps.v16,
+              GestureDetector(
+                onTap: (){
+                  Navigator.of(context).push(MaterialPageRoute(
+                                  builder: (context) => RouteMain()));
+                },
+                child: Container(
+                  decoration: const BoxDecoration(
+                    border: Border(
+                      bottom: BorderSide(
+                        color: colorGray900,
+                        width: 1.0,
+                      ),
+                    ),
+                  ),
+                  child: const Text(
+                    '로그인 없이 둘러보기',
+                    style: TS.s13w500(colorGray900),
+                  ),
+                ),
+              ),
                           Gaps.v40,
                         ],
                       ),

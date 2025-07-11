@@ -1,25 +1,18 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:flutter_svg/svg.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:tennisreminder_app/service/map/google_map_screen.dart';
 import 'package:tennisreminder_app/service/map/naver_map_screen.dart';
-import 'package:tennisreminder_app/service/weather/weather_alarm.dart';
 import 'package:tennisreminder_app/ui/component/custom_divider.dart';
 import 'package:tennisreminder_core/const/model/model_court.dart';
 import 'package:tennisreminder_core/const/value/enum.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:tennisreminder_core/const/model/model_court_alarm.dart';
 import 'package:tennisreminder_core/const/value/colors.dart';
 import 'package:tennisreminder_core/const/value/keys.dart';
 import 'package:tennisreminder_core/const/value/gaps.dart';
 import 'package:tennisreminder_core/const/value/text_style.dart';
 
 import '../../../const/static/global.dart';
-import '../../../service/notification/court_notification_setting_upgrade.dart';
 import '../../../service/utils/utils.dart';
 import '../../component/court_reservation_section.dart';
 
@@ -46,21 +39,15 @@ class _RouteCourtInformationState extends State<RouteCourtInformation> {
   final ValueNotifier<bool> vnAlarmSet = ValueNotifier(false);
 
   // GoogleMapController for showing marker info window
-  late GoogleMapController _mapController;
 
   Future<String?> getFcmToken() async {
     // TODO: Replace with your actual FCM token fetch logic
     return await FirebaseMessaging.instance.getToken();
   }
 
-  void _onMapCreated(GoogleMapController controller) {
-    _mapController = controller;
-    // Show the info window for this court's marker after map loads
-    _mapController.showMarkerInfoWindow(MarkerId(widget.court.uid));
-  }
 
   void _openNaverMapApp() async {
-    final name = widget.court.courtAddress ?? '코트 위치';
+    final name = widget.court.courtAddress;
     final appUrl = Uri.parse('nmap://place?lat=${widget.court.latitude}&lng=${widget.court.longitude}&name=$name');
     // Web fallback: open Naver Map search for the name (address-based search)
     final url = Uri.encodeFull('https://map.naver.com/v5/search/$name');
@@ -167,6 +154,7 @@ class _RouteCourtInformationState extends State<RouteCourtInformation> {
                                           debugPrint("❤️ 좋아요 버튼 클릭됨 - 현재 유저 UID: $userUid, user_type: ${currentUser?.userType}");
                                           if (userUid == null || currentUser?.userType != UserType.user) {
                                             debugPrint("❌ user_type이 'UserType.user'가 아니거나 로그인되지 않음 - 좋아요 처리 중단");
+                                            Utils.toast(desc: '로그인 후 이용해주세요');
                                             return;
                                           }
 
@@ -344,7 +332,7 @@ class _RouteCourtInformationState extends State<RouteCourtInformation> {
                                         GestureDetector(
                                           onTap: () async {
                                             final url = widget.court.reservationUrl;
-                                            if (url != null && await canLaunch(url)) {
+                                            if (await canLaunch(url)) {
                                               await launch(url);
                                             } else {
                                               Utils.toast(desc: '예약사이트를 제공하지 않는 코트입니다.');
@@ -574,19 +562,30 @@ class _RouteCourtInformationState extends State<RouteCourtInformation> {
               ),
              Positioned(
                bottom: 20,
-                left: 20,
-                right: 20,
-                child: Material(
-                  color: Colors.transparent,
-                  elevation: 0,
-                  child: Container(
-                    color: Colors.transparent,
-                    child: CourtReservationSection(
-                      court: widget.court,
-                    ),
-                  ),
-                ),
-              ),
+               left: 20,
+               right: 20,
+               child: Material(
+                 color: Colors.transparent,
+                 elevation: 0,
+                 child: Container(
+                   color: Colors.transparent,
+                   child: Builder(
+                     builder: (context) {
+                       final currentUser = Global.userNotifier.value;
+                       final userUid = currentUser?.uid;
+                       debugPrint("❤️ 예약 버튼 클릭 확인 - 현재 유저 UID: $userUid, user_type: ${currentUser?.userType}");
+                       if (userUid == null || currentUser?.userType != UserType.user) {
+                         debugPrint("❌ user_type이 'UserType.user'가 아니거나 로그인되지 않음 - 예약 버튼 미노출");
+                         return const SizedBox.shrink();
+                       }
+                       return CourtReservationSection(
+                         court: widget.court,
+                       );
+                     },
+                   ),
+                 ),
+               ),
+             ),
 
               /// Bottom buttons: "모든 알람 삭제하기" and "예약하러 가기"
 /*              Container(
