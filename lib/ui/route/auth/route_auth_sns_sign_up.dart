@@ -8,9 +8,11 @@ import 'package:tennisreminder_core/const/value/enum.dart';
 import 'package:tennisreminder_core/const/value/gaps.dart';
 import 'package:tennisreminder_core/const/value/keys.dart';
 import 'package:tennisreminder_core/const/value/text_style.dart';
+import '../../../const/static/global.dart';
 import '../../../service/utils/utils.dart';
 import '../../component/basic_button.dart';
 import '../route_main.dart';
+import '../route_splash.dart';
 
 class RouteAuthSnsSignUp extends StatefulWidget {
   final String uid;
@@ -71,6 +73,7 @@ class _RouteAuthSnsSignUpState extends State<RouteAuthSnsSignUp> {
                           uid: widget.uid,
                           email: widget.email ?? 'SNS',
                           loginType: widget.loginType,
+                          userType: UserType.user,
                           dateCreate: Timestamp.now(),
                         );
                         try {
@@ -79,6 +82,7 @@ class _RouteAuthSnsSignUpState extends State<RouteAuthSnsSignUp> {
                               .collection(keyUser)
                               .doc(modelUser.uid)
                               .set(modelUser.toJson());
+                          Global.userNotifier.value = modelUser;
                           debugPrint('Firestore 저장 성공');
 
                           final pref = await SharedPreferences.getInstance();
@@ -89,7 +93,7 @@ class _RouteAuthSnsSignUpState extends State<RouteAuthSnsSignUp> {
                             debugPrint('Navigator.push 호출');
                             await Future.microtask(() {
                               Navigator.of(context).push(
-                                MaterialPageRoute(builder: (context) => const RouteMain()),
+                                MaterialPageRoute(builder: (context) => const RouteSplash()),
                               );
                             });
                             debugPrint('Navigator.push 완료');
