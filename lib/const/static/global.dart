@@ -23,5 +23,7 @@ class Global {
   ///날씨관련
   static final ValueNotifier<List<Map<String, dynamic>>> vnForecast = ValueNotifier([]);
   static final ValueNotifier<List<Map<String, dynamic>>> vnHourly = ValueNotifier([]);
+
+  static String? fcmToken;
 }
 

@@ -30,6 +30,8 @@ Future<void> main() async {
   await initializeDateFormatting('ko_KR');
 
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  ///알람 fcm 불러오기
+  Global.fcmToken = await FirebaseMessaging.instance.getToken();
 
   CourtNotificationFixedDayEachMonth.setupFirebaseForegroundHandler();
 

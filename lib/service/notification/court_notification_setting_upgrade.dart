@@ -52,9 +52,9 @@ class CourtNotificationFixedDayEachMonth {
       Utils.toast(desc: '알림이 꺼져 있어요.\n[설정 > 알림]에서 테코알의 알림 권한을 켜주세요.');
       return;
     }
-    final fcmToken = await FirebaseMessaging.instance.getToken();
+    final fcmToken = Global.fcmToken;
     if (fcmToken == null) {
-      throw Exception('FCM 토큰을 가져올 수 없습니다.');
+      throw Exception('FCM 토큰이 존재하지 않습니다. 앱을 다시 실행해주세요.');
     }
 
     final userUid = Global.uid;
@@ -198,7 +198,10 @@ class CourtNotificationDaysBeforePlay {
       Utils.toast(desc: '알림이 꺼져 있어요.\n[설정 > 알림]에서 테코알의 알림 권한을 켜주세요.');
       return;
     }
-    final fcmToken = await FirebaseMessaging.instance.getToken();
+    final fcmToken = Global.fcmToken;
+    if (fcmToken == null) {
+      throw Exception('FCM 토큰이 존재하지 않습니다. 앱을 다시 실행해주세요.');
+    }
     if (fcmToken == null) {
       throw Exception('FCM 토큰을 가져올 수 없습니다.');
     }
@@ -305,15 +308,11 @@ class CourtNotificationNthWeekdayOfMonth {
 
     if (isGranted != true) {
       Utils.toast(desc: '알림이 꺼져 있어요.\n[설정 > 알림]에서 테코알의 알림 권한을 켜주세요.');
-      final fcmToken = await FirebaseMessaging.instance.getToken();
-      if (fcmToken == null) {
-        throw Exception('FCM 토큰을 가져올 수 없습니다.');
-      }
       return;
     }
-    final fcmToken = await FirebaseMessaging.instance.getToken();
+    final fcmToken = Global.fcmToken;
     if (fcmToken == null) {
-      throw Exception('FCM 토큰을 가져올 수 없습니다.');
+      throw Exception('FCM 토큰이 존재하지 않습니다. 앱을 다시 실행해주세요.');
     }
 
     final userUid = Global.uid;

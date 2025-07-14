@@ -53,6 +53,7 @@ class CourtReservationSection extends StatelessWidget {
             final reservationDay = court.reservationInfo?.reservationDay;
             final reservationHour = court.reservationInfo?.reservationHour;
             if (reservationDay != null && reservationHour != null) {
+              final fcmToken = await FirebaseMessaging.instance.getToken();
               await CourtNotificationFixedDayEachMonth.saveAlarmToFirestore(
                 court: court,
                 reservationDay: reservationDay,
@@ -132,6 +133,7 @@ class CourtReservationSection extends StatelessWidget {
             final reservationHour = court.reservationInfo?.reservationHour;
 
             if (reservationWeekNumber != null && reservationWeekday != null && reservationHour != null) {
+              final fcmToken = await FirebaseMessaging.instance.getToken();
               await CourtNotificationNthWeekdayOfMonth.saveAlarmToFirestore(
                 court: court,
                 reservationWeekNumber: reservationWeekNumber,

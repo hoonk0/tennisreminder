@@ -184,6 +184,7 @@ class _TabAlarmState extends State<TabAlarm> {
                                   keyAlarmDateTime: alarm.alarmDateTime,
                                   keyDateCreate: alarm.dateCreate,
                                   keyAlarmEnabled: true,
+                                  keyFcmToken:Global.fcmToken
                                 };
 
                                 await FirebaseFirestore.instance.collection(keyCourtAlarms).add(data);
