@@ -30,8 +30,21 @@ Future<void> main() async {
   await initializeDateFormatting('ko_KR');
 
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-  ///알람 fcm 불러오기
-  Global.fcmToken = await FirebaseMessaging.instance.getToken();
+  // 알림 권한 요청 (iOS)
+  await FirebaseMessaging.instance.requestPermission(
+    alert: true,
+    badge: true,
+    sound: true,
+  );
+
+  // APNs 토큰 확인 후 FCM 토큰 요청
+  final apnsToken = await FirebaseMessaging.instance.getAPNSToken();
+  if (apnsToken != null) {
+    Global.fcmToken = await FirebaseMessaging.instance.getToken();
+    print('✅ FCM 토큰: ${Global.fcmToken}');
+  } else {
+    print('❌ APNs 토큰이 아직 없음, FCM 토큰 요청 지연됨');
+  }
 
   CourtNotificationFixedDayEachMonth.setupFirebaseForegroundHandler();
 
