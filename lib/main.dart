@@ -67,15 +67,6 @@ Future<void> main() async {
     },
   );
 
-  final user = FirebaseAuth.instance.currentUser;
-  if (user != null) {
-    print('✅ 로그인된 사용자 UID: ${user.uid}');
-    await _loadFavoriteCourts();
-    await syncCourtAlarms(user.uid);
-  } else {
-    print('❌ 로그인된 사용자 없음 (FirebaseAuth.currentUser == null)');
-  }
-
   runApp(const ProviderScope(child: MyApp()));
 }
 
