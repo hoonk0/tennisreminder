@@ -67,7 +67,7 @@ exports.sendDailyAlarm = onSchedule(
       functions.logger.info(`⏱️ 시간 차이 (분): ${diffInMinutes}`);
       functions.logger.info(`🔍 fcm_token: ${alarmData.fcmToken ?? alarmData.fcm_token}`);
       functions.logger.info(`🔍 user_uid: ${alarmData.userUid ?? alarmData.user_uid}`);
-      if (Math.abs(diffInMinutes) <= 1) {
+      if (diffInMinutes === 0) {
         functions.logger.info(`🔔 알람 전송 대상: ${alarmData.courtName ?? alarmData.court_name ?? "테니스 코트"}`);
         functions.logger.info(`🕓 알람 예약 시간: ${alarmDateTimeRaw?.toDate ? alarmDateTimeRaw.toDate() : alarmDateTimeRaw}`);
         // FCM 토큰 확인
@@ -107,7 +107,6 @@ exports.sendEmail = onRequest(async (req, res) => {
   const subject = req.query.subject;
   const content = req.query.content;
 
-  if (!to || !subject || !content) {
   if (!to || !subject || !content) {
     res.status(400).send("Missing required parameters");
     return;
