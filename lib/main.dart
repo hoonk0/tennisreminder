@@ -37,13 +37,22 @@ Future<void> main() async {
     sound: true,
   );
 
-  // APNs 토큰 확인 후 FCM 토큰 요청
-  final apnsToken = await FirebaseMessaging.instance.getAPNSToken();
-  if (apnsToken != null) {
-    Global.fcmToken = await FirebaseMessaging.instance.getToken();
-    print('✅ FCM 토큰: ${Global.fcmToken}');
+  // APNs/FCM 토큰 확인 및 요청
+  if (Platform.isIOS) {
+    final apnsToken = await FirebaseMessaging.instance.getAPNSToken();
+    if (apnsToken != null) {
+      Global.fcmToken = await FirebaseMessaging.instance.getToken();
+      print('✅ FCM 토큰(iOS): ${Global.fcmToken}');
+    } else {
+      print('❌ APNs 토큰이 아직 없음, FCM 토큰 요청 지연됨');
+    }
   } else {
-    print('❌ APNs 토큰이 아직 없음, FCM 토큰 요청 지연됨');
+    Global.fcmToken = await FirebaseMessaging.instance.getToken();
+    if (Global.fcmToken != null) {
+      print('✅ FCM 토큰(Android): ${Global.fcmToken}');
+    } else {
+      print('❌ FCM 토큰을 받아오지 못했습니다.');
+    }
   }
 
   CourtNotificationFixedDayEachMonth.setupFirebaseForegroundHandler();
