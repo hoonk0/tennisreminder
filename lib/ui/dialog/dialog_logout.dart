@@ -33,7 +33,7 @@ class DialogLogout extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Gaps.v30,
-          Container(
+/*          Container(
             width: 70,
             height: 70,
             decoration: const BoxDecoration(
@@ -49,10 +49,10 @@ class DialogLogout extends StatelessWidget {
               ),
             ),
           ),
-          Gaps.v20,
+          Gaps.v20,*/
           Text(
             title,
-            style: const TS.s16w600(colorGray900),
+            style: const TS.s16w600(colorMain900),
             textAlign: TextAlign.center,
           ),
           Gaps.v4,

@@ -130,7 +130,7 @@ class _RouteLoginState extends State<RouteAuthLogin> {
 
                               const Text(
                                 '공공기관 테니스코트\n예약 알리미',
-                                style: TS.s24w600(colorMain900),
+                                style: TS.s24w700(colorMain900),
                                 textAlign: TextAlign.center,
                               ),
                             ],

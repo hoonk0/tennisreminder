@@ -8,8 +8,10 @@ import 'package:tennisreminder_core/const/model/model_court.dart';
 import 'package:tennisreminder_core/const/model/model_court_alarm.dart';
 import 'package:tennisreminder_core/const/value/colors.dart';
 import 'package:tennisreminder_core/const/value/gaps.dart';
+import 'package:tennisreminder_core/const/value/keys.dart';
 import 'package:tennisreminder_core/const/value/text_style.dart';
 import '../../const/static/global.dart';
+import '../../service/stream/stream_me.dart';
 import '../../service/utils/utils.dart';
 import '../dialog/dialog_logout.dart';
 import '../route/my_page/route_profile_privacy_policy.dart';
@@ -50,6 +52,20 @@ class TabProfile extends StatelessWidget {
     }
 
     final success = await Utils.deleteAccount();
+    if (globalUser != null) {
+      final snapshot = await FirebaseFirestore.instance
+          .collection(keyCourtAlarms)
+          .where(keyUid, isEqualTo: globalUser.uid)
+          .get();
+
+      for (final doc in snapshot.docs) {
+        await doc.reference.delete();
+      }
+
+      Global.vnCourtAlarms.value = [];
+    }
+    // 스트림 구독 취소
+    await StreamMe.streamSubscription?.cancel();
     if (success && context.mounted) {
       Navigator.of(context).pushAndRemoveUntil(
         MaterialPageRoute(builder: (_) => const RouteSplash()),
