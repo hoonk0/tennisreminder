@@ -68,8 +68,9 @@ class _RouteMainState extends State<RouteMain> {
           //physics: const NeverScrollableScrollPhysics(), // 사용자 스크롤 비활성
           children: const [
             TabHome(), // 0
-            TabAlarm(), //3
-            TabProfile(), // 4
+            TabAlarm(), //1
+            //TabBoard(),
+            TabProfile(), //2
           ],
           onPageChanged: (index) {
             Global.tabIndexNotifier.value = index; // 내비게이션 → notifier 동기화
