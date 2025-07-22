@@ -31,10 +31,10 @@
               "client_type": 3
             },
             {
-              "client_id": "334096525-o7v0fsdf329k9875h2k3cidrkd3oo965.apps.googleusercontent.com",
+              "client_id": "334096525-ibl75ph054q4v3e7moo7tuejbv1loi8s.apps.googleusercontent.com",
               "client_type": 2,
               "ios_info": {
-                "bundle_id": "com.example.tennisReminderAdmin"
+                "bundle_id": "com.hoonk.tennisreminderApp"
               }
             }
           ]
@@ -75,10 +75,10 @@
               "client_type": 3
             },
             {
-              "client_id": "334096525-o7v0fsdf329k9875h2k3cidrkd3oo965.apps.googleusercontent.com",
+              "client_id": "334096525-ibl75ph054q4v3e7moo7tuejbv1loi8s.apps.googleusercontent.com",
               "client_type": 2,
               "ios_info": {
-                "bundle_id": "com.example.tennisReminderAdmin"
+                "bundle_id": "com.hoonk.tennisreminderApp"
               }
             }
           ]
@@ -87,12 +87,20 @@
     },
     {
       "client_info": {
-        "mobilesdk_app_id": "1:334096525:android:cfe411c2e9ad021d2edac4",
+        "mobilesdk_app_id": "1:334096525:android:0fefbf0839a33fb32edac4",
         "android_client_info": {
-          "package_name": "com.hoonk.tennisreminder_app"
+          "package_name": "com.hoonk.tennisreminder"
         }
       },
       "oauth_client": [
+        {
+          "client_id": "334096525-omn8alvh3v19v4ar2348l8eqfsaa66g3.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.hoonk.tennisreminder",
+            "certificate_hash": "0b094e6fb4b0d7f025b6a571278cb27dd7f1ab87"
+          }
+        },
         {
           "client_id": "334096525-tslo8i1rl1gttt9p9gjivupugernsgb5.apps.googleusercontent.com",
           "client_type": 3
@@ -111,10 +119,54 @@
               "client_type": 3
             },
             {
-              "client_id": "334096525-o7v0fsdf329k9875h2k3cidrkd3oo965.apps.googleusercontent.com",
+              "client_id": "334096525-ibl75ph054q4v3e7moo7tuejbv1loi8s.apps.googleusercontent.com",
               "client_type": 2,
               "ios_info": {
-                "bundle_id": "com.example.tennisReminderAdmin"
+                "bundle_id": "com.hoonk.tennisreminderApp"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:334096525:android:cfe411c2e9ad021d2edac4",
+        "android_client_info": {
+          "package_name": "com.hoonk.tennisreminder_app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "334096525-jtngpi6dr47fuknrrs01h2etqlh61ctd.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.hoonk.tennisreminder_app",
+            "certificate_hash": "4742aafd9350ecc5a9f83e9280c6865e6a14ed97"
+          }
+        },
+        {
+          "client_id": "334096525-tslo8i1rl1gttt9p9gjivupugernsgb5.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDgITAhBu0-Ttbf0sz7BgfGm2H-ywg6OBw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "334096525-tslo8i1rl1gttt9p9gjivupugernsgb5.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "334096525-ibl75ph054q4v3e7moo7tuejbv1loi8s.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.hoonk.tennisreminderApp"
               }
             }
           ]
