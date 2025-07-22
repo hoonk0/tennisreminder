@@ -940,10 +940,10 @@ packages:
     dependency: "direct main"
     description:
       name: naver_login_sdk
-      sha256: ce7662debacf2fb38fc3c50e9f2219f6588465dc06b18e0df83cf1b9c228aec9
+      sha256: "071e421deb397400db1440800292c2c313c8b3473de4a4d522706fb108f7afd4"
       url: "https://pub.dev"
     source: hosted
-    version: "2.3.0"
+    version: "3.0.2"
   octo_image:
     dependency: transitive
     description:

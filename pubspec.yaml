@@ -55,7 +55,7 @@ dependencies:
   kakao_flutter_sdk_user: 1.9.7+3
   crypto: ^3.0.3
   google_sign_in: ^6.2.1
-  naver_login_sdk: ^2.3.0
+  naver_login_sdk: ^3.0.2
 
   # 기본 패키지
   shared_preferences: ^2.5.2

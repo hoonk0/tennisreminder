@@ -61,15 +61,12 @@
         </activity>
         <!-- ✅ 네이버 로그인 설정 -->
         <activity
-            android:name="com.navercorp.nid.flutter.NaverLoginActivity"
+            android:name="com.naver.nid.flutter.NaverLoginActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
-
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-
-                <!-- 네이버 로그인 Redirect URI -->
                 <data
                     android:scheme="naverDTY9BzaNLS7fQGjW3Z1T"
                     android:host="oauth" />
