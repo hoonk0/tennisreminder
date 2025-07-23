@@ -94,6 +94,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "334096525-3vuufce9m6r80qqnn799sm3u2l76tnt8.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.hoonk.tennisreminder_app",
+            "certificate_hash": "40d703121596a57ec59b47fe88cd9520e4625ced"
+          }
+        },
+        {
           "client_id": "334096525-nsr9d1e7b77lg4n96ak574dclpit2j1g.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {

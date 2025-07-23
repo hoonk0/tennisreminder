@@ -50,9 +50,15 @@ class TabProfile extends StatelessWidget {
       }
       return;
     }
-
     final success = await Utils.deleteAccount();
-    if (globalUser != null) {
+
+    if (success && context.mounted) {
+      Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(builder: (_) => const RouteSplash()),
+            (route) => false,
+      );
+    }
+
       final snapshot = await FirebaseFirestore.instance
           .collection(keyCourtAlarms)
           .where(keyUid, isEqualTo: globalUser.uid)
@@ -63,15 +69,11 @@ class TabProfile extends StatelessWidget {
       }
 
       Global.vnCourtAlarms.value = [];
-    }
+
+
     // 스트림 구독 취소
-    await StreamMe.streamSubscription?.cancel();
-    if (success && context.mounted) {
-      Navigator.of(context).pushAndRemoveUntil(
-        MaterialPageRoute(builder: (_) => const RouteSplash()),
-            (route) => false,
-      );
-    }
+   // await StreamMe.streamSubscription?.cancel();
+
   }
 
   final VoidCallback? onTapBookmark;
