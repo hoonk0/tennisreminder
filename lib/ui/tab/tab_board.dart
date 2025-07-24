@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:tennisreminder_app/ui/route/board/route_board_court.dart';
 
 class TabBoard extends StatelessWidget {
   const TabBoard({super.key});
@@ -24,7 +25,7 @@ class TabBoard extends StatelessWidget {
             Expanded(
               child: TabBarView(
                 children: [
-                  Center(child: Text('코트 양도 게시판 내용')),
+                  RouteBoardCourt(),
                   Center(child: Text('라켓 중고거래 게시판 내용')),
                 ],
               ),

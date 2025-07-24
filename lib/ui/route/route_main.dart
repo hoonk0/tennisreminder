@@ -70,8 +70,8 @@ class _RouteMainState extends State<RouteMain> {
           children: const [
             TabHome(), // 0
             TabAlarm(), //1
-            //TabBoard(),
-            TabProfile(), //2
+            TabBoard(),
+            //TabProfile(), //2
           ],
           onPageChanged: (index) {
             Global.tabIndexNotifier.value = index; // 내비게이션 → notifier 동기화
