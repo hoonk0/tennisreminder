@@ -37,7 +37,7 @@ class _BottomSheetCourtTransferState extends State<BottomSheetCourtTransfer> {
     selectedDateNotifier = ValueNotifier<DateTime?>(null);
     startTimeNotifier = ValueNotifier<TimeOfDay?>(null);
     endTimeNotifier = ValueNotifier<TimeOfDay?>(null);
-    vnTransferOption = ValueNotifier<bool>(false);
+    vnTransferOption = ValueNotifier<bool>(true);
   }
 
   @override
