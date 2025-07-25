@@ -1,4 +1,6 @@
 import 'package:flutter/foundation.dart';
+import 'package:tennisreminder_app/ui/component/loading_bar.dart';
+import 'package:tennisreminder_app/ui/route/board/route_board_court_transfer_detail.dart';
 import 'package:tennisreminder_core/const/value/gaps.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
@@ -6,6 +8,7 @@ import 'package:tennisreminder_core/const/value/colors.dart';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:tennisreminder_core/const/value/keys.dart';
+import 'package:tennisreminder_core/const/value/text_style.dart';
 
 import '../../bottom_sheet/bottom_sheet_court_transfer.dart';
 import '../../component/basic_button.dart';
@@ -28,7 +31,7 @@ class RouteBoardCourt extends StatelessWidget {
                     .snapshots(),
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const CircularProgressIndicator();
+                    return LoadingBar();
                   }
                   if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
                     return const Text('게시글이 없습니다.');
@@ -38,25 +41,71 @@ class RouteBoardCourt extends StatelessWidget {
 
                   return ListView.separated(
                     itemCount: docs.length,
-                    separatorBuilder: (context, index) => const Divider(),
+                    separatorBuilder: (context, index) => Text(''),
                     itemBuilder: (context, index) {
                       final doc = docs[index];
                       final data = doc.data() as Map<String, dynamic>;
 
-                      return ListTile(
-                        title: Text(data[keyTransferCourtName] ?? '코트 이름 없음'),
-                        subtitle: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text('날짜: ${data[keyTransferDate] ?? ''}'),
-                            Text('시간: ${data[keyTransferStartTime]} ~ ${data[keyTransferEndTime]}'),
-                            Text('연락처: ${data[keyContact] ?? ''}'),
-                            Text('교환 여부: ${data[keyIsExchange] == true ? '교환' : '양도'}'),
-                            if ((data[keyTransferExtraInfo] ?? '').isNotEmpty)
-                              Text('추가정보: ${data[keyTransferExtraInfo]}'),
-                          ],
+                     return GestureDetector(
+                       onTap: () {
+                         Navigator.push(
+                           context,
+                           MaterialPageRoute(
+                             builder: (context) => RouteCourtTransferDetail(data: data),
+                           ),
+                         );
+                       },
+                       child: Container(
+                          padding: const EdgeInsets.all(16),
+                          margin: const EdgeInsets.symmetric(vertical: 2),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(12),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.1),
+                                blurRadius: 8,
+                                offset: Offset(0, 4),
+                              ),
+                            ],
+                          ),
+                          child: Stack(
+                            children: [
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Gaps.v8,
+                                  Text(
+                                    data[keyTransferCourtName] ?? '코트 이름 없음',
+                                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                                  ),
+                                  Gaps.v8,
+                                  Text('날짜: ${data[keyTransferDate]?.toString().split('T').first ?? ''}'),
+                                  Text('시간: ${data[keyTransferStartTime]} ~ ${data[keyTransferEndTime]}'),
+                   /*               Text('연락처: ${data[keyContact] ?? ''}'),
+                                    if ((data[keyTransferExtraInfo] ?? '').isNotEmpty)
+                                      Text('추가정보: ${data[keyTransferExtraInfo]}'),*/
+                                ],
+                              ),
+                              Positioned(
+                                top: 0,
+                                right: 0,
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                  decoration: BoxDecoration(
+                                    color: (data[keyIsExchange] == true) ? Colors.green : Colors.blue,
+                                    borderRadius: const BorderRadius.all(Radius.circular(10)),
+                                  ),
+                                  child: Text(
+                                    data[keyIsExchange] == true ? '교환' : '양도',
+                                    style: TS.s12w600(colorWhite),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
-                      );
+                     );
                     },
                   );
                 },

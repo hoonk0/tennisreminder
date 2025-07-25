@@ -20,13 +20,16 @@ class BottomSheetCourtTransfer extends StatefulWidget {
 }
 
 class _BottomSheetCourtTransferState extends State<BottomSheetCourtTransfer> {
+  bool isExchange = false;
+  bool isTransfer = false;
   late final TextEditingController tecCourtNameController;
   late final TextEditingController tecContactController;
   late final TextEditingController tecExtraInfoController;
   late final ValueNotifier<DateTime?> selectedDateNotifier;
   late final ValueNotifier<TimeOfDay?> startTimeNotifier;
   late final ValueNotifier<TimeOfDay?> endTimeNotifier;
-  late final ValueNotifier<bool> vnTransferOption;
+
+  late final ValueNotifier<bool> vnExchangeTransferOption;
 
   @override
   void initState() {
@@ -37,7 +40,7 @@ class _BottomSheetCourtTransferState extends State<BottomSheetCourtTransfer> {
     selectedDateNotifier = ValueNotifier<DateTime?>(null);
     startTimeNotifier = ValueNotifier<TimeOfDay?>(null);
     endTimeNotifier = ValueNotifier<TimeOfDay?>(null);
-    vnTransferOption = ValueNotifier<bool>(true);
+    vnExchangeTransferOption = ValueNotifier<bool>(true);
   }
 
   @override
@@ -48,7 +51,7 @@ class _BottomSheetCourtTransferState extends State<BottomSheetCourtTransfer> {
     selectedDateNotifier.dispose();
     startTimeNotifier.dispose();
     endTimeNotifier.dispose();
-    vnTransferOption.dispose();
+    vnExchangeTransferOption.dispose();
     super.dispose();
   }
 
@@ -232,59 +235,54 @@ class _BottomSheetCourtTransferState extends State<BottomSheetCourtTransfer> {
             children: [
               Expanded(
                 flex: 1,
-                child: Text('교환/양도'
-                ),
+                child: Text('교환/양도'),
               ),
               Expanded(
                 flex: 4,
-                child: ValueListenableBuilder<bool>(
-                  valueListenable: vnTransferOption,
-                  builder: (context, isExchange, _) {
-                    return Row(
-                      children: [
-                        Expanded(
-                          child: GestureDetector(
-                            onTap: () => vnTransferOption.value = true,
-                            child: Container(
-                              padding: EdgeInsets.symmetric(vertical: 10),
-                              decoration: BoxDecoration(
-                                color: isExchange ? colorMain900 : colorGray200,
-                                borderRadius: BorderRadius.horizontal(left: Radius.circular(8)),
-                              ),
-                              alignment: Alignment.center,
-                              child: Text(
-                                '교환',
-                                style: TextStyle(
-                                  color: isExchange ? Colors.white : Colors.black,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
+                child: Row(
+                  children: [
+                    GestureDetector(
+                      onTap: () {
+                        vnExchangeTransferOption.value = true;
+                        isExchange = false;
+                      },
+                      child: ValueListenableBuilder(
+                        valueListenable: vnExchangeTransferOption,
+                        builder: (_, value, __) {
+                          return Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                            decoration: BoxDecoration(
+                              border: Border.all(color: value ? colorMain900 : colorGray300),
+                              borderRadius: BorderRadius.circular(8),
+                              color: value ? colorMain900 : colorWhite,
                             ),
-                          ),
-                        ),
-                        Expanded(
-                          child: GestureDetector(
-                            onTap: () => vnTransferOption.value = false,
-                            child: Container(
-                              padding: EdgeInsets.symmetric(vertical: 10),
-                              decoration: BoxDecoration(
-                                color: !isExchange ? colorMain900 : colorGray200,
-                                borderRadius: BorderRadius.horizontal(right: Radius.circular(8)),
-                              ),
-                              alignment: Alignment.center,
-                              child: Text(
-                                '양도',
-                                style: TextStyle(
-                                  color: !isExchange ? Colors.white : Colors.black,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
+                            child: const Text('교환 중'),
+                          );
+                        },
+                      ),
+                    ),
+                    SizedBox(width: 10),
+                    GestureDetector(
+                      onTap: () {
+                        vnExchangeTransferOption.value = false;
+                        isTransfer = false;
+                      },
+                      child: ValueListenableBuilder(
+                        valueListenable: vnExchangeTransferOption,
+                        builder: (_, value, __) {
+                          return Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                            decoration: BoxDecoration(
+                              border: Border.all(color: !value ? colorMain900 : colorGray300),
+                              borderRadius: BorderRadius.circular(8),
+                              color: !value ? colorMain900 : colorWhite,
                             ),
-                          ),
-                        ),
-                      ],
-                    );
-                  },
+                            child: const Text('양도 중'),
+                          );
+                        },
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ],
@@ -413,14 +411,14 @@ class _BottomSheetCourtTransferState extends State<BottomSheetCourtTransfer> {
               Expanded(
                 flex: 4,
                 child: TextFieldBorder(
-                  hintText: '연락처를 입력하세요',
+                  hintText: '핸드폰, 오픈카톡 등 연락처를 입력하세요',
                   controller: tecContactController,
-                  keyboardType: TextInputType.number,
+                  /*      keyboardType: TextInputType.number,
                   inputFormatters: [
                     FilteringTextInputFormatter.digitsOnly,
                     LengthLimitingTextInputFormatter(11),
                     PhoneNumberFormatter(),
-                  ],
+                  ],*/
                 ),
               ),
             ],
@@ -465,7 +463,8 @@ class _BottomSheetCourtTransferState extends State<BottomSheetCourtTransfer> {
                 keyPostId: postId,
                 keyTransferBoardWriter: Global.userNotifier.value?.toJson(),
                 keyCreatedAt: now,
-                keyIsExchange: vnTransferOption.value,
+                keyIsExchange: isExchange,
+                keyIsTransfer: isTransfer,
                 keyTransferCourtName: tecCourtNameController.text,
                 keyTransferDate: selectedDate.toIso8601String(),
                 keyTransferStartTime: '${startTime.hour}:${startTime.minute.toString().padLeft(2, '0')}',

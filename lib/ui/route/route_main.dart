@@ -71,7 +71,7 @@ class _RouteMainState extends State<RouteMain> {
             TabHome(), // 0
             TabAlarm(), //1
             TabBoard(),
-            //TabProfile(), //2
+            TabProfile(), //2
           ],
           onPageChanged: (index) {
             Global.tabIndexNotifier.value = index; // 내비게이션 → notifier 동기화
@@ -83,7 +83,7 @@ class _RouteMainState extends State<RouteMain> {
         builder: (context, currentIndex, child) {
           return Row(
             children: List.generate(
-              3,
+              4,
               (index) => Expanded(
                 child: GestureDetector(
                   onTap: () {

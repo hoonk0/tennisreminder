@@ -1402,7 +1402,7 @@ packages:
     description:
       path: "."
       ref: main
-      resolved-ref: "8fce698119bd1b9b1f6bd4824e341e638b3dee23"
+      resolved-ref: "043d306b5c5a60ce567784f922ee6f78f83412c1"
       url: "https://github.com/hoonk0/tennisreminder_core.git"
     source: git
     version: "1.0.0+1"
