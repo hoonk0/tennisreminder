@@ -4,10 +4,12 @@ import 'package:flutter/services.dart';
 import 'package:tennisreminder_app/ui/component/custom_divider.dart';
 import 'package:tennisreminder_app/ui/component/textfield_border.dart';
 import 'package:tennisreminder_core/const/value/colors.dart';
+import 'package:tennisreminder_core/const/value/enum.dart';
 import 'package:tennisreminder_core/const/value/gaps.dart';
 import 'package:tennisreminder_core/const/value/keys.dart';
 import 'package:tennisreminder_core/const/value/text_style.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:tennisreminder_core/utils_enum/utils_enum.dart';
 
 import '../../const/static/global.dart';
 import '../../service/utils/utils.dart';
@@ -20,8 +22,6 @@ class BottomSheetCourtTransfer extends StatefulWidget {
 }
 
 class _BottomSheetCourtTransferState extends State<BottomSheetCourtTransfer> {
-  bool isExchange = false;
-  bool isTransfer = false;
   late final TextEditingController tecCourtNameController;
   late final TextEditingController tecContactController;
   late final TextEditingController tecExtraInfoController;
@@ -29,7 +29,12 @@ class _BottomSheetCourtTransferState extends State<BottomSheetCourtTransfer> {
   late final ValueNotifier<TimeOfDay?> startTimeNotifier;
   late final ValueNotifier<TimeOfDay?> endTimeNotifier;
 
-  late final ValueNotifier<bool> vnExchangeTransferOption;
+  // Persistent FocusNodes for each TextField
+  late FocusNode focusCourtName;
+  late FocusNode focusContact;
+  late FocusNode focusTransferExtraInfo;
+
+  late final ValueNotifier<TradeState> tradeStateNotifier;
 
   @override
   void initState() {
@@ -40,7 +45,13 @@ class _BottomSheetCourtTransferState extends State<BottomSheetCourtTransfer> {
     selectedDateNotifier = ValueNotifier<DateTime?>(null);
     startTimeNotifier = ValueNotifier<TimeOfDay?>(null);
     endTimeNotifier = ValueNotifier<TimeOfDay?>(null);
-    vnExchangeTransferOption = ValueNotifier<bool>(true);
+    // vnExchangeTransferOption = ValueNotifier<bool>(true);
+    tradeStateNotifier = ValueNotifier<TradeState>(TradeState.exchangeOngoing);
+
+    // Initialize FocusNodes
+    focusCourtName = FocusNode();
+    focusContact = FocusNode();
+    focusTransferExtraInfo = FocusNode();
   }
 
   @override
@@ -51,11 +62,17 @@ class _BottomSheetCourtTransferState extends State<BottomSheetCourtTransfer> {
     selectedDateNotifier.dispose();
     startTimeNotifier.dispose();
     endTimeNotifier.dispose();
-    vnExchangeTransferOption.dispose();
+    // vnExchangeTransferOption.dispose();
+    tradeStateNotifier.dispose();
+    // Dispose FocusNodes
+    focusCourtName.dispose();
+    focusContact.dispose();
+    focusTransferExtraInfo.dispose();
     super.dispose();
   }
 
-  void pickDate() {
+  Future<void> pickDate() async {
+    FocusScope.of(context).unfocus();
     showCupertinoModalPopup(
       context: context,
       builder: (_) => Container(
@@ -91,9 +108,12 @@ class _BottomSheetCourtTransferState extends State<BottomSheetCourtTransfer> {
         ),
       ),
     );
+    await Future.delayed(Duration(milliseconds: 100));
+    FocusScope.of(context).requestFocus(FocusNode());
   }
 
-  void pickStartTime() {
+  Future<void> pickStartTime() async {
+    FocusScope.of(context).unfocus();
     showCupertinoModalPopup(
       context: context,
       builder: (_) => Container(
@@ -137,9 +157,12 @@ class _BottomSheetCourtTransferState extends State<BottomSheetCourtTransfer> {
         ),
       ),
     );
+    await Future.delayed(Duration(milliseconds: 100));
+    FocusScope.of(context).requestFocus(FocusNode());
   }
 
-  void pickEndTime() {
+  Future<void> pickEndTime() async {
+    FocusScope.of(context).unfocus();
     showCupertinoModalPopup(
       context: context,
       builder: (_) => Container(
@@ -183,6 +206,8 @@ class _BottomSheetCourtTransferState extends State<BottomSheetCourtTransfer> {
         ),
       ),
     );
+    await Future.delayed(Duration(milliseconds: 100));
+    FocusScope.of(context).requestFocus(FocusNode());
   }
 
   void submit() {
@@ -202,10 +227,12 @@ class _BottomSheetCourtTransferState extends State<BottomSheetCourtTransfer> {
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
+    return GestureDetector(
+      onTap: () => FocusScope.of(context).unfocus(),
+      child: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
           Center(
             child: Container(
               width: 40,
@@ -226,7 +253,13 @@ class _BottomSheetCourtTransferState extends State<BottomSheetCourtTransfer> {
           Row(children: [
             Expanded(
                 flex:1,child: Text('코트 이름')),
-            Expanded(flex: 4,child: TextFieldBorder(controller: tecCourtNameController)),
+            Expanded(
+              flex: 4,
+              child: TextFieldBorder(
+                controller: tecCourtNameController,
+                focusNode: focusCourtName,
+              ),
+            ),
           ],),
 
           Gaps.v10,
@@ -239,50 +272,29 @@ class _BottomSheetCourtTransferState extends State<BottomSheetCourtTransfer> {
               ),
               Expanded(
                 flex: 4,
-                child: Row(
-                  children: [
-                    GestureDetector(
-                      onTap: () {
-                        vnExchangeTransferOption.value = true;
-                        isExchange = false;
-                      },
-                      child: ValueListenableBuilder(
-                        valueListenable: vnExchangeTransferOption,
-                        builder: (_, value, __) {
-                          return Container(
+                child: Wrap(
+                  spacing: 8,
+                  children: [TradeState.exchangeOngoing,TradeState.transferOngoing].map((state) {
+                    return ValueListenableBuilder<TradeState>(
+                      valueListenable: tradeStateNotifier,
+                      builder: (_, selected, __) {
+                        final isSelected = selected == state;
+                        return GestureDetector(
+                          onTap: () => tradeStateNotifier.value = state,
+                          child: Container(
                             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                             decoration: BoxDecoration(
-                              border: Border.all(color: value ? colorMain900 : colorGray300),
+                              border: Border.all(color: isSelected ? colorMain900 : colorGray300),
                               borderRadius: BorderRadius.circular(8),
-                              color: value ? colorMain900 : colorWhite,
+                              color: isSelected ? colorMain900 : colorWhite,
                             ),
-                            child: const Text('교환 중'),
-                          );
-                        },
-                      ),
-                    ),
-                    SizedBox(width: 10),
-                    GestureDetector(
-                      onTap: () {
-                        vnExchangeTransferOption.value = false;
-                        isTransfer = false;
+                            child: Text(UtilsEnum.getNameFromTradeState(state),
+                                style: TS.s14w400(isSelected ? colorWhite : colorGray900)),
+                          ),
+                        );
                       },
-                      child: ValueListenableBuilder(
-                        valueListenable: vnExchangeTransferOption,
-                        builder: (_, value, __) {
-                          return Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                            decoration: BoxDecoration(
-                              border: Border.all(color: !value ? colorMain900 : colorGray300),
-                              borderRadius: BorderRadius.circular(8),
-                              color: !value ? colorMain900 : colorWhite,
-                            ),
-                            child: const Text('양도 중'),
-                          );
-                        },
-                      ),
-                    ),
-                  ],
+                    );
+                  }).toList(),
                 ),
               ),
             ],
@@ -413,6 +425,7 @@ class _BottomSheetCourtTransferState extends State<BottomSheetCourtTransfer> {
                 child: TextFieldBorder(
                   hintText: '핸드폰, 오픈카톡 등 연락처를 입력하세요',
                   controller: tecContactController,
+                  focusNode: focusContact,
                   /*      keyboardType: TextInputType.number,
                   inputFormatters: [
                     FilteringTextInputFormatter.digitsOnly,
@@ -431,11 +444,12 @@ class _BottomSheetCourtTransferState extends State<BottomSheetCourtTransfer> {
               Expanded(flex: 1, child: Text('추가 정보')),
               Expanded(
                 flex: 4,
-            child: TextFieldBorder(
-              maxLines: 3,
-              hintText: '교환방법, 유료 여부 등',
-              controller: tecExtraInfoController,
-            ),
+                child: TextFieldBorder(
+                  maxLines: 3,
+                  hintText: '교환방법, 유료 여부 등',
+                  controller: tecExtraInfoController,
+                  focusNode: focusTransferExtraInfo,
+                ),
               ),
             ],
           ),
@@ -463,8 +477,9 @@ class _BottomSheetCourtTransferState extends State<BottomSheetCourtTransfer> {
                 keyPostId: postId,
                 keyTransferBoardWriter: Global.userNotifier.value?.toJson(),
                 keyCreatedAt: now,
-                keyIsExchange: isExchange,
-                keyIsTransfer: isTransfer,
+                // keyIsExchange: isExchange,
+                // keyIsTransfer: isTransfer,
+                'tradeState': tradeStateNotifier.value.name,
                 keyTransferCourtName: tecCourtNameController.text,
                 keyTransferDate: selectedDate.toIso8601String(),
                 keyTransferStartTime: '${startTime.hour}:${startTime.minute.toString().padLeft(2, '0')}',
@@ -481,8 +496,9 @@ class _BottomSheetCourtTransferState extends State<BottomSheetCourtTransfer> {
               Navigator.pop(context);
             },
           ),
-          Gaps.v20,
-        ],
+            Gaps.v20,
+          ],
+        ),
       ),
     );
   }
