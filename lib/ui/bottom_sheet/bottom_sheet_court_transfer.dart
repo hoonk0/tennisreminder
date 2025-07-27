@@ -470,7 +470,7 @@ class _BottomSheetCourtTransferState extends State<BottomSheetCourtTransfer> {
                 return;
               }
 
-              final postId = FirebaseFirestore.instance.collection('court_transfers').doc().id;
+              final postId = FirebaseFirestore.instance.collection(keyCourtTransferBoard).doc().id;
               final now = Timestamp.now();
 
               final data = {
@@ -490,7 +490,7 @@ class _BottomSheetCourtTransferState extends State<BottomSheetCourtTransfer> {
 
               await FirebaseFirestore.instance
                   .collection(keyCourtTransferBoard)
-                  .doc(postId)
+                  .doc(keyPostId)
                   .set(data);
 
               Navigator.pop(context);

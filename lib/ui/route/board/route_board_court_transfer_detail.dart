@@ -1,9 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:tennisreminder_core/const/value/colors.dart';
+import 'package:tennisreminder_core/const/value/enum.dart';
 import 'package:tennisreminder_core/const/value/gaps.dart';
 import 'package:tennisreminder_core/const/value/keys.dart';
 import 'package:tennisreminder_core/const/value/text_style.dart';
+import 'package:tennisreminder_core/utils_enum/utils_enum.dart';
 
 import '../../../const/static/global.dart';
 
@@ -42,11 +44,46 @@ class RouteCourtTransferDetail extends StatelessWidget {
                     ),
                   ),
                 Gaps.h5,
-                // 교환/양도/완료 버튼
+           // 교환/양도/완료 버튼
                 if (Global.userNotifier.value?.uid == data[keyTransferBoardWriter]?[keyUid])
-                  Container(
+                  GestureDetector(
+                    onTap: () async {
+                      final docRef = FirebaseFirestore.instance
+                          .collection(keyCourtTransferBoard)
+                          .doc(data[keyPostId]);
 
-                  )
+                      final currentState = UtilsEnum.getNameFromTradeStateRaw(data[keyTradeState]);
+
+                      if (currentState != TradeState.done) {
+                        final shouldUpdate = await showDialog<bool>(
+                          context: context,
+                          builder: (ctx) => AlertDialog(
+                            title: const Text('완료 처리'),
+                            content: const Text('정말 완료 처리하시겠습니까? 이후 상태 변경은 불가합니다.'),
+                            actions: [
+                              TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('취소')),
+                              TextButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('확인')),
+                            ],
+                          ),
+                        );
+
+                        if (shouldUpdate == true) {
+                          await docRef.update({keyTradeState: TradeState.done.name});
+                        }
+                      }
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: Colors.purple,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Text(
+                        UtilsEnum.getNameFromTradeStateRaw(data[keyTradeState]),
+                        style: TS.s14w600(colorWhite),
+                      ),
+                    ),
+                  ),
               ],
             ),
             Gaps.v20,
