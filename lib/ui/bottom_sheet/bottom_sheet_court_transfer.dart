@@ -479,7 +479,7 @@ class _BottomSheetCourtTransferState extends State<BottomSheetCourtTransfer> {
                 keyCreatedAt: now,
                 // keyIsExchange: isExchange,
                 // keyIsTransfer: isTransfer,
-                'tradeState': tradeStateNotifier.value.name,
+                keyTradeState: tradeStateNotifier.value.name,
                 keyTransferCourtName: tecCourtNameController.text,
                 keyTransferDate: selectedDate.toIso8601String(),
                 keyTransferStartTime: '${startTime.hour}:${startTime.minute.toString().padLeft(2, '0')}',

@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:tennisreminder_app/ui/component/loading_bar.dart';
 import 'package:tennisreminder_app/ui/route/board/route_board_court_transfer_detail.dart';
+import 'package:tennisreminder_core/const/value/enum.dart';
 import 'package:tennisreminder_core/const/value/gaps.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
@@ -9,6 +10,7 @@ import 'package:tennisreminder_core/const/value/colors.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:tennisreminder_core/const/value/keys.dart';
 import 'package:tennisreminder_core/const/value/text_style.dart';
+import 'package:tennisreminder_core/utils_enum/utils_enum.dart';
 
 import '../../bottom_sheet/bottom_sheet_court_transfer.dart';
 import '../../component/basic_button.dart';
@@ -45,6 +47,12 @@ class RouteBoardCourt extends StatelessWidget {
                     itemBuilder: (context, index) {
                       final doc = docs[index];
                       final data = doc.data() as Map<String, dynamic>;
+
+                     final tradeStateRaw = (data[keyTradeState] ?? '').toString().trim();
+                     final tradeState = TradeState.values.firstWhere(
+                       (e) => e.name == tradeStateRaw,
+                       orElse: () => TradeState.transferOngoing,
+                     );
 
                      return GestureDetector(
                        onTap: () {
@@ -93,12 +101,18 @@ class RouteBoardCourt extends StatelessWidget {
                                 child: Container(
                                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                                   decoration: BoxDecoration(
-                                    color: (data[keyIsExchange] == true) ? Colors.green : Colors.blue,
+                                    color: (tradeState == TradeState.transferOngoing)
+                                        ? Colors.green
+                                        : (tradeState == TradeState.exchangeOngoing)
+                                            ? Colors.blue
+                                            : Colors.grey,
                                     borderRadius: const BorderRadius.all(Radius.circular(10)),
                                   ),
                                   child: Text(
-                                    data[keyIsExchange] == true ? '교환' : '양도',
-                                    style: TS.s12w600(colorWhite),
+                                    UtilsEnum.getNameFromTradeState(TradeState.values.firstWhere(
+                                          (e) => e.name == data[keyTradeState],
+                                      orElse: () => TradeState.transferOngoing,
+                                    )),
                                   ),
                                 ),
                               ),
