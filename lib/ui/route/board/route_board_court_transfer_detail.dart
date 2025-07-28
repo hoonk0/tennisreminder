@@ -9,6 +9,7 @@ import 'package:tennisreminder_core/const/value/text_style.dart';
 import 'package:tennisreminder_core/utils_enum/utils_enum.dart';
 
 import '../../../const/static/global.dart';
+import '../../bottom_sheet/bottom_sheet_court_transfer.dart';
 
 
 class RouteCourtTransferDetail extends StatelessWidget {
@@ -36,68 +37,109 @@ class RouteCourtTransferDetail extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 if (Global.userNotifier.value?.uid == data[keyTransferBoardWriter]?[keyUid])
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                    decoration: BoxDecoration(
-                      color: colorGray500,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Text(
-                      '편집',
-                      style: TS.s14w600(colorWhite),
-                    ),
-                  ),
-                Gaps.h5,
-           // 교환/양도/완료 버튼
-                if (Global.userNotifier.value?.uid == data[keyTransferBoardWriter]?[keyUid])
                   GestureDetector(
-                    onTap: () async {
-                      final docRef = FirebaseFirestore.instance
-                          .collection(keyCourtTransferBoard)
-                          .doc(data[keyPostId]);
-
-
-                      debugPrint('🟡 현재 상태: $currentState');
-                      debugPrint('🟡 완료 상태와 비교: ${currentState != TradeState.done}');
-
-                      if (currentState != TradeState.done) {
-                        final result = await showDialog<bool>(
-                          context: context,
-                          barrierDismissible: false,
-                          builder: (context) => DialogYN(
-                            desc: '상태를 완료로 바꾸시겠어요?',
-                            onTapYes: () async {
-                              await docRef.update({keyTradeState: TradeState.done.name});
-                              debugPrint('✅ 상태가 완료로 변경됨');
-                              Navigator.of(context).pop(true);
-                            },
-                            title: '양도/교환 완료',
-                            buttonLabelLeft: '네',
-                            buttonLabelRight: '아니요',
-                          ),
-                        );
-
-                        debugPrint('✅ 다이얼로그 결과: $result');
-                      }else{
-                        return ;
-                      }
+                    onTap: () {
+                      showModalBottomSheet(
+                        context: context,
+                        isScrollControlled: true,
+                        backgroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+                        ),
+                        builder: (context) {
+                          return Padding(
+                              padding: EdgeInsets.only(
+                              bottom: MediaQuery.of(context).viewInsets.bottom,
+                          left: 16,
+                          right: 16,
+                          top: 16,),
+                            child: BottomSheetCourtTransfer(
+                              initialData: data,
+                            ),
+                          );
+                        },
+                      );
                     },
                     child: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                       decoration: BoxDecoration(
-                        color: (currentState == TradeState.transferOngoing)
-                            ? Colors.green
-                            : (currentState == TradeState.exchangeOngoing)
-                            ? Colors.blue
-                            : Colors.grey,
+                        color: colorGray500,
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Text(
-                        UtilsEnum.getNameFromTradeStateRaw(data[keyTradeState]),
+                        '편집',
                         style: TS.s14w600(colorWhite),
                       ),
                     ),
-                  )
+                  ),
+                Gaps.h5,
+           // 교환/양도/완료 버튼
+                Builder(
+                  builder: (context) {
+                    final isOwner = Global.userNotifier.value?.uid == data[keyTransferBoardWriter]?[keyUid];
+                    final stateName = UtilsEnum.getNameFromTradeStateRaw(data[keyTradeState]);
+                    Color bgColor;
+                    switch (stateName) {
+                      case '교환':
+                        bgColor = Colors.blue;
+                        break;
+                      case '양도':
+                        bgColor = Colors.green;
+                        break;
+                      case '완료':
+                        bgColor = Colors.grey;
+                        break;
+                      default:
+                        bgColor = Colors.black;
+                    }
+                    final statusWidget = Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: bgColor,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Text(
+                        stateName,
+                        style: TS.s14w600(colorWhite),
+                      ),
+                    );
+
+                    if (!isOwner) return statusWidget;
+
+                    return GestureDetector(
+                      onTap: () async {
+                        final docRef = FirebaseFirestore.instance
+                            .collection(keyCourtTransferBoard)
+                            .doc(data[keyPostId]);
+
+                        final currentStateRaw = data[keyTradeState];
+                        final currentState = UtilsEnum.getTradeStateFromRaw(currentStateRaw);
+                        debugPrint('🟡 현재 상태: $currentState');
+                        debugPrint('🟡 완료 상태와 비교: ${currentState != TradeState.done}');
+
+                        if (currentState != TradeState.done) {
+                          final result = await showDialog<bool>(
+                            context: context,
+                            barrierDismissible: false,
+                            builder: (context) => DialogYN(
+                              desc: '상태를 완료로 바꾸시겠어요?',
+                              onTapYes: () async {
+                                await docRef.update({keyTradeState: TradeState.done.name});
+                                debugPrint('✅ 상태가 완료로 변경됨');
+                                Navigator.of(context).pop(true);
+                              },
+                              title: '양도/교환 완료',
+                              buttonLabelLeft: '네',
+                              buttonLabelRight: '아니요',
+                            ),
+                          );
+                          debugPrint('✅ 다이얼로그 결과: $result');
+                        }
+                      },
+                      child: statusWidget,
+                    );
+                  },
+                )
               ],
             ),
             Gaps.v20,

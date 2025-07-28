@@ -17,11 +17,16 @@ import '../component/basic_button.dart';
 
 
 class BottomSheetCourtTransfer extends StatefulWidget {
+  final Map<String, dynamic>? initialData;
+
+  const BottomSheetCourtTransfer({Key? key, this.initialData}) : super(key: key);
+
   @override
   _BottomSheetCourtTransferState createState() => _BottomSheetCourtTransferState();
 }
 
 class _BottomSheetCourtTransferState extends State<BottomSheetCourtTransfer> {
+
   late final TextEditingController tecCourtNameController;
   late final TextEditingController tecContactController;
   late final TextEditingController tecExtraInfoController;
@@ -39,12 +44,28 @@ class _BottomSheetCourtTransferState extends State<BottomSheetCourtTransfer> {
   @override
   void initState() {
     super.initState();
-    tecCourtNameController = TextEditingController();
-    tecContactController = TextEditingController();
-    tecExtraInfoController = TextEditingController();
-    selectedDateNotifier = ValueNotifier<DateTime?>(null);
-    startTimeNotifier = ValueNotifier<TimeOfDay?>(null);
-    endTimeNotifier = ValueNotifier<TimeOfDay?>(null);
+    tecCourtNameController = TextEditingController(text: widget.initialData?[keyTransferCourtName] ?? '');
+    tecContactController = TextEditingController(text: widget.initialData?[keyContact] ?? '');
+    tecExtraInfoController = TextEditingController(text: widget.initialData?[keyTransferExtraInfo] ?? '');
+    selectedDateNotifier = ValueNotifier<DateTime?>(
+      widget.initialData?[keyTransferDate] != null
+          ? DateTime.tryParse(widget.initialData![keyTransferDate])
+          : null,
+    );
+    startTimeNotifier = ValueNotifier<TimeOfDay?>(
+      widget.initialData?[keyTransferStartTime] != null
+          ? TimeOfDay(
+              hour: int.tryParse(widget.initialData![keyTransferStartTime].split(":")[0]) ?? 0,
+              minute: int.tryParse(widget.initialData![keyTransferStartTime].split(":")[1]) ?? 0)
+          : null,
+    );
+    endTimeNotifier = ValueNotifier<TimeOfDay?>(
+      widget.initialData?[keyTransferEndTime] != null
+          ? TimeOfDay(
+              hour: int.tryParse(widget.initialData![keyTransferEndTime].split(":")[0]) ?? 0,
+              minute: int.tryParse(widget.initialData![keyTransferEndTime].split(":")[1]) ?? 0)
+          : null,
+    );
     // vnExchangeTransferOption = ValueNotifier<bool>(true);
     tradeStateNotifier = ValueNotifier<TradeState>(TradeState.exchangeOngoing);
 
@@ -470,28 +491,45 @@ class _BottomSheetCourtTransferState extends State<BottomSheetCourtTransfer> {
                 return;
               }
 
-              final postId = FirebaseFirestore.instance.collection(keyCourtTransferBoard).doc().id;
-              final now = Timestamp.now();
+              if (widget.initialData != null) {
+                // 기존 문서 업데이트
+                final docRef = FirebaseFirestore.instance
+                    .collection(keyCourtTransferBoard)
+                    .doc(widget.initialData![keyPostId]);
 
-              final data = {
-                keyPostId: postId,
-                keyTransferBoardWriter: Global.userNotifier.value?.toJson(),
-                keyCreatedAt: now,
-                // keyIsExchange: isExchange,
-                // keyIsTransfer: isTransfer,
-                keyTradeState: tradeStateNotifier.value.name,
-                keyTransferCourtName: tecCourtNameController.text,
-                keyTransferDate: selectedDate.toIso8601String(),
-                keyTransferStartTime: '${startTime.hour}:${startTime.minute.toString().padLeft(2, '0')}',
-                keyTransferEndTime: '${endTime.hour}:${endTime.minute.toString().padLeft(2, '0')}',
-                keyContact: tecContactController.text,
-                keyTransferExtraInfo: tecExtraInfoController.text,
-              };
+                await docRef.update({
+                  keyTransferCourtName: tecCourtNameController.text,
+                  keyContact: tecContactController.text,
+                  keyTransferExtraInfo: tecExtraInfoController.text,
+                  keyTransferDate: selectedDate.toIso8601String(),
+                  keyTransferStartTime: '${startTime.hour}:${startTime.minute.toString().padLeft(2, '0')}',
+                  keyTransferEndTime: '${endTime.hour}:${endTime.minute.toString().padLeft(2, '0')}',
+                  keyTradeState: tradeStateNotifier.value.name,
+                });
+                Navigator.pop(context);
+              } else {
+                // 새로 생성해 저장
+                final postId = FirebaseFirestore.instance.collection(keyCourtTransferBoard).doc().id;
+                final now = Timestamp.now();
 
-              await FirebaseFirestore.instance
-                  .collection(keyCourtTransferBoard)
-                  .doc(postId)
-                  .set(data);
+                final data = {
+                  keyPostId: postId,
+                  keyTransferBoardWriter: Global.userNotifier.value?.toJson(),
+                  keyCreatedAt: now,
+                  keyTradeState: tradeStateNotifier.value.name,
+                  keyTransferCourtName: tecCourtNameController.text,
+                  keyTransferDate: selectedDate.toIso8601String(),
+                  keyTransferStartTime: '${startTime.hour}:${startTime.minute.toString().padLeft(2, '0')}',
+                  keyTransferEndTime: '${endTime.hour}:${endTime.minute.toString().padLeft(2, '0')}',
+                  keyContact: tecContactController.text,
+                  keyTransferExtraInfo: tecExtraInfoController.text,
+                };
+
+                await FirebaseFirestore.instance
+                    .collection(keyCourtTransferBoard)
+                    .doc(postId)
+                    .set(data);
+              }
 
               Navigator.pop(context);
             },
