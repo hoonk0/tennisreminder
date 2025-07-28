@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:tennisreminder_app/ui/dialog/dialog_YN.dart';
 import 'package:tennisreminder_core/const/value/colors.dart';
 import 'package:tennisreminder_core/const/value/enum.dart';
 import 'package:tennisreminder_core/const/value/gaps.dart';
@@ -18,6 +19,9 @@ class RouteCourtTransferDetail extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final currentStateRaw = data[keyTradeState];
+    final currentState = UtilsEnum.getTradeStateFromRaw(currentStateRaw);
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('교환/양도 글'),
@@ -52,30 +56,40 @@ class RouteCourtTransferDetail extends StatelessWidget {
                           .collection(keyCourtTransferBoard)
                           .doc(data[keyPostId]);
 
-                      final currentState = UtilsEnum.getNameFromTradeStateRaw(data[keyTradeState]);
+
+                      debugPrint('🟡 현재 상태: $currentState');
+                      debugPrint('🟡 완료 상태와 비교: ${currentState != TradeState.done}');
 
                       if (currentState != TradeState.done) {
-                        final shouldUpdate = await showDialog<bool>(
+                        final result = await showDialog<bool>(
                           context: context,
-                          builder: (ctx) => AlertDialog(
-                            title: const Text('완료 처리'),
-                            content: const Text('정말 완료 처리하시겠습니까? 이후 상태 변경은 불가합니다.'),
-                            actions: [
-                              TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('취소')),
-                              TextButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('확인')),
-                            ],
+                          barrierDismissible: false,
+                          builder: (context) => DialogYN(
+                            desc: '상태를 완료로 바꾸시겠어요?',
+                            onTapYes: () async {
+                              await docRef.update({keyTradeState: TradeState.done.name});
+                              debugPrint('✅ 상태가 완료로 변경됨');
+                              Navigator.of(context).pop(true);
+                            },
+                            title: '양도/교환 완료',
+                            buttonLabelLeft: '네',
+                            buttonLabelRight: '아니요',
                           ),
                         );
 
-                        if (shouldUpdate == true) {
-                          await docRef.update({keyTradeState: TradeState.done.name});
-                        }
+                        debugPrint('✅ 다이얼로그 결과: $result');
+                      }else{
+                        return ;
                       }
                     },
                     child: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                       decoration: BoxDecoration(
-                        color: Colors.purple,
+                        color: (currentState == TradeState.transferOngoing)
+                            ? Colors.green
+                            : (currentState == TradeState.exchangeOngoing)
+                            ? Colors.blue
+                            : Colors.grey,
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Text(
@@ -83,7 +97,7 @@ class RouteCourtTransferDetail extends StatelessWidget {
                         style: TS.s14w600(colorWhite),
                       ),
                     ),
-                  ),
+                  )
               ],
             ),
             Gaps.v20,

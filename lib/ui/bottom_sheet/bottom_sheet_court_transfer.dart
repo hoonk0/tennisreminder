@@ -490,7 +490,7 @@ class _BottomSheetCourtTransferState extends State<BottomSheetCourtTransfer> {
 
               await FirebaseFirestore.instance
                   .collection(keyCourtTransferBoard)
-                  .doc(keyPostId)
+                  .doc(postId)
                   .set(data);
 
               Navigator.pop(context);

@@ -112,7 +112,7 @@ class RouteBoardCourt extends StatelessWidget {
                                     UtilsEnum.getNameFromTradeState(TradeState.values.firstWhere(
                                           (e) => e.name == data[keyTradeState],
                                       orElse: () => TradeState.transferOngoing,
-                                    )),
+                                    ),),style: TS.s14w400(colorWhite),
                                   ),
                                 ),
                               ),
