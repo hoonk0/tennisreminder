@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:tennisreminder_app/ui/component/custom_dropdown.dart';
 import 'package:tennisreminder_app/ui/component/loading_bar.dart';
 import 'package:tennisreminder_app/ui/route/board/route_board_court_transfer_detail.dart';
 import 'package:tennisreminder_core/const/value/enum.dart';
@@ -17,7 +18,8 @@ import '../../component/basic_button.dart';
 import '../../component/basic_button_shadow.dart';
 
 class RouteBoardCourt extends StatelessWidget {
-  const RouteBoardCourt({super.key});
+  final ValueNotifier<TradeState?> vnTradeStateSelect = ValueNotifier<TradeState?>(null);
+   RouteBoardCourt({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -25,101 +27,138 @@ class RouteBoardCourt extends StatelessWidget {
       children: [
         Column(
           children: [
+            ///게시글 필터
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 10),
+              child: ValueListenableBuilder<TradeState?>(
+                valueListenable: vnTradeStateSelect,
+                builder: (context, selectedState, _) {
+                  return CustomDropdown<TradeState>(
+                    value: selectedState,
+                    hint: Text(selectedState == null ? '전체' : UtilsEnum.getNameFromTradeState(selectedState)),
+                    items: const [
+                      DropdownMenuItem(value: null, child: Text('전체')),
+                      DropdownMenuItem(value: TradeState.exchangeOngoing, child: Text('교환')),
+                      DropdownMenuItem(value: TradeState.transferOngoing, child: Text('양도')),
+                      DropdownMenuItem(value: TradeState.done, child: Text('완료')),
+                    ],
+                    onChanged: (state) {
+                      vnTradeStateSelect.value = state;
+                    },
+                  );
+                },
+              ),
+            ),
+
+            ///게시글 리스트
             Expanded(
-              child: StreamBuilder<QuerySnapshot>(
-                stream: FirebaseFirestore.instance
-                    .collection(keyCourtTransferBoard)
-                    .orderBy(keyCreatedAt, descending: true)
-                    .snapshots(),
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return LoadingBar();
-                  }
-                  if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-                    return const Text('게시글이 없습니다.');
-                  }
+              child: ValueListenableBuilder<TradeState?>(
+                valueListenable: vnTradeStateSelect,
+                builder: (context, selectedState, _) {
+                  return StreamBuilder<QuerySnapshot>(
+                    stream: FirebaseFirestore.instance
+                        .collection(keyCourtTransferBoard)
+                        .orderBy(keyCreatedAt, descending: true)
+                        .snapshots(),
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return LoadingBar();
+                      }
+                      if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                        return const Text('게시글이 없습니다.');
+                      }
 
-                  final docs = snapshot.data!.docs;
+                      final allDocs = snapshot.data!.docs;
+                      print('🔍 선택된 상태: $selectedState');
+                      for (final doc in allDocs) {
+                        print('📄 게시글 상태: ${doc[keyTradeState]}');
+                      }
 
-                  return ListView.separated(
-                    itemCount: docs.length,
-                    separatorBuilder: (context, index) => Text(''),
-                    itemBuilder: (context, index) {
-                      final doc = docs[index];
-                      final data = doc.data() as Map<String, dynamic>;
+                      final filteredDocs = selectedState == null
+                          ? allDocs
+                          : allDocs.where((doc) {
+                              final stateRaw = doc[keyTradeState];
+                              return stateRaw == selectedState.name;
+                            }).toList();
+                      print('✅ 필터링된 게시글 수: ${filteredDocs.length}');
 
-                     final tradeStateRaw = (data[keyTradeState] ?? '').toString().trim();
-                     final tradeState = TradeState.values.firstWhere(
-                       (e) => e.name == tradeStateRaw,
-                       orElse: () => TradeState.transferOngoing,
-                     );
-
-                     return GestureDetector(
-                       onTap: () {
-                         Navigator.push(
-                           context,
-                           MaterialPageRoute(
-                             builder: (context) => RouteCourtTransferDetail(data: data),
-                           ),
-                         );
-                       },
-                       child: Container(
-                          padding: const EdgeInsets.all(16),
-                          margin: const EdgeInsets.symmetric(vertical: 2),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(12),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withOpacity(0.1),
-                                blurRadius: 8,
-                                offset: Offset(0, 4),
-                              ),
-                            ],
-                          ),
-                          child: Stack(
-                            children: [
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Gaps.v8,
-                                  Text(
-                                    data[keyTransferCourtName] ?? '코트 이름 없음',
-                                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                      return ListView.separated(
+                        itemCount: filteredDocs.length,
+                        separatorBuilder: (context, index) => const SizedBox(height: 4),
+                        itemBuilder: (context, index) {
+                          final doc = filteredDocs[index];
+                          final data = doc.data() as Map<String, dynamic>;
+                          final tradeStateRaw = (data[keyTradeState] ?? '').toString().trim();
+                          final tradeState = TradeState.values.firstWhere(
+                            (e) => e.name == tradeStateRaw,
+                            orElse: () => TradeState.transferOngoing,
+                          );
+                          return GestureDetector(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => RouteCourtTransferDetail(data: data),
+                                ),
+                              );
+                            },
+                            child: Container(
+                              padding: const EdgeInsets.all(16),
+                              margin: const EdgeInsets.symmetric(vertical: 2),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(12),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withOpacity(0.1),
+                                    blurRadius: 8,
+                                    offset: Offset(0, 4),
                                   ),
-                                  Gaps.v8,
-                                  Text('날짜: ${data[keyTransferDate]?.toString().split('T').first ?? ''}'),
-                                  Text('시간: ${data[keyTransferStartTime]} ~ ${data[keyTransferEndTime]}'),
-                   /*               Text('연락처: ${data[keyContact] ?? ''}'),
-                                    if ((data[keyTransferExtraInfo] ?? '').isNotEmpty)
-                                      Text('추가정보: ${data[keyTransferExtraInfo]}'),*/
                                 ],
                               ),
-                              Positioned(
-                                top: 0,
-                                right: 0,
-                                child: Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                                  decoration: BoxDecoration(
-                                    color: (tradeState == TradeState.transferOngoing)
-                                        ? Colors.green
-                                        : (tradeState == TradeState.exchangeOngoing)
-                                            ? Colors.blue
-                                            : Colors.grey,
-                                    borderRadius: const BorderRadius.all(Radius.circular(10)),
+                              child: Stack(
+                                children: [
+                                  Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Gaps.v8,
+                                      Text(
+                                        data[keyTransferCourtName] ?? '코트 이름 없음',
+                                        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                                      ),
+                                      Gaps.v8,
+                                      Text('날짜: ${data[keyTransferDate]?.toString().split('T').first ?? ''}'),
+                                      Text('시간: ${data[keyTransferStartTime]} ~ ${data[keyTransferEndTime]}'),
+                                    ],
                                   ),
-                                  child: Text(
-                                    UtilsEnum.getNameFromTradeState(TradeState.values.firstWhere(
+                                  Positioned(
+                                    top: 0,
+                                    right: 0,
+                                    child: Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                      decoration: BoxDecoration(
+                                        color: (tradeState == TradeState.transferOngoing)
+                                            ? Colors.green
+                                            : (tradeState == TradeState.exchangeOngoing)
+                                                ? Colors.blue
+                                                : Colors.grey,
+                                        borderRadius: const BorderRadius.all(Radius.circular(10)),
+                                      ),
+                                      child: Text(
+                                        UtilsEnum.getNameFromTradeState(TradeState.values.firstWhere(
                                           (e) => e.name == data[keyTradeState],
-                                      orElse: () => TradeState.transferOngoing,
-                                    ),),style: TS.s14w400(colorWhite),
+                                          orElse: () => TradeState.transferOngoing,
+                                        )),
+                                        style: TS.s14w400(colorWhite),
+                                      ),
+                                    ),
                                   ),
-                                ),
+                                ],
                               ),
-                            ],
-                          ),
-                        ),
-                     );
+                            ),
+                          );
+                        },
+                      );
                     },
                   );
                 },
@@ -128,6 +167,7 @@ class RouteBoardCourt extends StatelessWidget {
           ],
         ),
 
+        ///게시글 쓰기 버튼
         Positioned(
           bottom: 20,
           left: 16,
