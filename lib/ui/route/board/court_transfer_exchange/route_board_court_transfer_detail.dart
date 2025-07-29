@@ -8,8 +8,8 @@ import 'package:tennisreminder_core/const/value/keys.dart';
 import 'package:tennisreminder_core/const/value/text_style.dart';
 import 'package:tennisreminder_core/utils_enum/utils_enum.dart';
 
-import '../../../const/static/global.dart';
-import '../../bottom_sheet/bottom_sheet_court_transfer.dart';
+import '../../../../const/static/global.dart';
+import '../../../bottom_sheet/bottom_sheet_court_transfer.dart';
 
 
 class RouteCourtTransferDetail extends StatelessWidget {

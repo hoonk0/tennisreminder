@@ -19,6 +19,7 @@ class CustomDropdown<T> extends DropdownButtonHideUnderline {
             hint: hint,
             items: items,
             onChanged: onChanged,
+            underline: SizedBox(),
             style: const TS.s16w400(colorBlack),
             buttonStyleData: ButtonStyleData(
               padding: const EdgeInsets.only(right: 10, top: 10, bottom: 10),

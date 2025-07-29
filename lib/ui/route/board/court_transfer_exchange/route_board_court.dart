@@ -1,7 +1,8 @@
 import 'package:flutter/foundation.dart';
+import 'package:sizer/sizer.dart';
 import 'package:tennisreminder_app/ui/component/custom_dropdown.dart';
 import 'package:tennisreminder_app/ui/component/loading_bar.dart';
-import 'package:tennisreminder_app/ui/route/board/route_board_court_transfer_detail.dart';
+import 'package:tennisreminder_app/ui/route/board/court_transfer_exchange/route_board_court_transfer_detail.dart';
 import 'package:tennisreminder_core/const/value/enum.dart';
 import 'package:tennisreminder_core/const/value/gaps.dart';
 import 'package:flutter/material.dart';
@@ -13,9 +14,9 @@ import 'package:tennisreminder_core/const/value/keys.dart';
 import 'package:tennisreminder_core/const/value/text_style.dart';
 import 'package:tennisreminder_core/utils_enum/utils_enum.dart';
 
-import '../../bottom_sheet/bottom_sheet_court_transfer.dart';
-import '../../component/basic_button.dart';
-import '../../component/basic_button_shadow.dart';
+import '../../../bottom_sheet/bottom_sheet_court_transfer.dart';
+import '../../../component/basic_button.dart';
+import '../../../component/basic_button_shadow.dart';
 
 class RouteBoardCourt extends StatelessWidget {
   final ValueNotifier<TradeState?> vnTradeStateSelect = ValueNotifier<TradeState?>(null);
@@ -28,25 +29,31 @@ class RouteBoardCourt extends StatelessWidget {
         Column(
           children: [
             ///게시글 필터
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 10),
-              child: ValueListenableBuilder<TradeState?>(
-                valueListenable: vnTradeStateSelect,
-                builder: (context, selectedState, _) {
-                  return CustomDropdown<TradeState>(
-                    value: selectedState,
-                    hint: Text(selectedState == null ? '전체' : UtilsEnum.getNameFromTradeState(selectedState)),
-                    items: const [
-                      DropdownMenuItem(value: null, child: Text('전체')),
-                      DropdownMenuItem(value: TradeState.exchangeOngoing, child: Text('교환')),
-                      DropdownMenuItem(value: TradeState.transferOngoing, child: Text('양도')),
-                      DropdownMenuItem(value: TradeState.done, child: Text('완료')),
-                    ],
-                    onChanged: (state) {
-                      vnTradeStateSelect.value = state;
-                    },
-                  );
-                },
+            Align(
+              alignment: Alignment.centerRight,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 10),
+                child: ValueListenableBuilder<TradeState?>(
+                  valueListenable: vnTradeStateSelect,
+                  builder: (context, selectedState, _) {
+                    return SizedBox(
+                      width: 25.w,
+                      child: CustomDropdown<TradeState>(
+                        value: selectedState,
+                        hint: Text(selectedState == null ? '전체' : UtilsEnum.getNameFromTradeState(selectedState)),
+                        items: const [
+                          DropdownMenuItem(value: null, child: Text('전체')),
+                          DropdownMenuItem(value: TradeState.exchangeOngoing, child: Text('교환')),
+                          DropdownMenuItem(value: TradeState.transferOngoing, child: Text('양도')),
+                          DropdownMenuItem(value: TradeState.done, child: Text('완료')),
+                        ],
+                        onChanged: (state) {
+                          vnTradeStateSelect.value = state;
+                        },
+                      ),
+                    );
+                  },
+                ),
               ),
             ),
 
@@ -111,8 +118,8 @@ class RouteBoardCourt extends StatelessWidget {
                                 boxShadow: [
                                   BoxShadow(
                                     color: Colors.black.withOpacity(0.1),
-                                    blurRadius: 8,
-                                    offset: Offset(0, 4),
+                                    blurRadius: 4,
+                                    offset: Offset(0,2),
                                   ),
                                 ],
                               ),
