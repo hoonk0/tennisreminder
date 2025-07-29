@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:sizer/sizer.dart';
+import 'package:tennisreminder_app/ui/bottom_sheet/bottom_sheet_racket_opinion.dart';
 import 'package:tennisreminder_app/ui/component/custom_dropdown.dart';
 import 'package:tennisreminder_app/ui/component/loading_bar.dart';
 import 'package:tennisreminder_app/ui/route/board/court_transfer_exchange/route_board_court_transfer_detail.dart';
@@ -20,7 +21,7 @@ import '../../../component/basic_button.dart';
 import '../../../component/basic_button_shadow.dart';
 
 class RouteRacketOpinion extends StatelessWidget {
-  final ValueNotifier<TradeState?> vnTradeStateSelect = ValueNotifier<TradeState?>(null);
+  final ValueNotifier<RacketBrand?> vnRacketBrandSelect = ValueNotifier<RacketBrand?>(null);
    RouteRacketOpinion({super.key});
 
   @override
@@ -30,42 +31,44 @@ class RouteRacketOpinion extends StatelessWidget {
         Column(
           children: [
             ///게시글 필터
-           /* Align(
+            Align(
               alignment: Alignment.centerRight,
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 10),
-                child: ValueListenableBuilder<TradeState?>(
-                  valueListenable: vnTradeStateSelect,
-                  builder: (context, selectedState, _) {
+                child: ValueListenableBuilder<RacketBrand?>(
+                  valueListenable: vnRacketBrandSelect,
+                  builder: (context, selectBrand, _) {
                     return SizedBox(
-                      width: 25.w,
-                      child: CustomDropdown<TradeState>(
-                        value: selectedState,
-                        hint: Text(selectedState == null ? '전체' : UtilsEnum.getNameFromTradeState(selectedState)),
-                        items: const [
-                          DropdownMenuItem(value: null, child: Text('전체')),
-                          DropdownMenuItem(value: TradeState.exchangeOngoing, child: Text('교환')),
-                          DropdownMenuItem(value: TradeState.transferOngoing, child: Text('양도')),
-                          DropdownMenuItem(value: TradeState.done, child: Text('완료')),
-                        ],
+                      width: 35.w,
+                      child: CustomDropdown<RacketBrand>(
+                        value: selectBrand,
+                        hint: Text(selectBrand == null ? '전체' : UtilsEnum.getNameFromRacketBrand(selectBrand)),
+                        items: RacketBrand.values
+                            .map(
+                              (brand) => DropdownMenuItem(
+                                value: brand,
+                                child: Text(UtilsEnum.getNameFromRacketBrand(brand)),
+                              ),
+                            )
+                            .toList(),
                         onChanged: (state) {
-                          vnTradeStateSelect.value = state;
+                          vnRacketBrandSelect.value = state;
                         },
                       ),
                     );
                   },
                 ),
               ),
-            ),*/
+            ),
 
             ///게시글 리스트
             Expanded(
-              child: ValueListenableBuilder<TradeState?>(
-                valueListenable: vnTradeStateSelect,
+              child: ValueListenableBuilder<RacketBrand?>(
+                valueListenable: vnRacketBrandSelect,
                 builder: (context, selectedState, _) {
                   return StreamBuilder<QuerySnapshot>(
                     stream: FirebaseFirestore.instance
-                        .collection(keyCourtTransferBoard)
+                        .collection(keyRacketOpinionBoard)
                         .orderBy(keyCreatedAt, descending: true)
                         .snapshots(),
                     builder: (context, snapshot) {
@@ -78,14 +81,13 @@ class RouteRacketOpinion extends StatelessWidget {
 
                       final allDocs = snapshot.data!.docs;
                       final allOpinions = allDocs.map((doc) {
-                        final data = doc.data() as Map<String, dynamic>;
-                        return ModelRacketOpinion.fromJson(data);
+                        return ModelRacketOpinion.fromJson(doc.data() as Map<String, dynamic>);
                       }).toList();
 
                       final filteredOpinions = selectedState == null
                           ? allOpinions
                           : allOpinions.where((opinion) {
-                              return selectedState == TradeState.transferOngoing; // Placeholder: Update this if filtering is implemented for this model.
+                              return opinion.racketBrand == selectedState.name;
                             }).toList();
 
                       return ListView.separated(
@@ -111,17 +113,11 @@ class RouteRacketOpinion extends StatelessWidget {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Gaps.v8,
-                                Text(
-                                  '${opinion.racketBrand} ${opinion.racketName}',
-                                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                                ),
+                                Text('${opinion.racketBrand} ${opinion.racketName}', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                                 Gaps.v8,
                                 Text('무게: ${opinion.racketWeight} / 헤드사이즈: ${opinion.racketHeadSize}'),
                                 if (opinion.racketOpinion != null)
-                                  Padding(
-                                    padding: const EdgeInsets.only(top: 8.0),
-                                    child: Text('의견: ${opinion.racketOpinion}'),
-                                  ),
+                                  Text('의견: ${opinion.racketOpinion}'),
                               ],
                             ),
                           );
@@ -141,7 +137,7 @@ class RouteRacketOpinion extends StatelessWidget {
           left: 16,
           right: 16,
           child: BasicButtonShadow(
-            title: "교환/양도 글 쓰기",
+            title: "라켓 후기 작성",
             onTap: () {
               showModalBottomSheet(
                 context: context,
@@ -157,7 +153,7 @@ class RouteRacketOpinion extends StatelessWidget {
                     right: 16,
                     top: 16,
                   ),
-                  child: BottomSheetCourtTransfer(),
+                  child: BottomSheetRacketOpinion(),
                 ),
               );
             },

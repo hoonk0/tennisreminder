@@ -21,16 +21,16 @@ class TabBoard extends StatelessWidget {
               labelStyle: TextStyle(fontWeight: FontWeight.bold),
               tabs: [
                 Tab(icon: Icon(Icons.sports_tennis), text: '코트 양도'),
-                Tab(icon: Icon(Icons.comment), text: '라켓 후기'),
                 Tab(icon: Icon(Icons.shopping_bag), text: '라켓 거래'),
+                Tab(icon: Icon(Icons.comment), text: '라켓 후기'),
               ],
             ),
             Expanded(
               child: TabBarView(
                 children: [
                   RouteBoardCourt(),
-                  RouteRacketOpinion(),
                   Center(child: Text('라켓 중고거래 게시판 내용')),
+                  RouteRacketOpinion(),
                 ],
               ),
             ),
